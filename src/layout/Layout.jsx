@@ -5,7 +5,7 @@ import Navbar from './Navbar'
 
 const Layout = ({children}) => {
   return (
-    <Box sx={{bgcolor:"black"}}>
+    <Box >
         <Navbar/>
         {children}
         <Footer/>

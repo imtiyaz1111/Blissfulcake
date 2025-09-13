@@ -1,13 +1,20 @@
-// CakeBanner.js
-import React from "react";
+// HomeBanner.js
+import React, { useEffect, useState } from "react";
 import { Box } from "@mui/material";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 // Import Swiper styles
 import "swiper/css";
 import { Autoplay } from "swiper/modules";
+import { getAllBanner } from "../Api/functions/homeBannerFunctions";
 
 const HomeBanner = () => {
+  const [bannerData, setBannerData] = useState([]);
+
+  useEffect(() => {
+    getAllBanner(setBannerData);
+  }, []);
+
   return (
     <Box sx={{ width: "100%", position: "relative" }}>
       <Box className="cakeBannerSection">
@@ -23,35 +30,26 @@ const HomeBanner = () => {
           className="mySwiper"
           style={{ width: "100%" }}
         >
-          {/* Slide 1 */}
-          <SwiperSlide>
-            <Box
-              component="img"
-              src="https://mioamoreshop.com/_next/image?url=https%3A%2F%2Fapi.mioamoreshop.com%2Fstorage%2F3677%2Fbanner2.jpg&w=1920&q=75"
-              alt="Chocolate Cake"
-              sx={{
-                width: "100%",
-                height: { xs: "200px", sm: "300px", md: "450px", lg: "500px" },
-                borderRadius: 2,
-                objectFit: "cover",
-              }}
-            />
-          </SwiperSlide>
-
-          {/* Slide 2 */}
-          <SwiperSlide>
-            <Box
-              component="img"
-              src="https://mioamoreshop.com/_next/image?url=https%3A%2F%2Fapi.mioamoreshop.com%2Fstorage%2F9334%2Fmio-slider-1-(1).png&w=1920&q=75"
-              alt="Birthday Cake"
-              sx={{
-                width: "100%",
-                height: { xs: "200px", sm: "300px", md: "450px", lg: "500px" },
-                borderRadius: 2,
-                objectFit: "cover",
-              }}
-            />
-          </SwiperSlide>
+          {bannerData.map((item, index) => (
+            <SwiperSlide key={item._id || index}>
+              <Box
+                component="img"
+                src={`http://localhost:5000${item.bannerImg}`}
+                alt={`Banner ${index + 1}`}
+                sx={{
+                  width: "100%",
+                  height: {
+                    xs: "200px",
+                    sm: "300px",
+                    md: "450px",
+                    lg: "500px",
+                  },
+                  borderRadius: 2,
+                  objectFit: "cover",
+                }}
+              />
+            </SwiperSlide>
+          ))}
         </Swiper>
       </Box>
     </Box>

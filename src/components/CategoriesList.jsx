@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Typography, Card, CardActionArea, CardMedia, CardContent } from "@mui/material";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
@@ -15,6 +15,7 @@ import theme from "../assets/categories/themeCakes.png";
 import donuts from "../assets/categories/donuts.png";
 import pastries from "../assets/categories/pastries.png";
 import photo from "../assets/categories/photoCakes.png";
+import { getAllCategories } from "../Api/functions/categoriesFunction";
 
 const categories = [
   { title: "Birthday Cakes", image: birthday, path: "/category/birthday" },
@@ -28,6 +29,10 @@ const categories = [
 ];
 
 const CategoriesList = () => {
+  const [categoryData, setCategoryData] = useState([]);
+  useEffect(()=>{
+    getAllCategories(setCategoryData)
+  },[])
   return (
     <Box sx={{ p: 4, background: "#FDEFF1" }}>
       <Typography variant="h4" align="center" gutterBottom fontWeight="bold">
@@ -51,7 +56,7 @@ const CategoriesList = () => {
           1024: { slidesPerView: 5 },
         }}
       >
-        {categories.map((cat, index) => (
+        {categoryData.map((cat, index) => (
           <SwiperSlide key={index}>
             <Card
               sx={{
@@ -67,8 +72,8 @@ const CategoriesList = () => {
               >
                 <CardMedia
                   component="img"
-                  image={cat.image}
-                  alt={cat.title}
+                  image={`http://localhost:5000${cat.image}`}
+                  alt={cat.category}
                   sx={{
                     width: 150,
                     height: 150,
@@ -83,7 +88,7 @@ const CategoriesList = () => {
                 />
                 <CardContent sx={{ p: 0 }}>
                   <Typography variant="subtitle1" fontWeight="bold">
-                    {cat.title}
+                    {cat.category}
                   </Typography>
                 </CardContent>
               </CardActionArea>

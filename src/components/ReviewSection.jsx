@@ -1,16 +1,17 @@
 // Reviews.js
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Typography, Card, CardMedia } from "@mui/material";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import "swiper/css";
-
-import review1 from "../assets/reviews/review1.png";
-import review2 from "../assets/reviews/review2.png";
-import review3 from "../assets/reviews/review3.png";
+import { getAllReviewImg } from "../Api/functions/reviewImgFunctions";
 
 const ReviewSection = () => {
-  const reviews = [review1, review2, review3, review1, review2, review3];
+  const [reviewData, setReviewData] = useState([]);
+
+  useEffect(() => {
+    getAllReviewImg(setReviewData);
+  }, []);
 
   return (
     <Box sx={{ py: 6, backgroundColor: "#FDEFF1" }}>
@@ -34,8 +35,8 @@ const ReviewSection = () => {
           mx: "auto",
         }}
       >
-        Here’s what our happy customers are saying about our cakes. We’re grateful
-        for the love and support! 🍰💖
+        Here’s what our happy customers are saying about our cakes. We’re
+        grateful for the love and support! 🍰💖
       </Typography>
 
       <Swiper
@@ -55,7 +56,7 @@ const ReviewSection = () => {
         }}
         modules={[Autoplay]}
       >
-        {reviews.map((img, index) => (
+        {reviewData.map((data, index) => (
           <SwiperSlide key={index}>
             <Card
               sx={{
@@ -71,7 +72,7 @@ const ReviewSection = () => {
             >
               <CardMedia
                 component="img"
-                image={img}
+                image={`http://localhost:5000${data.reviewImg}`}
                 alt={`Review ${index + 1}`}
                 sx={{
                   height: "100%",
