@@ -3,9 +3,20 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./Pages/Home";
 import Layout from "./layout/Layout";
 import PrivateRoute from "./ProtectedRoutes/PrivateRoute";
+import Aboutus from "./Pages/Aboutus";
+import Gallery from "./Pages/Gallery";
+import Contactus from "./Pages/Contactus";
+import Blogs from "./Pages/Blog/Blogs";
+import Products from "./Pages/Product/Products";
 
 const App = () => {
-  const publicRoute = [{ path: "/", element: <Home /> }];
+  const publicRoute = [{ path: "/", element: <Home /> },
+    { path: "/aboutus", element: <Aboutus /> },
+    { path: "/gallery", element: <Gallery /> },
+    { path: "/contactus", element: <Contactus /> },
+    { path: "/blog", element: <Blogs /> },
+    { path: "/shop", element: <Products /> },
+  ];
 
   const privateRoute = [];
 

@@ -48,6 +48,12 @@ const Navbar = () => {
 
   const navItems = ["Home", "Gallery", "About Us", "Blog", "Shop", "Contact Us"];
 
+  // Function to get correct link
+  const getNavLink = (item) => {
+    if (item === "Home") return "/";
+    return `/${item.replace(/\s+/g, "").toLowerCase()}`;
+  };
+
   return (
     <Box sx={{ flexGrow: 1, backgroundColor: "#FDEFF1" }}>
       {/* Top pink bar */}
@@ -94,18 +100,29 @@ const Navbar = () => {
       {/* Main Navbar */}
       <AppBar position="static" color="transparent" elevation={0}>
         <Toolbar sx={{ justifyContent: "space-between", px: { xs: 2, md: 6 }, gap: 2 }}>
-          {/* Logo */}
+          {/* Logo (clickable) */}
           <Box
-            component="img"
-            src={logo}
-            alt="Logo"
+            component={Link}
+            to="/"
             sx={{
               py: 1,
               width: { xs: 70, sm: 90, md: 110 },
               height: "auto",
               borderRadius: "50%",
+              display: "block",
             }}
-          />
+          >
+            <Box
+              component="img"
+              src={logo}
+              alt="Logo"
+              sx={{
+                width: "100%",
+                height: "auto",
+                borderRadius: "50%",
+              }}
+            />
+          </Box>
 
           {/* Search bar (desktop only) */}
           {!isMobile && (
@@ -149,7 +166,7 @@ const Navbar = () => {
                 <Button
                   key={item}
                   component={Link}
-                  to={`/${item.replace(/\s+/g, "").toLowerCase()}`}
+                  to={getNavLink(item)}
                   sx={{
                     color: "black",
                     textTransform: "none",
@@ -220,7 +237,7 @@ const Navbar = () => {
                   <List>
                     {navItems.map((item) => (
                       <ListItem key={item} disablePadding>
-                        <ListItemButton component={Link} to={`/${item.replace(/\s+/g, "").toLowerCase()}`}>
+                        <ListItemButton component={Link} to={getNavLink(item)}>
                           <ListItemText primary={item} />
                         </ListItemButton>
                       </ListItem>
