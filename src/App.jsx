@@ -8,9 +8,16 @@ import Gallery from "./Pages/Gallery";
 import Contactus from "./Pages/Contactus";
 import Blogs from "./Pages/Blog/Blogs";
 import Products from "./Pages/Product/Products";
+import AdminLayout from "./Admin/Layouts/AdminLayout";
+import Dashboard from "./Admin/Pages/Dashboard";
+import AllBannerList from "./Admin/Pages/Banner/AllBannerList";
+import AddBanner from "./Admin/Pages/Banner/AddBanner";
+import AllGalleryList from "./Admin/Pages/Gallery/AllGalleryList";
+import AddGallery from "./Admin/Pages/Gallery/AddGallery";
 
 const App = () => {
-  const publicRoute = [{ path: "/", element: <Home /> },
+  const publicRoute = [
+    { path: "/", element: <Home /> },
     { path: "/aboutus", element: <Aboutus /> },
     { path: "/gallery", element: <Gallery /> },
     { path: "/contactus", element: <Contactus /> },
@@ -20,12 +27,18 @@ const App = () => {
 
   const privateRoute = [];
 
-  const adminRoute = [];
+  const adminRoute = [
+    { path: "admin/dashboard", element: <Dashboard /> },
+    { path: "banner/manage", element: <AllBannerList /> },
+    { path: "banner/add", element: <AddBanner /> },
+    { path: "gallery/manage", element: <AllGalleryList /> },
+    { path: "gallery/add", element: <AddGallery /> },
+  ];
   return (
     <>
       <Router>
-        <Layout>
-          <Routes>
+        <Routes>
+          <Route element={<Layout />}>
             {/* Public Routes */}
             {publicRoute.map((item, index) => (
               <Route key={index} path={item.path} element={item.element} />
@@ -43,21 +56,23 @@ const App = () => {
                 }
               />
             ))}
-
-            {/* Admin Route */}
+          </Route>
+          {/* Admin Route */}
+          <Route element={<AdminLayout />}>
             {adminRoute.map((item, index) => (
               <Route
                 key={index}
                 path={item.path}
                 element={
-                  <PrivateRoute allowedRoles={["admin"]}>
-                    {item.element}
-                  </PrivateRoute>
+                  item.element
+                  // <PrivateRoute allowedRoles={["admin"]}>
+                  //   {item.element}
+                  // </PrivateRoute>
                 }
               />
             ))}
-          </Routes>
-        </Layout>
+          </Route>
+        </Routes>
       </Router>
     </>
   );

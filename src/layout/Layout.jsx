@@ -2,12 +2,13 @@ import React from 'react'
 import { Box } from '@mui/material'
 import Footer from './Footer'
 import Navbar from './Navbar'
+import { Outlet } from 'react-router-dom'
 
-const Layout = ({children}) => {
+const Layout = () => {
   return (
     <Box >
         <Navbar/>
-        {children}
+       <Outlet/>
         <Footer/>
     </Box>
   )
