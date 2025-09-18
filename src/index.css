@@ -3,3 +3,1099 @@
   margin: 0px;
   box-sizing: border-box;
 }
+/* ======================================================
+                        SignUP component 
+========================================================= */
+
+/* Container */
+.signup-container {
+  background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 50%, #fd79a8 100%);
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.form-area{
+    background: rgba(255, 255, 255, 0.95);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Wrapper */
+.signup-form-wrapper {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  /* border-radius: 20px; */
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  padding: 40px;
+  /* box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); */
+  width: 100%;
+  max-width: 400px;
+  z-index: 10;
+  position: relative;
+}
+
+.signup-image{
+     background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  padding: 40px;
+  /* box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); */
+  width: 100%;
+  max-width: 350px;
+  z-index: 10;
+  position: relative;
+}
+
+/* Title & Subtitle */
+.form-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+  background: linear-gradient(45deg, #fd79a8, #fdcb6e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 10px;
+}
+
+.form-subtitle {
+  text-align: center;
+  color: #636e72;
+  margin-bottom: 30px;
+  font-size: 1.1rem;
+}
+
+/* Inputs */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  color: #2d3436;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #fd79a8;
+  box-shadow: 0 0 0 3px rgba(253, 121, 168, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Error Message */
+.error-text {
+  color: #e74c3c;
+  font-size: 0.8rem;
+  margin-top: 5px;
+  display: block;
+}
+
+/* Button */
+.signup-button {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(45deg, #fd79a8, #fdcb6e);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.signup-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(253, 121, 168, 0.3);
+}
+
+.signup-button:active {
+  transform: translateY(-1px);
+}
+
+/* Login Link */
+.login-link {
+  text-align: center;
+  margin-top: 20px;
+  color: #636e72;
+}
+
+.login-link a {
+  color: #fd79a8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
+
+/* Decorative images */
+.decorative-cupcake {
+  position: absolute;
+  top: 10%;
+  left: 5%;
+  width: 120px;
+  height: 120px;
+  opacity: 0.8;
+  animation: float 6s ease-in-out infinite;
+  z-index: 5;
+}
+
+.decorative-donut {
+  position: absolute;
+  bottom: 15%;
+  right: 8%;
+  width: 100px;
+  height: 100px;
+  opacity: 0.8;
+  animation: float 8s ease-in-out infinite reverse;
+  z-index: 5;
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .signup-form-wrapper {
+    padding: 30px 20px;
+    margin: 20px;
+  }
+  .form-title { font-size: 2rem; }
+  .decorative-cupcake { width: 80px; height: 80px; top: 5%; left: 3%; }
+  .decorative-donut { width: 70px; height: 70px; bottom: 10%; right: 5%; }
+}
+
+@media (max-width: 480px) {
+  .decorative-cupcake,
+  .decorative-donut { display: none; }
+}
+
+/* Background Particles */
+.signup-container::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    radial-gradient(circle at 40% 60%, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 100px 100px, 50px 50px, 80px 80px;
+  animation: sparkle 20s linear infinite;
+}
+
+@keyframes sparkle {
+  0% { opacity: 0.5; transform: translateX(0); }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; transform: translateX(10px); }
+}
+
+
+@media screen and (max-width: 769px) {
+    .signup-image{
+        display: none;
+    }
+    
+    .form-area{
+        background: none;
+    }
+
+    .signup-form-wrapper {
+        border-radius: 20px !important;
+    }
+}
+
+
+
+/* ======================================================
+                        Login component 
+========================================================= */
+
+
+/* Login container */
+.login-container {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #fd79a8 0%, #fab1a0 50%,#ffeaa7 100% );
+  overflow-x: hidden;
+}
+
+/* Login form wrapper */
+.login-form-wrapper {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 40px;
+  /* box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); */
+  width: 100%;
+  max-width: 400px;
+  z-index: 10;
+  position: relative;
+}
+
+.login-image{
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  padding: 40px;
+  /* box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); */
+  width: 100%;
+  max-width: 350px;
+  z-index: 10;
+  position: relative;
+}
+
+/* Title & subtitle */
+.login-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+  background: linear-gradient(45deg, #fd79a8, #fdcb6e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 10px;
+}
+
+.login-subtitle {
+  text-align: center;
+  color: #636e72;
+  margin-bottom: 30px;
+  font-size: 1.1rem;
+}
+
+/* Form groups */
+.login-form-group {
+  margin-bottom: 20px;
+}
+
+.login-label {
+  display: block;
+  color: #2d3436;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.login-input {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.login-input:focus {
+  outline: none;
+  border-color: #fd79a8;
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+  transform: translateY(-2px);
+}
+
+
+/* Forgot password link */
+.forgot-link {
+  text-align: right;
+  margin-top: -10px;
+  margin-bottom: 20px;
+}
+
+.forgot-link a {
+  color: #00cec9;
+  font-size: 0.9rem;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.forgot-link a:hover {
+  text-decoration: underline;
+}
+
+
+/* Login button */
+.login-button {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(45deg, #fd79a8, #fdcb6e);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.login-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(108, 92, 231, 0.3);
+}
+
+.login-button:active {
+  transform: translateY(-1px);
+}
+
+/* Signup link */
+.signup-link {
+  text-align: center;
+  margin-top: 20px;
+  color: #636e72;
+}
+
+.signup-link a {
+  color: #fd79a8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.signup-link a:hover {
+  text-decoration: underline;
+}
+
+/* Decorative images */
+.login-decorative-cupcake {
+  position: absolute;
+  top: 10%;
+  left: 5%;
+  width: 120px;
+  height: 120px;
+  opacity: 0.8;
+  animation: login-float 6s ease-in-out infinite;
+  z-index: 5;
+}
+
+.login-decorative-donut {
+  position: absolute;
+  bottom: 15%;
+  right: 8%;
+  width: 100px;
+  height: 100px;
+  opacity: 0.8;
+  animation: login-float 8s ease-in-out infinite reverse;
+  z-index: 5;
+}
+
+/* Floating animation */
+@keyframes login-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(5deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .login-form-wrapper {
+    padding: 30px 20px;
+    margin: 20px;
+  }
+
+  .login-title {
+    font-size: 2rem;
+  }
+
+  .login-decorative-cupcake {
+    width: 80px;
+    height: 80px;
+    top: 5%;
+    left: 3%;
+  }
+
+  .login-decorative-donut {
+    width: 70px;
+    height: 70px;
+    bottom: 10%;
+    right: 5%;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-decorative-cupcake,
+  .login-decorative-donut {
+    display: none;
+  }
+}
+
+/* Background particles */
+.login-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    radial-gradient(circle at 40% 60%, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 100px 100px, 50px 50px, 80px 80px;
+  animation: login-sparkle 20s linear infinite;
+}
+
+@keyframes login-sparkle {
+  0% {
+    opacity: 0.5;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+    transform: translateX(10px);
+  }
+}
+
+
+
+@media screen and (max-width: 769px) {
+    .login-image{
+        display: none;
+    }
+    
+    .form-area{
+        background: none;
+    }
+
+    .login-form-wrapper {
+        border-radius: 20px !important;
+    }
+}
+
+
+
+/* ======================================================
+                        forgotpassword component 
+========================================================= */
+
+
+/* Forgot container */
+.forgot-container {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 50%, #fd79a8 100%);
+  overflow-x: hidden;
+}
+
+/* Forgot form wrapper */
+.forgot-form-wrapper {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 40px;
+  width: 100%;
+  max-width: 400px;
+  z-index: 10;
+  position: relative;
+}
+
+.forgot-image {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  padding: 40px;
+  width: 100%;
+  max-width: 350px;
+  z-index: 10;
+  position: relative;
+}
+
+/* Title & subtitle */
+.forgot-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+  background: linear-gradient(45deg, #fd79a8, #fdcb6e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 10px;
+}
+
+.forgot-subtitle {
+  text-align: center;
+  color: #636e72;
+  margin-bottom: 30px;
+  font-size: 1.1rem;
+}
+
+/* Form groups */
+.forgot-form-group {
+  margin-bottom: 20px;
+}
+
+.forgot-label {
+  display: block;
+  color: #2d3436;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.forgot-input {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.forgot-input:focus {
+  outline: none;
+  border-color: #fd79a8;
+  box-shadow: 0 0 0 3px rgba(214, 48, 49, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Button */
+.forgot-button {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(45deg, #fd79a8, #fdcb6e);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.forgot-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(214, 48, 49, 0.3);
+}
+
+.forgot-button:active {
+  transform: translateY(-1px);
+}
+
+/* Back to login link */
+.forgot-login-link {
+  text-align: center;
+  margin-top: 20px;
+  color: #636e72;
+}
+
+.forgot-login-link a {
+  color: #fd79a8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.forgot-login-link a:hover {
+  text-decoration: underline;
+}
+
+/* Decorative images */
+.forgot-decorative-cupcake {
+  position: absolute;
+  top: 10%;
+  left: 5%;
+  width: 120px;
+  height: 120px;
+  opacity: 0.8;
+  animation: forgot-float 6s ease-in-out infinite;
+  z-index: 5;
+}
+
+.forgot-decorative-donut {
+  position: absolute;
+  bottom: 15%;
+  right: 8%;
+  width: 100px;
+  height: 100px;
+  opacity: 0.8;
+  animation: forgot-float 8s ease-in-out infinite reverse;
+  z-index: 5;
+}
+
+/* Floating animation */
+@keyframes forgot-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(5deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .forgot-form-wrapper {
+    padding: 30px 20px;
+    margin: 20px;
+  }
+
+  .forgot-title {
+    font-size: 2rem;
+  }
+
+  .forgot-decorative-cupcake {
+    width: 80px;
+    height: 80px;
+    top: 5%;
+    left: 3%;
+  }
+
+  .forgot-decorative-donut {
+    width: 70px;
+    height: 70px;
+    bottom: 10%;
+    right: 5%;
+  }
+}
+
+@media (max-width: 480px) {
+  .forgot-decorative-cupcake,
+  .forgot-decorative-donut {
+    display: none;
+  }
+}
+
+/* Background particles */
+.forgot-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    radial-gradient(circle at 40% 60%, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 100px 100px, 50px 50px, 80px 80px;
+  animation: forgot-sparkle 20s linear infinite;
+}
+
+@keyframes forgot-sparkle {
+  0% {
+    opacity: 0.5;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+    transform: translateX(10px);
+  }
+}
+
+@media screen and (max-width: 769px) {
+  .forgot-image {
+    display: none;
+  }
+
+  .form-area {
+    background: none;
+  }
+
+  .forgot-form-wrapper {
+    border-radius: 20px !important;
+  }
+}
+
+
+
+/* ======================================================
+                    changepassword component 
+========================================================= */
+
+
+/* ChangePassword container */
+.changepassword-container {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 50%, #fd79a8 100%);
+  overflow-x: hidden;
+}
+
+/* Form wrapper */
+.changepassword-form-wrapper {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 40px;
+  width: 100%;
+  max-width: 400px;
+  z-index: 10;
+  position: relative;
+}
+
+/* Left side image */
+.changepassword-image {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  padding: 40px;
+  width: 100%;
+  max-width: 400px;
+  z-index: 10;
+  position: relative;
+}
+
+/* Title & subtitle */
+.changepassword-title {
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: bold;
+  background: linear-gradient(45deg, #fd79a8, #fdcb6e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 10px;
+}
+
+.changepassword-subtitle {
+  text-align: center;
+  color: #636e72;
+  margin-bottom: 30px;
+  font-size: 1.1rem;
+}
+
+/* Form groups */
+.changepassword-form-group {
+  margin-bottom: 20px;
+}
+
+.changepassword-label {
+  display: block;
+  color: #2d3436;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.changepassword-input {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.changepassword-input:focus {
+  outline: none;
+  border-color: #fd79a8;
+  box-shadow: 0 0 0 3px rgba(0, 206, 201, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Button */
+.changepassword-button {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(45deg, #fd79a8, #fdcb6e);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.changepassword-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 206, 155, 0.3);
+}
+
+.changepassword-button:active {
+  transform: translateY(-1px);
+}
+
+/* Back to login link */
+.changepassword-back-link {
+  text-align: center;
+  margin-top: 20px;
+  color: #636e72;
+}
+
+.changepassword-back-link a {
+  color: #fd79a8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.changepassword-back-link a:hover {
+  text-decoration: underline;
+}
+
+/* Decorative images */
+.changepassword-decorative-cupcake {
+  position: absolute;
+  top: 10%;
+  left: 5%;
+  width: 120px;
+  height: 120px;
+  opacity: 0.8;
+  animation: changepassword-float 6s ease-in-out infinite;
+  z-index: 5;
+}
+
+.changepassword-decorative-donut {
+  position: absolute;
+  bottom: 15%;
+  right: 8%;
+  width: 100px;
+  height: 100px;
+  opacity: 0.8;
+  animation: changepassword-float 8s ease-in-out infinite reverse;
+  z-index: 5;
+}
+
+/* Floating animation */
+@keyframes changepassword-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(5deg);
+  }
+}
+
+/* Background particles */
+.changepassword-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    radial-gradient(circle at 40% 60%, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 100px 100px, 50px 50px, 80px 80px;
+  animation: changepassword-sparkle 20s linear infinite;
+}
+
+@keyframes changepassword-sparkle {
+  0% {
+    opacity: 0.5;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+    transform: translateX(10px);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .changepassword-form-wrapper {
+    padding: 30px 20px;
+    margin: 20px;
+  }
+
+  .changepassword-title {
+    font-size: 2rem;
+  }
+
+  .changepassword-decorative-cupcake {
+    width: 80px;
+    height: 80px;
+    top: 5%;
+    left: 3%;
+  }
+
+  .changepassword-decorative-donut {
+    width: 70px;
+    height: 70px;
+    bottom: 10%;
+    right: 5%;
+  }
+
+  .changepassword-image {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .changepassword-decorative-cupcake,
+  .changepassword-decorative-donut {
+    display: none;
+  }
+}
+
+
+/* ======================================================
+                    verify otp component 
+========================================================= */
+
+
+
+/* VerifyOTP.css */
+.otp-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #fd79a8 0%, #ffeaa7 100%);
+  padding: 20px;
+}
+
+.otp-box {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-radius: 16px;
+  padding: 30px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.otp-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  background: linear-gradient(45deg, #fd79a8, #fdcb6e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+
+.otp-subtitle {
+  font-size: 0.95rem;
+  color: #636e72;
+  margin-bottom: 20px;
+}
+
+.otp-inputs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.otp-input {
+  width: 45px;
+  height: 55px;
+  text-align: center;
+  font-size: 1.2rem;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.otp-input:focus {
+  outline: none;
+  border-color: #fd79a8;
+  box-shadow: 0 0 8px rgba(253, 121, 168, 0.3);
+}
+
+.otp-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.otp-btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.otp-btn.verify {
+  background: linear-gradient(45deg, #fd79a8, #fdcb6e);
+  color: #fff;
+}
+
+.otp-btn.resend {
+  background: #fff;
+  border: 2px solid #fd79a8;
+  color: #fd79a8;
+}
+
+.otp-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+}
+
+.otp-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.otp-note {
+  font-size: 0.8rem;
+  color: #777;
+}
+
+/* Shake animation */
+@keyframes shake {
+  0% { transform: translateX(0) }
+  25% { transform: translateX(-6px) }
+  50% { transform: translateX(6px) }
+  75% { transform: translateX(-4px) }
+  100% { transform: translateX(0) }
+}
+
+.animate-shake {
+  animation: shake 0.6s ease-in-out;
+}
