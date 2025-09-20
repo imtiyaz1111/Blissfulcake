@@ -1,18 +1,23 @@
 import React, { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import password_image from "../../assets/authImg/password-image.jpg";
+import { Link, useNavigate } from "react-router-dom";
 import chococake from "../../assets/authImg/chococake.png";
 import comcom from "../../assets/authImg/comcom.png";
+import password_image from "../../assets/authImg/password-image.jpg";
 import { toast } from "react-toastify";
-import { changePassword } from "../../Api/functions/authFunctions";
+import { updatePassword } from "../../Api/functions/authFunctions";
+import { useAuth } from "../../context/AuthProvider";
 
-const ChangePassword = () => {
+const UpdatePassword = () => {
   const navigate = useNavigate();
-  const { email } = useParams();
+  const [auth]=useAuth()
+  const token=auth?.token;
+
   const [formData, setFormData] = useState({
+    oldPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
+
   const [loading, setLoading] = useState(false);
 
   // ✅ handle input change
@@ -20,11 +25,15 @@ const ChangePassword = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // ✅ submit form
+  // ✅ handle submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.newPassword || !formData.confirmPassword) {
+    if (
+      !formData.oldPassword ||
+      !formData.newPassword ||
+      !formData.confirmPassword
+    ) {
       toast.error("All fields are required");
       return;
     }
@@ -33,11 +42,12 @@ const ChangePassword = () => {
       toast.error("Passwords do not match");
       return;
     }
-    const newData = { 
+    const newData = {
+      oldPassword: formData.oldPassword,
       newPassword: formData.newPassword,
       confirmPassword: formData.confirmPassword,
-     };
-    await changePassword(newData, navigate, setLoading,email);
+    };
+    updatePassword(newData, navigate, setLoading,token);
   };
 
   return (
@@ -52,12 +62,24 @@ const ChangePassword = () => {
 
         {/* Form */}
         <div className="changepassword-form-wrapper">
-          <h1 className="changepassword-title">Change Password</h1>
+          <h1 className="changepassword-title">Update Password</h1>
           <p className="changepassword-subtitle">
-            Enter a new password for your account
+            Update your password securely
           </p>
 
           <form onSubmit={handleSubmit}>
+            <div className="changepassword-form-group">
+              <label className="changepassword-label">Old Password</label>
+              <input
+                type="password"
+                name="oldPassword"
+                value={formData.oldPassword}
+                onChange={handleChange}
+                className="changepassword-input"
+                placeholder="Enter your old password"
+              />
+            </div>
+
             <div className="changepassword-form-group">
               <label className="changepassword-label">New Password</label>
               <input
@@ -114,4 +136,4 @@ const ChangePassword = () => {
   );
 };
 
-export default ChangePassword;
+export default UpdatePassword;

@@ -27,6 +27,7 @@ import UpdateCategory from "./Admin/Pages/Category/UpdateCategory";
 import UsersList from "./Admin/Pages/User/UsersList";
 import Profile from "./Pages/Profile";
 import VerifyEmail from "./Pages/Auth/VerifyEmail";
+import UpdatePassword from "./Pages/Auth/UpdatePassword";
 
 const App = () => {
   const publicRoute = [
@@ -41,32 +42,32 @@ const App = () => {
   const authRoute = [
     { path: "/login", element: <Login /> },
     { path: "/register", element: <Signup /> },
-    { path: "/verify-otp", element: <VerifyOTP /> },
     { path: "/forgot-password", element: <ForgotPassword /> },
-    { path: "/change-password", element: <ChangePassword /> },
+    { path: "/verify-otp/:email", element: <VerifyOTP /> },
+    { path: "/change-password/:email", element: <ChangePassword /> },
     { path: "/verify-email/:token", element: <VerifyEmail /> },
+    { path: "/update-password", element: <UpdatePassword /> },
   ];
 
   const privateRoute = [
     {
       path: "/profile",
       element: <Profile />,
-      allowedRoles: ["user", "admin"],
     },
   ];
 
   const adminRoute = [
-    { path: "/admin/dashboard", element: <Dashboard />, allowedRoles: ["admin"] },
-    { path: "/banner/manage", element: <AllBannerList />, allowedRoles: ["admin"] },
-    { path: "/banner/add", element: <AddBanner />, allowedRoles: ["admin"] },
-    { path: "/gallery/manage", element: <AllGalleryList />, allowedRoles: ["admin"] },
-    { path: "/gallery/add", element: <AddGallery />, allowedRoles: ["admin"] },
-    { path: "/review/manage", element: <AllReviewImgList />, allowedRoles: ["admin"] },
-    { path: "/review/add", element: <AddReveiwImg />, allowedRoles: ["admin"] },
-    { path: "/category/manage", element: <CategoryList />, allowedRoles: ["admin"] },
-    { path: "/category/add", element: <AddCategory />, allowedRoles: ["admin"] },
-    { path: "/category/update", element: <UpdateCategory />, allowedRoles: ["admin"] },
-    { path: "/user/manage", element: <UsersList />, allowedRoles: ["admin"] },
+    { path: "/admin/dashboard", element: <Dashboard /> },
+    { path: "/banner/manage", element: <AllBannerList /> },
+    { path: "/banner/add", element: <AddBanner /> },
+    { path: "/gallery/manage", element: <AllGalleryList /> },
+    { path: "/gallery/add", element: <AddGallery /> },
+    { path: "/review/manage", element: <AllReviewImgList /> },
+    { path: "/review/add", element: <AddReveiwImg /> },
+    { path: "/category/manage", element: <CategoryList /> },
+    { path: "/category/add", element: <AddCategory /> },
+    { path: "/category/update", element: <UpdateCategory /> },
+    { path: "/user/manage", element: <UsersList /> },
   ];
 
   return (
@@ -89,7 +90,7 @@ const App = () => {
               key={index}
               path={item.path}
               element={
-                <PrivateRoute allowedRoles={item.allowedRoles}>
+                <PrivateRoute allowedRoles={["user"]}>
                   {item.element}
                 </PrivateRoute>
               }
@@ -104,7 +105,7 @@ const App = () => {
               key={index}
               path={item.path}
               element={
-                <PrivateRoute allowedRoles={item.allowedRoles}>
+                <PrivateRoute allowedRoles={["admin"]}>
                   {item.element}
                 </PrivateRoute>
               }

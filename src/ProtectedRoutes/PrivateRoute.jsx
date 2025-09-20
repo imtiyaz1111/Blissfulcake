@@ -16,13 +16,13 @@ const PrivateRoute = ({ children, allowedRoles }) => {
   if (!isAuthenticated) {
     const toastId = "login-warning";
     toast.warning("Please log in to access this page", { toastId });
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login"  />;
   }
 
   if (allowedRoles && !allowedRoles.includes(role)) {
     // Redirect based on role
     if (role === "user") return <Navigate to="/" replace />;
-    if (role === "admin") return <Navigate to="/admin/dashboard" replace />;
+    if (role === "admin") return <Navigate to="/admin/dashboard"  />;
     // return <Navigate to="/" replace />; // fallback
   }
 

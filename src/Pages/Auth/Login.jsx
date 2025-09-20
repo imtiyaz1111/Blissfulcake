@@ -102,7 +102,7 @@ const Login = () => {
 
             {/* Forgot Password */}
             <p className="forgot-link">
-              <Link to="/forgot_password">Forgot Password?</Link>
+              <Link to="/forgot-password">Forgot Password?</Link>
             </p>
 
             {/* Remember me */}
