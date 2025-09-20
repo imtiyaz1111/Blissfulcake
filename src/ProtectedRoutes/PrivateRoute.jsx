@@ -4,31 +4,26 @@ import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 
 const PrivateRoute = ({ children, allowedRoles }) => {
-  const authCookie = Cookies.get("auth");
+  // Get auth cookie
+  const Cookie = Cookies.get("auth");
+  const authData = Cookie ? JSON.parse(Cookie) : null;
 
-  let isAuthenticated = false;
-  let userRole = null;
+  const token = authData?.token;
+  const role = authData?.user?.role; 
 
-  if (authCookie) {
-    try {
-      const parsedAuth = JSON.parse(authCookie);
-      isAuthenticated = !!parsedAuth.token;
-      userRole = parsedAuth.role; // Make sure role is saved in cookie after login
-    } catch (error) {
-      console.error("Invalid auth cookie format:", error);
-    }
-  }
+  const isAuthenticated = !!token;
 
   if (!isAuthenticated) {
     const toastId = "login-warning";
-    toast.warning("Please login to access this page", { toastId });
-    return <Navigate to="/login" />;
+    toast.warning("Please log in to access this page", { toastId });
+    return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(userRole)) {
-    const toastId = "role-warning";
-    toast.error("You do not have permission to access this page", { toastId });
-    return <Navigate to="/" />;
+  if (allowedRoles && !allowedRoles.includes(role)) {
+    // Redirect based on role
+    if (role === "user") return <Navigate to="/" replace />;
+    if (role === "admin") return <Navigate to="/admin/dashboard" replace />;
+    // return <Navigate to="/" replace />; // fallback
   }
 
   return children;

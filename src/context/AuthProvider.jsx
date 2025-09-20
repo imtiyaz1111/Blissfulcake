@@ -1,5 +1,6 @@
 import { useState, useContext, createContext, useEffect } from "react";
 import Cookies from "js-cookie";
+
 const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
@@ -7,8 +8,6 @@ const AuthProvider = ({ children }) => {
     user: null,
     token: "",
   });
-
-  
 
   useEffect(() => {
     const cookieData = Cookies.get("auth");
@@ -26,12 +25,7 @@ const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider
-      value={[
-        auth,
-        setAuth,
-      ]}
-    >
+    <AuthContext.Provider value={[auth, setAuth]}>
       {children}
     </AuthContext.Provider>
   );

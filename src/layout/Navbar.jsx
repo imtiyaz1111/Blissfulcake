@@ -13,10 +13,12 @@ import {
   InputBase,
   Menu,
   MenuItem,
+  Avatar,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+
 import MenuIcon from "@mui/icons-material/Menu";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import SearchIcon from "@mui/icons-material/Search";
@@ -29,12 +31,16 @@ import EmailIcon from "@mui/icons-material/Email";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import CloseIcon from "@mui/icons-material/Close";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+
 import logo from "../assets/blissfulllogo.jpg";
+import { useAuth } from "../context/AuthProvider";
+import { logOut } from "../Api/functions/authFunctions";
 
 const Navbar = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
 
-  // Custom breakpoints
+  // Breakpoints
   const isBelow1176 = useMediaQuery("(max-width:1176px)");
   const isBelow991 = useMediaQuery("(max-width:991px)");
 
@@ -47,12 +53,30 @@ const Navbar = () => {
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
 
-  const navItems = ["Home", "Gallery", "About Us", "Blog", "Shop", "Contact Us"];
+  const navItems = [
+    "Home",
+    "Gallery",
+    "About Us",
+    "Blog",
+    "Shop",
+    "Contact Us",
+  ];
 
-  // ✅ Fixed NavLink path generator
   const getNavLink = (item) => {
     if (item === "Home") return "/";
     return `/${item.replace(/\s+/g, "").toLowerCase()}`;
+  };
+
+  // Authentication state
+  const [auth, setAuth] = useAuth();
+  const token = auth?.token;
+  const isLoggedIn = Boolean(token);
+  console.log("Auth in Navbar:", auth);
+
+  const handleLogout = () => {
+    setDrawerOpen(false);
+    handleMenuClose();
+    logOut(setAuth, navigate, token);
   };
 
   return (
@@ -182,28 +206,58 @@ const Navbar = () => {
                 <IconButton color="inherit">
                   <ShoppingCartOutlinedIcon />
                 </IconButton>
-                <IconButton color="inherit" onClick={handleMenuOpen}>
-                  <AccountCircleIcon />
+
+                {/* Profile Dropdown */}
+                <IconButton
+                  color="inherit"
+                  onClick={handleMenuOpen}
+                  aria-controls={openMenu ? "profile-menu" : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={openMenu ? "true" : undefined}
+                >
+                  {isLoggedIn ? (
+                    <Avatar sx={{ bgcolor: "#f48fb1" }}>
+                      {auth?.user?.username?.[0]?.toUpperCase()}
+                    </Avatar>
+                  ) : (
+                    <AccountCircleIcon />
+                  )}
                 </IconButton>
                 <Menu
+                  id="profile-menu"
                   anchorEl={anchorEl}
                   open={openMenu}
                   onClose={handleMenuClose}
                 >
-                  <MenuItem
-                    component={Link}
-                    to="/login"
-                    onClick={handleMenuClose}
-                  >
-                    Login
-                  </MenuItem>
-                  <MenuItem
-                    component={Link}
-                    to="/register"
-                    onClick={handleMenuClose}
-                  >
-                    Register
-                  </MenuItem>
+                  {!isLoggedIn ? (
+                    <>
+                      <MenuItem
+                        component={Link}
+                        to="/login"
+                        onClick={handleMenuClose}
+                      >
+                        Login
+                      </MenuItem>
+                      <MenuItem
+                        component={Link}
+                        to="/register"
+                        onClick={handleMenuClose}
+                      >
+                        Register
+                      </MenuItem>
+                    </>
+                  ) : (
+                    <>
+                      <MenuItem
+                        component={Link}
+                        to="/profile"
+                        onClick={handleMenuClose}
+                      >
+                        Profile
+                      </MenuItem>
+                      <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                    </>
+                  )}
                 </Menu>
               </Box>
             </>
@@ -212,7 +266,6 @@ const Navbar = () => {
           {/* -------- 1176px → 991px layout -------- */}
           {isBelow1176 && !isBelow991 && (
             <>
-              {/* Searchbar */}
               <Box
                 sx={{
                   flexGrow: 1,
@@ -243,35 +296,63 @@ const Navbar = () => {
                 </Box>
               </Box>
 
-              {/* Profile + Cart only */}
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 <IconButton color="inherit">
                   <ShoppingCartOutlinedIcon />
                 </IconButton>
-                <IconButton color="inherit" onClick={handleMenuOpen}>
-                  <AccountCircleIcon />
+                <IconButton
+                  color="inherit"
+                  onClick={handleMenuOpen}
+                  aria-controls={openMenu ? "profile-menu" : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={openMenu ? "true" : undefined}
+                >
+                  {isLoggedIn ? (
+                    <Avatar sx={{ bgcolor: "#f48fb1" }}>
+                      {auth?.user?.username?.[0]?.toUpperCase()}
+                    </Avatar>
+                  ) : (
+                    <AccountCircleIcon />
+                  )}
                 </IconButton>
                 <Menu
+                  id="profile-menu"
                   anchorEl={anchorEl}
                   open={openMenu}
                   onClose={handleMenuClose}
                 >
-                  <MenuItem
-                    component={Link}
-                    to="/login"
-                    onClick={handleMenuClose}
-                  >
-                    Login
-                  </MenuItem>
-                  <MenuItem
-                    component={Link}
-                    to="/register"
-                    onClick={handleMenuClose}
-                  >
-                    Register
-                  </MenuItem>
+                  {!isLoggedIn ? (
+                    <>
+                      <MenuItem
+                        component={Link}
+                        to="/login"
+                        onClick={handleMenuClose}
+                      >
+                        Login
+                      </MenuItem>
+                      <MenuItem
+                        component={Link}
+                        to="/register"
+                        onClick={handleMenuClose}
+                      >
+                        Register
+                      </MenuItem>
+                    </>
+                  ) : (
+                    <>
+                      <MenuItem
+                        component={Link}
+                        to="/profile"
+                        onClick={handleMenuClose}
+                      >
+                        Profile
+                      </MenuItem>
+                      <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                    </>
+                  )}
                 </Menu>
               </Box>
+
               <IconButton color="inherit" onClick={() => setDrawerOpen(true)}>
                 <MenuIcon
                   sx={{
@@ -283,6 +364,7 @@ const Navbar = () => {
                   }}
                 />
               </IconButton>
+
               <Drawer
                 anchor="right"
                 open={drawerOpen}
@@ -296,7 +378,6 @@ const Navbar = () => {
                     backgroundColor: "#FDEFF1",
                   }}
                 >
-                  {/* Cross button */}
                   <IconButton
                     onClick={() => setDrawerOpen(false)}
                     sx={{
@@ -306,7 +387,6 @@ const Navbar = () => {
                       color: "red",
                       border: "1px solid red",
                       borderRadius: "50%",
-                      "&:hover": { backgroundColor: "rgba(255,0,0,0.1)" },
                     }}
                   >
                     <CloseIcon />
@@ -316,7 +396,6 @@ const Navbar = () => {
                     sx={{ mt: 5 }}
                     role="presentation"
                     onClick={() => setDrawerOpen(false)}
-                    onKeyDown={() => setDrawerOpen(false)}
                   >
                     <List>
                       {navItems.map((item) => (
@@ -360,6 +439,7 @@ const Navbar = () => {
                   }}
                 />
               </IconButton>
+
               <Drawer
                 anchor="right"
                 open={drawerOpen}
@@ -372,7 +452,6 @@ const Navbar = () => {
                     backgroundColor: "#FDEFF1",
                   }}
                 >
-                  {/* Cross button */}
                   <IconButton
                     onClick={() => setDrawerOpen(false)}
                     sx={{
@@ -382,14 +461,12 @@ const Navbar = () => {
                       color: "red",
                       border: "1px solid red",
                       borderRadius: "50%",
-                      "&:hover": { backgroundColor: "rgba(255,0,0,0.1)" },
                     }}
                   >
                     <CloseIcon />
                   </IconButton>
 
                   <Box sx={{ mt: 5 }}>
-                    {/* Mobile Search */}
                     <Box sx={{ p: 2 }}>
                       <Box
                         sx={{
@@ -446,20 +523,40 @@ const Navbar = () => {
                       >
                         Cart
                       </Button>
-                      <Button
-                        startIcon={<AccountCircleIcon />}
-                        component={Link}
-                        to="/login"
-                      >
-                        Login
-                      </Button>
-                      <Button
-                        startIcon={<AccountCircleIcon />}
-                        component={Link}
-                        to="/register"
-                      >
-                        Register
-                      </Button>
+                      {!isLoggedIn ? (
+                        <>
+                          <Button
+                            startIcon={<AccountCircleIcon />}
+                            component={Link}
+                            to="/login"
+                          >
+                            Login
+                          </Button>
+                          <Button
+                            startIcon={<AccountCircleIcon />}
+                            component={Link}
+                            to="/register"
+                          >
+                            Register
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button
+                            startIcon={<AccountCircleIcon />}
+                            component={Link}
+                            to="/profile"
+                          >
+                            Profile
+                          </Button>
+                          <Button
+                            startIcon={<AccountCircleIcon />}
+                            onClick={handleLogout}
+                          >
+                            Logout
+                          </Button>
+                        </>
+                      )}
                     </Box>
                   </Box>
                 </Box>
