@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import HomeBanner from "../components/HomeBanner";
 import HeroSection from "../components/HeroSection";
 import CategoriesList from "../components/categoriesList";

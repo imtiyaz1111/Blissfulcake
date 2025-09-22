@@ -32,7 +32,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import CloseIcon from "@mui/icons-material/Close";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
-import logo from "../assets/blissfulllogo.jpg";
+import logo from "../assets/blissfulllogo.png";
 import { useAuth } from "../context/AuthProvider";
 import { logOut } from "../Api/functions/authFunctions";
 

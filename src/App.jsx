@@ -30,6 +30,13 @@ import VerifyEmail from "./Pages/Auth/VerifyEmail";
 import UpdatePassword from "./Pages/Auth/UpdatePassword";
 
 const App = () => {
+  // const [loading, setLoading] = useState(true);
+  //  useEffect(() => {
+  //   // simulate data loading
+  //   setTimeout(() => {
+  //     setLoading(false);
+  //   }, 3000);
+  // }, []);
   const publicRoute = [
     { path: "/", element: <Home /> },
     { path: "/aboutus", element: <Aboutus /> },

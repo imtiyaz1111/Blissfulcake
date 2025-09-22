@@ -3,7 +3,7 @@ import Cookies from "js-cookie";
 import axiosInstance from "../axiosIntance";
 import AUTH_ENDPOINTS from "../endPoint/authEndpoint";
 
-// login user
+// ✅ login user
 export const login = async (data, navigate, setLoading, setAuth) => {
   setLoading(true);
   try {
@@ -35,7 +35,7 @@ export const login = async (data, navigate, setLoading, setAuth) => {
   }
 };
 
-// register user
+// ✅ register user
 export const registerUser = async (newData, navigate, setLoading) => {
   setLoading(true);
   try {
@@ -53,7 +53,7 @@ export const registerUser = async (newData, navigate, setLoading) => {
   }
 };
 
-// logout
+// ✅ logout
 export const logOut = async (setAuth, navigate, token) => {
   try {
     const response = await axiosInstance.post(
@@ -67,8 +67,7 @@ export const logOut = async (setAuth, navigate, token) => {
     );
 
     if (response.data.success === true) {
-      // ✅ Remove auth cookie
-      Cookies.remove("auth");
+      Cookies.remove("auth"); // ✅ Remove auth cookie
 
       setAuth({
         user: null,
@@ -84,7 +83,7 @@ export const logOut = async (setAuth, navigate, token) => {
   }
 };
 
-// verify email
+// ✅ verify email
 export const verifyEmail = async (token) => {
   try {
     const response = await axiosInstance.post(
@@ -99,7 +98,7 @@ export const verifyEmail = async (token) => {
 
     if (response.data.success === true) {
       toast.success(response.data.message);
-      return true; // ✅ success
+      return true;
     } else {
       throw new Error(response.data.message || "Verification failed");
     }
@@ -112,10 +111,10 @@ export const verifyEmail = async (token) => {
   }
 };
 
-// forgot password
+// ✅ forgot password
 export const forgotPassword = async (data, navigate, setIsLoading) => {
+  setIsLoading(true);
   try {
-    setIsLoading(true);
     const response = await axiosInstance.post(
       AUTH_ENDPOINTS.FORGOT_PASSWORD,
       data,
@@ -125,7 +124,7 @@ export const forgotPassword = async (data, navigate, setIsLoading) => {
         },
       }
     );
-    setIsLoading(false);
+
     if (response.data.success === true) {
       toast.success(response.data.message);
       navigate(`/verify-otp/${response.data.data.email}`);
@@ -135,13 +134,15 @@ export const forgotPassword = async (data, navigate, setIsLoading) => {
       error.response?.data?.message || "Request failed. Please try again."
     );
     throw error;
+  } finally {
+    setIsLoading(false);
   }
 };
 
-// verify otp
+// ✅ verify otp
 export const verifyOtp = async (data, navigate, setIsLoading, email) => {
+  setIsLoading(true);
   try {
-    setIsLoading(true);
     const response = await axiosInstance.post(
       AUTH_ENDPOINTS.VERIFY_OTP(email),
       data,
@@ -151,7 +152,7 @@ export const verifyOtp = async (data, navigate, setIsLoading, email) => {
         },
       }
     );
-    setIsLoading(false);
+
     if (response.data.success === true) {
       toast.success(response.data.message);
       navigate(`/change-password/${email}`);
@@ -162,6 +163,8 @@ export const verifyOtp = async (data, navigate, setIsLoading, email) => {
         "OTP verification failed. Please try again."
     );
     throw error;
+  } finally {
+    setIsLoading(false);
   }
 };
 
@@ -169,7 +172,7 @@ export const verifyOtp = async (data, navigate, setIsLoading, email) => {
 export const resendOtp = async (data) => {
   try {
     const response = await axiosInstance.post(
-      AUTH_ENDPOINTS.RESEND_OTP, // ✅ make sure you add this in authEndpoint.js
+      AUTH_ENDPOINTS.RESEND_OTP,
       data,
       {
         headers: {
@@ -193,12 +196,12 @@ export const resendOtp = async (data) => {
   }
 };
 
-// change password
+// ✅ change password (forgot password flow)
 export const changePassword = async (data, navigate, setLoading, email) => {
+  setLoading(true);
   try {
-    setLoading(true);
     const response = await axiosInstance.post(
-      AUTH_ENDPOINTS.CHANGE_PASSWORD(email), 
+      AUTH_ENDPOINTS.CHANGE_PASSWORD(email),
       data,
       {
         headers: {
@@ -206,43 +209,73 @@ export const changePassword = async (data, navigate, setLoading, email) => {
         },
       }
     );
-    setLoading(false);
+
     if (response.data.success === true) {
       toast.success(response.data.message);
       navigate("/login");
     }
   } catch (error) {
     toast.error(
-      error.response?.data?.message || "Change password failed. Please try again."
+      error.response?.data?.message ||
+        "Change password failed. Please try again."
     );
     throw error;
+  } finally {
+    setLoading(false);
   }
-}
+};
 
-// update password
-export const updatePassword = async (data, navigate, setLoading,token) => {
+// ✅ update password (logged-in user)
+export const updatePassword = async (data, navigate, setLoading, token) => {
+  setLoading(true);
   try {
-    setLoading(true);
     const response = await axiosInstance.put(
       AUTH_ENDPOINTS.UPDATE_PASSWORD,
       data,
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, 
+          Authorization: `Bearer ${token}`,
         },
       }
     );
-    setLoading(false);
+
     if (response.data.success === true) {
       toast.success(response.data.message);
-      Cookies.remove("auth");
+      Cookies.remove("auth"); // ✅ clear auth
       navigate("/login");
     }
   } catch (error) {
     toast.error(
-      error.response?.data?.message || "Update password failed. Please try again."
+      error.response?.data?.message ||
+        "Update password failed. Please try again."
     );
     throw error;
+  } finally {
+    setLoading(false);
   }
-}
+};
+
+// ✅ get all users (admin only)
+export const getAllUsers = async (setAllUserData, setLoading, token) => {
+  setLoading(true);
+  try {
+    const response = await axiosInstance.get(AUTH_ENDPOINTS.GET_ALL_USERS, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.data.success === true) {
+      setAllUserData(response.data.users);
+      toast.success(response.data.message);
+    }
+  } catch (error) {
+    toast.error(
+      error.response?.data?.message || "Fetching all users failed. Please try again."
+    );
+  } finally {
+    setLoading(false);
+  }
+};

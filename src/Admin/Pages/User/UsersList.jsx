@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -21,54 +21,59 @@ import {
 } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import PersonIcon from "@mui/icons-material/Person";
-
-const initialUsers = [
-  { id: 1, username: "john_doe", email: "john@example.com", role: "Admin", isDisabled: false },
-  { id: 2, username: "jane_smith", email: "jane@example.com", role: "Editor", isDisabled: false },
-  { id: 3, username: "mark_jones", email: "mark@example.com", role: "Viewer", isDisabled: true },
-  { id: 4, username: "alice_wong", email: "alice@example.com", role: "Editor", isDisabled: false },
-  { id: 5, username: "bob_brown", email: "bob@example.com", role: "Viewer", isDisabled: false },
-  { id: 6, username: "lucy_lee", email: "lucy@example.com", role: "Admin", isDisabled: false },
-];
+import { toast } from "react-toastify";
+import { useAuth } from "../../../context/AuthProvider";
+import { getAllUsers } from "../../../Api/functions/authFunctions";
+import Loading from "../../../components/Loading/Loading";
 
 const UsersList = () => {
-  const [users, setUsers] = useState(initialUsers);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [allUserData, setAllUserData] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const [auth] = useAuth();
+  const token = auth?.token;
+
+  // Fetch all users
+  useEffect(() => {
+    if (token) {
+      getAllUsers(setAllUserData, setLoading, token);
+    }
+  }, [token]);
+  console.log("user", allUserData);
 
   // Pagination states
   const [page, setPage] = useState(1);
   const rowsPerPage = 5;
 
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-    setSelectedUser(null);
+  // Open Delete Dialog
+  const handleDeleteClick = (user) => {
+    setSelectedUser(user);
+    setOpenDialog(true);
   };
 
-  const handleConfirmDelete = () => {
-    setUsers(users.filter((u) => u.id !== selectedUser.id));
+  // Close Delete Dialog
+  const handleCloseDialog = () => {
     setOpenDialog(false);
     setSelectedUser(null);
   };
 
   // Handle Disable Toggle
   const handleToggleDisable = (userId) => {
-    setUsers(
-      users.map((u) =>
+    setAllUserData((prev) =>
+      prev.map((u) =>
         u.id === userId ? { ...u, isDisabled: !u.isDisabled } : u
       )
     );
   };
 
   // Filter + Search + Sort
-  const filteredUsers = users
+  const filteredUsers = (allUserData || [])
     .filter(
       (u) =>
-        u.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        u.email.toLowerCase().includes(searchQuery.toLowerCase())
+        u?.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        u?.email?.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) =>
       sortOrder === "asc"
@@ -153,63 +158,108 @@ const UsersList = () => {
       </Box>
 
       {/* User Table */}
-      <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
-        <Table>
-          <TableHead sx={{ background: "linear-gradient(135deg, #ff94a3, #f48fb1)" }}>
-            <TableRow>
-              <TableCell>
-                <strong>ID</strong>
-              </TableCell>
-              <TableCell>
-                <strong>Username</strong>
-              </TableCell>
-              <TableCell>
-                <strong>Email</strong>
-              </TableCell>
-              <TableCell>
-                <strong>Role</strong>
-              </TableCell>
-              <TableCell align="center">
-                <strong>Disable</strong>
-              </TableCell>
-             
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {paginatedUsers.map((user) => (
-              <TableRow
-                key={user.id}
-                sx={{
-                  opacity: user.isDisabled ? 0.5 : 1,
-                  transition: "opacity 0.3s ease",
-                }}
-              >
-                <TableCell>{user.id}</TableCell>
-                <TableCell>{user.username}</TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>{user.role}</TableCell>
-                <TableCell align="center">
-                  <Switch
-                    checked={!user.isDisabled}
-                    onChange={() => handleToggleDisable(user.id)}
-                    color="primary"
-                  />
-                </TableCell>
-             
-              </TableRow>
-            ))}
-            {paginatedUsers.length === 0 && (
+      {loading ? (
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight="50vh"
+        >
+          <Loading />
+        </Box>
+      ) : (
+        <TableContainer
+          component={Paper}
+          sx={{ borderRadius: 2, boxShadow: 3 }}
+        >
+          <Table>
+            <TableHead
+              sx={{ background: "linear-gradient(135deg, #ff94a3, #f48fb1)" }}
+            >
               <TableRow>
-                <TableCell colSpan={6} align="center">
-                  <Typography color="text.secondary">
-                    No users found
-                  </Typography>
+                <TableCell>
+                  <strong>No.</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Username</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Email</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Number</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Role</strong>
+                </TableCell>
+                <TableCell align="center">
+                  <strong>Active</strong>
+                </TableCell>
+                <TableCell align="center">
+                  <strong>Disable</strong>
                 </TableCell>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {paginatedUsers.map((user, index) => (
+                <TableRow
+                  key={user.id}
+                  sx={{
+                    opacity: user.isDisabled ? 0.5 : 1,
+                    transition: "opacity 0.3s ease",
+                  }}
+                >
+                  {/* Serial Number (based on pagination) */}
+                  <TableCell>{(page - 1) * rowsPerPage + index + 1}</TableCell>
+
+                  <TableCell>{user.username}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{user.number}</TableCell>
+                  <TableCell>{user.role}</TableCell>
+
+                  {/* Active Field */}
+                  <TableCell align="center">
+                    <Button
+                      variant="contained"
+                      size="small"
+                      sx={{
+                        bgcolor: user.isLoggedIn
+                          ? "error.main"
+                          : "success.main",
+                        "&:hover": {
+                          bgcolor: user.isLoggedIn
+                            ? "error.dark"
+                            : "success.dark",
+                        },
+                      }}
+                    >
+                      {user.isLoggedIn==true ? "Active" : "Inactive"}
+                    </Button>
+                  </TableCell>
+
+                  {/* Disable Toggle */}
+                  <TableCell align="center">
+                    <Switch
+                      checked={!user.isDisabled}
+                      onChange={() => handleToggleDisable(user.id)}
+                      color="primary"
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+              {paginatedUsers.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} align="center">
+                    <Typography color="text.secondary">
+                      No users found
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
       {/* Pagination */}
       {filteredUsers.length > rowsPerPage && (
@@ -222,37 +272,6 @@ const UsersList = () => {
           />
         </Box>
       )}
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={openDialog}
-        onClose={handleCloseDialog}
-        fullWidth
-        maxWidth="xs"
-      >
-        <DialogTitle>Delete User</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Are you sure you want to delete this user?
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={handleCloseDialog}
-            variant="outlined"
-            color="secondary"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleConfirmDelete}
-            variant="contained"
-            color="error"
-          >
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };

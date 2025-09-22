@@ -32,7 +32,7 @@ import {
   ListAlt as ListAltIcon,
 } from "@mui/icons-material";
 import { NavLink } from "react-router-dom";
-import logo from "../../assets/blissfulllogo.jpg";
+import logo from "../../assets/blissfulllogo.png";
 
 const expandedWidth = 240;
 const collapsedWidth = 70;

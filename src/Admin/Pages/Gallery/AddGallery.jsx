@@ -10,33 +10,46 @@ import {
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../context/AuthProvider";
+import { toast } from "react-toastify";
+import { uploadGallery } from "../../../Api/functions/galleryFunction";
 
 const AddGallery = () => {
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null); // preview
+  const [selectedFile, setSelectedFile] = useState(null); // actual file
+  const [loading, setLoading] = useState(false);
+  const [auth] = useAuth();
+  const token = auth?.token;
+  const navigate = useNavigate();
 
   // Handle image selection
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
+      setSelectedFile(file);
       setSelectedImage(URL.createObjectURL(file));
     }
   };
 
   // Handle image delete
   const handleDeleteImage = () => {
+    setSelectedFile(null);
     setSelectedImage(null);
   };
 
   // Handle form submit
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedImage) {
-      alert("Please select an image before submitting.");
-      return;
-    }
-    // You can replace this with API call to upload image
-    console.log("Gallery Image Submitted:", selectedImage);
-    alert("Gallery image added successfully!");
+    if (!token) return toast.error("Please login to upload a gallery image");
+    if (!selectedFile) return toast.error("Please select a gallery image");
+
+    const formData = new FormData();
+    formData.append("gallaryImage", selectedFile); // ✅ fixed spelling
+
+    await uploadGallery(formData, token, navigate, setLoading);
+    setSelectedFile(null);
+    setSelectedImage(null);
   };
 
   return (
@@ -83,11 +96,7 @@ const AddGallery = () => {
             component="label"
             startIcon={<CloudUploadIcon />}
             fullWidth
-            sx={{
-              borderRadius: 2,
-              textTransform: "none",
-              height: 50,
-            }}
+            sx={{ borderRadius: 2, textTransform: "none", height: 50 }}
           >
             {selectedImage ? "Change Image" : "Upload Gallery Image"}
             <input
@@ -115,6 +124,7 @@ const AddGallery = () => {
                 alt="Gallery Preview"
               />
               <IconButton
+                aria-label="delete image"
                 onClick={handleDeleteImage}
                 sx={{
                   position: "absolute",
@@ -135,6 +145,7 @@ const AddGallery = () => {
             type="submit"
             variant="contained"
             fullWidth
+            disabled={loading}
             sx={{
               borderRadius: 2,
               textTransform: "none",
@@ -142,7 +153,7 @@ const AddGallery = () => {
               background: "linear-gradient(135deg, #ff94a3, #f48fb1)",
             }}
           >
-            Add Gallery Image
+            {loading ? "Uploading..." : "Add Gallery Image"}
           </Button>
         </Box>
       </form>

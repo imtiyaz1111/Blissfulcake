@@ -6,11 +6,12 @@ const AUTH_ENDPOINTS = {
   Logout: `${baseURL}/api/user/logout`,
   VERIFY_MAIL: `${baseURL}/api/user/verify`,
   FORGOT_PASSWORD: `${baseURL}/api/user/forgot-password`,
-  VERIFY_OTP: (email) => `${baseURL}/api/user/verify-otp/${email}`, 
+  VERIFY_OTP: (email) => `${baseURL}/api/user/verify-otp/${email}`,
   RESEND_OTP: `${baseURL}/api/user/resend-otp`,
-  CHANGE_PASSWORD:(email) => `${baseURL}/api/user/change-password/${email}`,
+  CHANGE_PASSWORD: (email) => `${baseURL}/api/user/change-password/${email}`,
   UPDATE_PASSWORD: `${baseURL}/api/user/update-password`,
-
+  GET_ALL_USERS: `${baseURL}/api/user/all-users`,
+  Disable_User: (id)=> `${baseURL}/api/user//toggle-user/${id}`,
 };
 
 export default AUTH_ENDPOINTS;

@@ -10,33 +10,45 @@ import {
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../context/AuthProvider";
+import { toast } from "react-toastify";
+import { uploadReviewImg } from "../../../Api/functions/reviewImgFunctions"; // ✅ new API function
 
-const AddReveiwImg = () => {
-  const [selectedImage, setSelectedImage] = useState(null);
+const AddReviewImg = () => {
+  const [selectedImage, setSelectedImage] = useState(null); // preview
+  const [selectedFile, setSelectedFile] = useState(null); // actual file
+  const [loading, setLoading] = useState(false);
+  const [auth] = useAuth();
+  const token = auth?.token;
+  const navigate = useNavigate();
 
   // Handle image selection
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
+      setSelectedFile(file);
       setSelectedImage(URL.createObjectURL(file));
     }
   };
 
   // Handle image delete
   const handleDeleteImage = () => {
+    setSelectedFile(null);
     setSelectedImage(null);
   };
 
   // Handle form submit
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedImage) {
-      alert("Please select an image before submitting.");
-      return;
-    }
-    // You can replace this with API call to upload image
-    console.log("Review Image Submitted:", selectedImage);
-    alert("Review image added successfully!");
+    if (!selectedFile) return toast.error("Please select a review image");
+
+    const formData = new FormData();
+    formData.append("reviewImg", selectedFile); // ✅ adjust field name
+
+    await uploadReviewImg(formData, token, navigate, setLoading);
+    setSelectedFile(null);
+    setSelectedImage(null);
   };
 
   return (
@@ -83,13 +95,9 @@ const AddReveiwImg = () => {
             component="label"
             startIcon={<CloudUploadIcon />}
             fullWidth
-            sx={{
-              borderRadius: 2,
-              textTransform: "none",
-              height: 50,
-            }}
+            sx={{ borderRadius: 2, textTransform: "none", height: 50 }}
           >
-            {selectedImage ? "Change Image" : "Upload Gallery Image"}
+            {selectedImage ? "Change Image" : "Upload Review Image"}
             <input
               type="file"
               accept="image/*"
@@ -112,9 +120,10 @@ const AddReveiwImg = () => {
                 component="img"
                 height="200"
                 image={selectedImage}
-                alt="Gallery Preview"
+                alt="Review Preview"
               />
               <IconButton
+                aria-label="delete image"
                 onClick={handleDeleteImage}
                 sx={{
                   position: "absolute",
@@ -135,6 +144,7 @@ const AddReveiwImg = () => {
             type="submit"
             variant="contained"
             fullWidth
+            disabled={loading}
             sx={{
               borderRadius: 2,
               textTransform: "none",
@@ -142,7 +152,7 @@ const AddReveiwImg = () => {
               background: "linear-gradient(135deg, #ff94a3, #f48fb1)",
             }}
           >
-            Add Review Image
+            {loading ? "Uploading..." : "Add Review Image"}
           </Button>
         </Box>
       </form>
@@ -150,4 +160,4 @@ const AddReveiwImg = () => {
   );
 };
 
-export default AddReveiwImg;
+export default AddReviewImg;

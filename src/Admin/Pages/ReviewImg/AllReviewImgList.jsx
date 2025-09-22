@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Grid,
   Card,
@@ -15,54 +15,52 @@ import {
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 import DeleteIcon from "@mui/icons-material/Delete";
-
-const banners = [
-  {
-    id: 1,
-    image:
-      "https://mioamoreshop.com/_next/image?url=https%3A%2F%2Fapi.mioamoreshop.com%2Fstorage%2F3677%2Fbanner2.jpg&w=1920&q=75",
-  },
-  {
-    id: 2,
-    image:
-      "https://mioamoreshop.com/_next/image?url=https%3A%2F%2Fapi.mioamoreshop.com%2Fstorage%2F9334%2Fmio-slider-1-(1).png&w=1920&q=75",
-  },
-  {
-    id: 3,
-    image:
-      "https://images.unsplash.com/photo-1508921912186-1d1a45ebb3c1",
-  },
-  {
-    id: 4,
-    image:
-      "https://images.unsplash.com/photo-1522202176988-66273c2fd55f",
-  },
-  {
-    id: 5,
-    image:
-      "https://images.unsplash.com/photo-1519681393784-d120267933ba",
-  },
-];
+import { toast } from "react-toastify";
+import { useAuth } from "../../../context/AuthProvider";
+import { getAllReviewImg, deleteReviewImg } from "../../../Api/functions/reviewImgFunctions"; // ✅ new API funcs
+import Loading from "../../../components/Loading/Loading";
+import { baseURL } from "../../../Api/axiosIntance";
 
 const AllReviewImgList = () => {
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedBanner, setSelectedBanner] = useState(null);
+  const [selectedReview, setSelectedReview] = useState(null);
 
-  const handleDeleteClick = (banner) => {
-    setSelectedBanner(banner);
+  const [auth] = useAuth();
+  const token = auth?.token;
+
+  // Fetch reviews on mount
+  useEffect(() => {
+    getAllReviewImg(setReviews, setLoading)
+  }, []);
+
+  // Delete click handler
+  const handleDeleteClick = (reviewItem) => {
+    setSelectedReview(reviewItem);
     setOpenDialog(true);
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
-    setSelectedBanner(null);
+    setSelectedReview(null);
   };
 
-  const handleConfirmDelete = () => {
-    console.log("Deleting banner:", selectedBanner);
-    // Replace with API call to delete the banner
-    setOpenDialog(false);
-    setSelectedBanner(null);
+  // Confirm delete
+  const handleConfirmDelete = async () => {
+    if (!token) return toast.error("Please login to delete review images");
+    if (!selectedReview) return;
+    const id = selectedReview._id;
+
+    try {
+      await deleteReviewImg(id, token, setLoading);
+      setReviews((prev) => prev.filter((item) => item._id !== id));
+    } catch (error) {
+      toast.error("Failed to delete review image");
+    } finally {
+      setOpenDialog(false);
+      setSelectedReview(null);
+    }
   };
 
   return (
@@ -90,7 +88,7 @@ const AllReviewImgList = () => {
             <PhotoLibraryIcon />
           </IconButton>
           <Typography variant="h6" fontWeight="bold">
-           Review
+            Review
           </Typography>
         </Box>
         <Box display="flex" alignItems="center" gap={0.5}>
@@ -101,57 +99,65 @@ const AllReviewImgList = () => {
         </Box>
       </Box>
 
-      {/* Banner List - 4 per row on large screens */}
-      <Grid container spacing={2}>
-        {banners.map((banner) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={banner.id}>
-            <Card
-              sx={{
-                borderRadius: 2,
-                overflow: "hidden",
-                boxShadow: 3,
-                position: "relative",
-                height: "100%",
-              }}
-            >
-              {/* Delete Button */}
-              <IconButton
+      {/* Review List */}
+      {loading ? (
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
+          <Loading />
+        </Box>
+      ) : reviews.length === 0 ? (
+        <Typography align="center" color="text.secondary">
+          No reviews found.
+        </Typography>
+      ) : (
+        <Grid container spacing={2}>
+          {reviews.map((item) => (
+            <Grid item xs={12} sm={6} md={4} lg={3} key={item._id}>
+              <Card
                 sx={{
-                  position: "absolute",
-                  top: 10,
-                  right: 10,
-                  bgcolor: "rgba(0,0,0,0.5)",
-                  color: "#fff",
-                  "&:hover": { bgcolor: "rgba(255,0,0,0.7)" },
+                  borderRadius: 2,
+                  overflow: "hidden",
+                  boxShadow: 3,
+                  position: "relative",
+                  height: "100%",
                 }}
-                onClick={() => handleDeleteClick(banner)}
               >
-                <DeleteIcon />
-              </IconButton>
+                {/* Delete Button */}
+                <IconButton
+                  aria-label="delete review image"
+                  sx={{
+                    position: "absolute",
+                    top: 10,
+                    right: 10,
+                    bgcolor: "rgba(0,0,0,0.5)",
+                    color: "#fff",
+                    "&:hover": { bgcolor: "rgba(255,0,0,0.7)" },
+                  }}
+                  onClick={() => handleDeleteClick(item)}
+                >
+                  <DeleteIcon />
+                </IconButton>
 
-              <CardMedia
-                component="img"
-                image={banner.image}
-                alt={`Banner ${banner.id}`}
-                sx={{
-                  width: "250px",
-                  height:"250px",
-                  height: { xs: 180, sm: 200, md: 220 },
-                  objectFit: "cover",
-                }}
-              />
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+                <CardMedia
+                  component="img"
+                  image={`${baseURL}${item.reviewImg}`} // ✅ adjust field name
+                  alt={`Review ${item._id}`}
+                  sx={{
+                    width: 280,
+                    height: 250,
+                    objectFit: "cover",
+                  }}
+                />
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      )}
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="xs">
         <DialogTitle>Delete Review</DialogTitle>
         <DialogContent>
-          <Typography>
-            Are you sure you want to delete this Review?
-          </Typography>
+          <Typography>Are you sure you want to delete this review image?</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} variant="outlined" color="secondary">
