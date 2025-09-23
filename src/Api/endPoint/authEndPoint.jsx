@@ -11,7 +11,7 @@ const AUTH_ENDPOINTS = {
   CHANGE_PASSWORD: (email) => `${baseURL}/api/user/change-password/${email}`,
   UPDATE_PASSWORD: `${baseURL}/api/user/update-password`,
   GET_ALL_USERS: `${baseURL}/api/user/all-users`,
-  Disable_User: (id)=> `${baseURL}/api/user//toggle-user/${id}`,
+  Disable_User: (id)=> `${baseURL}/api/user/toggle-user/${id}`,
 };
 
 export default AUTH_ENDPOINTS;

@@ -28,6 +28,8 @@ import UsersList from "./Admin/Pages/User/UsersList";
 import Profile from "./Pages/Profile";
 import VerifyEmail from "./Pages/Auth/VerifyEmail";
 import UpdatePassword from "./Pages/Auth/UpdatePassword";
+import AllProductList from "./Admin/Pages/Product/AllProductList";
+import AddProduct from "./Admin/Pages/Product/AddProduct";
 
 const App = () => {
   // const [loading, setLoading] = useState(true);
@@ -75,6 +77,8 @@ const App = () => {
     { path: "/category/add", element: <AddCategory /> },
     { path: "/category/update", element: <UpdateCategory /> },
     { path: "/user/manage", element: <UsersList /> },
+    { path: "/product/manage", element: <AllProductList /> },
+    { path: "/product/add", element: <AddProduct /> },
   ];
 
   return (

@@ -171,15 +171,11 @@ export const verifyOtp = async (data, navigate, setIsLoading, email) => {
 // ✅ resend otp
 export const resendOtp = async (data) => {
   try {
-    const response = await axiosInstance.post(
-      AUTH_ENDPOINTS.RESEND_OTP,
-      data,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await axiosInstance.post(AUTH_ENDPOINTS.RESEND_OTP, data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
     if (response.data.success === true) {
       toast.success(response.data.message || "OTP resent successfully");
@@ -273,9 +269,35 @@ export const getAllUsers = async (setAllUserData, setLoading, token) => {
     }
   } catch (error) {
     toast.error(
-      error.response?.data?.message || "Fetching all users failed. Please try again."
+      error.response?.data?.message ||
+        "Fetching all users failed. Please try again."
     );
   } finally {
     setLoading(false);
+  }
+};
+
+// Disable_User
+
+export const toggle_isDisable = async (newData, id, token) => {
+  try {
+    const response = await axiosInstance.put(
+      AUTH_ENDPOINTS.Disable_User(id),
+      newData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    if (response.data.success === true) {
+      toast.success(response.data.message);
+    }
+  } catch (error) {
+    toast.error(
+      error.response?.data?.message ||
+        "Fetching disable users failed. Please try again."
+    );
   }
 };

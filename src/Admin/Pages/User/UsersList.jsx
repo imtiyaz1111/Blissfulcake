@@ -3,17 +3,13 @@ import {
   Box,
   Typography,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
   TextField,
   MenuItem,
   Pagination,
@@ -21,9 +17,11 @@ import {
 } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import PersonIcon from "@mui/icons-material/Person";
-import { toast } from "react-toastify";
 import { useAuth } from "../../../context/AuthProvider";
-import { getAllUsers } from "../../../Api/functions/authFunctions";
+import {
+  getAllUsers,
+  toggle_isDisable,
+} from "../../../Api/functions/authFunctions";
 import Loading from "../../../components/Loading/Loading";
 
 const UsersList = () => {
@@ -41,31 +39,27 @@ const UsersList = () => {
       getAllUsers(setAllUserData, setLoading, token);
     }
   }, [token]);
-  console.log("user", allUserData);
 
   // Pagination states
   const [page, setPage] = useState(1);
   const rowsPerPage = 5;
 
-  // Open Delete Dialog
-  const handleDeleteClick = (user) => {
-    setSelectedUser(user);
-    setOpenDialog(true);
-  };
-
-  // Close Delete Dialog
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-    setSelectedUser(null);
-  };
-
   // Handle Disable Toggle
-  const handleToggleDisable = (userId) => {
-    setAllUserData((prev) =>
-      prev.map((u) =>
-        u.id === userId ? { ...u, isDisabled: !u.isDisabled } : u
-      )
-    );
+  const handleToggleDisable = async (userId, currentStatus) => {
+    const newStatus = !currentStatus;
+    const newData = { isDisabled: newStatus };
+
+    try {
+      await toggle_isDisable(newData, userId, token);
+
+      setAllUserData((prev) =>
+        prev.map((u) =>
+          u._id === userId ? { ...u, isDisabled: newStatus } : u
+        )
+      );
+    } catch (error) {
+      console.error("Error toggling disable:", error);
+    }
   };
 
   // Filter + Search + Sort
@@ -126,7 +120,7 @@ const UsersList = () => {
         </Box>
       </Box>
 
-      {/* Search + Filter */}
+      {/* Search + Sort */}
       <Box
         display="flex"
         justifyContent="space-between"
@@ -168,10 +162,7 @@ const UsersList = () => {
           <Loading />
         </Box>
       ) : (
-        <TableContainer
-          component={Paper}
-          sx={{ borderRadius: 2, boxShadow: 3 }}
-        >
+        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
           <Table>
             <TableHead
               sx={{ background: "linear-gradient(135deg, #ff94a3, #f48fb1)" }}
@@ -193,7 +184,7 @@ const UsersList = () => {
                   <strong>Role</strong>
                 </TableCell>
                 <TableCell align="center">
-                  <strong>Active</strong>
+                  <strong>Status</strong>
                 </TableCell>
                 <TableCell align="center">
                   <strong>Disable</strong>
@@ -203,13 +194,13 @@ const UsersList = () => {
             <TableBody>
               {paginatedUsers.map((user, index) => (
                 <TableRow
-                  key={user.id}
+                  key={user._id}
                   sx={{
                     opacity: user.isDisabled ? 0.5 : 1,
                     transition: "opacity 0.3s ease",
                   }}
                 >
-                  {/* Serial Number (based on pagination) */}
+                  {/* Serial Number */}
                   <TableCell>{(page - 1) * rowsPerPage + index + 1}</TableCell>
 
                   <TableCell>{user.username}</TableCell>
@@ -217,23 +208,21 @@ const UsersList = () => {
                   <TableCell>{user.number}</TableCell>
                   <TableCell>{user.role}</TableCell>
 
-                  {/* Active Field */}
+                  {/* Active/Inactive Button */}
                   <TableCell align="center">
                     <Button
                       variant="contained"
                       size="small"
                       sx={{
-                        bgcolor: user.isLoggedIn
-                          ? "error.main"
-                          : "success.main",
+                        bgcolor: user.isLoggedIn ? "success.main" : "error.main",
                         "&:hover": {
                           bgcolor: user.isLoggedIn
-                            ? "error.dark"
-                            : "success.dark",
+                            ? "success.dark"
+                            : "error.dark",
                         },
                       }}
                     >
-                      {user.isLoggedIn==true ? "Active" : "Inactive"}
+                      {user.isLoggedIn ? "Online" : "Offline"}
                     </Button>
                   </TableCell>
 
@@ -241,7 +230,9 @@ const UsersList = () => {
                   <TableCell align="center">
                     <Switch
                       checked={!user.isDisabled}
-                      onChange={() => handleToggleDisable(user.id)}
+                      onChange={() =>
+                        handleToggleDisable(user._id, user.isDisabled)
+                      }
                       color="primary"
                     />
                   </TableCell>
