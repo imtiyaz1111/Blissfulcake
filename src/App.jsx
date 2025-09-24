@@ -30,6 +30,7 @@ import VerifyEmail from "./Pages/Auth/VerifyEmail";
 import UpdatePassword from "./Pages/Auth/UpdatePassword";
 import AllProductList from "./Admin/Pages/Product/AllProductList";
 import AddProduct from "./Admin/Pages/Product/AddProduct";
+import UpdateProduct from "./Admin/Pages/Product/UpdateProduct";
 
 const App = () => {
   // const [loading, setLoading] = useState(true);
@@ -79,6 +80,7 @@ const App = () => {
     { path: "/user/manage", element: <UsersList /> },
     { path: "/product/manage", element: <AllProductList /> },
     { path: "/product/add", element: <AddProduct /> },
+    { path: "/product/update/:id", element: <UpdateProduct /> },
   ];
 
   return (

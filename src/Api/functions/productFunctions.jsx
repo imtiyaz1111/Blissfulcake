@@ -18,6 +18,19 @@ export const getAllProduct = async (setAllProductData, setLoading) => {
   }
 };
 
+// GET ALL PRODUCTS
+export const getProductById = async (setSingleProduct, id) => {
+  try {
+    const response = await axiosInstance.get(PRODUCT_ENDPOINTS.GET_SINGLE_PRODUCT(id));
+    if (response.data.success==true) {
+      setSingleProduct(response.data.data);
+      toast.success(response.data.message); // ✅ fixed
+    }
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Failed to fetch products");
+  } 
+};
+
 // CREATE PRODUCT
 export const createProduct = async (formData, navigate, setLoading, token) => {
   try {
@@ -44,8 +57,9 @@ export const createProduct = async (formData, navigate, setLoading, token) => {
 };
 
 // UPDATE PRODUCT ✅ added
-export const updateProductById = async (id, formData, token) => {
+export const updateProductById = async (id, formData,navigate, setLoading, token) => {
   try {
+    setLoading(true);
     const response = await axiosInstance.put(
       PRODUCT_ENDPOINTS.UPDATE_PRODUCT(id),
       formData,
@@ -57,13 +71,14 @@ export const updateProductById = async (id, formData, token) => {
       }
     );
     if (response.data.success==true) {
-      toast.success(response.data.data.message);
-      return true;
+      toast.success(response.data.message);
+      navigate("/product/manage")
     }
-    return false;
   } catch (error) {
     toast.error(error.response?.data?.message || "Failed to update product");
     return false;
+  }finally {
+    setLoading(false);
   }
 };
 
@@ -94,7 +109,7 @@ export const replyToComment = async (productId, commentId, reply, token) => {
   try {
     const response = await axiosInstance.post(
       PRODUCT_ENDPOINTS.REPLY_COMMENT_PRODUCT(productId, commentId),
-      { reply }, // ✅ send in correct format
+      reply , // ✅ send in correct format
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -102,7 +117,7 @@ export const replyToComment = async (productId, commentId, reply, token) => {
       }
     );
     if (response.data.success==true) {
-      toast.success(response.data.data.message);
+      toast.success(response.data.message);
     }
   } catch (error) {
     toast.error(error.response?.data?.message || "Failed to reply to comment");
@@ -121,7 +136,7 @@ export const deleteProductById = async (id, token) => {
       }
     );
     if (response.data.success==true) {
-      toast.success(response.data.data.message);
+      toast.success(response.data.message);
       return true; // ✅ return for frontend to use
     }
     return false;
