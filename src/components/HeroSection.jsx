@@ -2,11 +2,16 @@
 import React from "react";
 import { Box, Typography, Button, Stack } from "@mui/material";
 import heroImage from "../assets/herosection.png";
+import herobackground from "./../assets/banner1.png"
 
 const HeroSection = () => {
   return (
     <Box
       sx={{
+        backgroundImage: `linear-gradient(rgba(255, 255, 254, 0.5), rgba(255, 255, 255, 0.5)), url(${herobackground})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
         width: "100%",
         py: { xs: 5, md: 10 },
         px: { xs: 2, sm: 4, md: 8 },

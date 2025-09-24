@@ -2,24 +2,27 @@ import { toast } from "react-toastify";
 import axiosInstance from "../axiosIntance";
 import REVIEWIMG_ENDPOINTS from "../endPoint/reviewImgEndPoint";
 
-
-export const getAllReviewImg = async (setReviewData,setLoading)=>{
-    try {
-        setLoading(true)
-        const res= await axiosInstance.get(REVIEWIMG_ENDPOINTS.getAllReviewImg)
-        if(res){
-            setReviewData(res.data.data)
-        }
-    } catch (error) {
-        console.log(error);
-        
-    }finally {
+export const getAllReviewImg = async (setReviewData, setLoading) => {
+  try {
+    setLoading(true);
+    const res = await axiosInstance.get(REVIEWIMG_ENDPOINTS.getAllReview);
+    if (res) {
+      setReviewData(res.data.data);
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
     setLoading(false);
   }
-}
+};
 
 // Upload Gallery
-export const uploadReviewImg = async (formData, token, navigate, setLoading) => {
+export const uploadReviewImg = async (
+  formData,
+  token,
+  navigate,
+  setLoading
+) => {
   try {
     setLoading(true);
     const response = await axiosInstance.post(
@@ -38,7 +41,9 @@ export const uploadReviewImg = async (formData, token, navigate, setLoading) => 
       navigate("/review/manage");
     }
   } catch (error) {
-    toast.error(error.response?.data?.message || "Failed to upload review image");
+    toast.error(
+      error.response?.data?.message || "Failed to upload review image"
+    );
   } finally {
     setLoading(false);
   }
@@ -60,7 +65,9 @@ export const deleteReviewImg = async (id, token, setLoading) => {
       toast.success(response.data.message);
     }
   } catch (error) {
-    toast.error(error.response?.data?.message || "Failed to delete Review image");
+    toast.error(
+      error.response?.data?.message || "Failed to delete Review image"
+    );
   } finally {
     setLoading(false);
   }

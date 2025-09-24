@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -17,89 +17,119 @@ import {
   TextField,
   MenuItem,
   Pagination,
+  IconButton,
+  Collapse,
+  Chip,
+  Rating,
+  Stack,
+  Avatar,
+  Tooltip,
+  Divider,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-
-// Sample Product Data
-const initialProducts = [
-  {
-    id: 1,
-    name: "Chocolate Cake",
-    category: "Cakes",
-    price: 450,
-    stock: 12,
-    image: "https://images.unsplash.com/photo-1608198093002-ad4e005484ec",
-  },
-  {
-    id: 2,
-    name: "Strawberry Pastry",
-    category: "Pastries",
-    price: 120,
-    stock: 25,
-    image: "https://images.unsplash.com/photo-1617196037281-2f53f8e95f98",
-  },
-  {
-    id: 3,
-    name: "Choco Chip Cookies",
-    category: "Cookies",
-    price: 200,
-    stock: 40,
-    image: "https://images.unsplash.com/photo-1605478572013-dc1eeb15bb7d",
-  },
-  {
-    id: 4,
-    name: "Dark Chocolate Box",
-    category: "Chocolates",
-    price: 800,
-    stock: 8,
-    image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587",
-  },
-  {
-    id: 5,
-    name: "French Baguette",
-    category: "Breads",
-    price: 150,
-    stock: 18,
-    image: "https://images.unsplash.com/photo-1608198093002-ad4e005484ec",
-  },
-];
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import CommentIcon from "@mui/icons-material/Comment";
+import ReplyIcon from "@mui/icons-material/Reply";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import { baseURL } from "../../../Api/axiosIntance";
+import {
+  deleteProductById,
+  getAllProduct,
+  replyToComment,
+  updateCommentStatus,
+} from "../../../Api/functions/productFunctions";
+import { useAuth } from "../../../context/AuthProvider";
 
 const AllProductList = () => {
-  const [products, setProducts] = useState(initialProducts);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [expandedVariants, setExpandedVariants] = useState({});
+  const [comments, setComments] = useState({});
+  const [openCommentsDialogFor, setOpenCommentsDialogFor] = useState(null);
+  const [replyText, setReplyText] = useState("");
+  const [currentCommentForReply, setCurrentCommentForReply] = useState(null);
+  const [deleteModal, setDeleteModal] = useState({
+    open: false,
+    productId: null,
+  });
+  const [auth] = useAuth();
+  const token = auth.token;
+
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
-
-  // Pagination states
   const [page, setPage] = useState(1);
   const rowsPerPage = 5;
 
-  // Handle Delete
-  const handleDeleteClick = (product) => {
-    setSelectedProduct(product);
-    setOpenDialog(true);
+  useEffect(() => {
+    getAllProduct(setProducts, setLoading);
+  }, []);
+
+  const toggleVariants = (productId) => {
+    setExpandedVariants((prev) => ({ ...prev, [productId]: !prev[productId] }));
   };
 
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-    setSelectedProduct(null);
+  const openCommentsDialog = (product) => {
+    setComments((prev) => ({ ...prev, [product._id]: product.reviews || [] }));
+    setOpenCommentsDialogFor(product._id);
   };
 
-  const handleConfirmDelete = () => {
-    setProducts(products.filter((p) => p.id !== selectedProduct.id));
-    setOpenDialog(false);
-    setSelectedProduct(null);
+  const closeCommentsDialog = () => {
+    setOpenCommentsDialogFor(null);
+    setReplyText("");
+    setCurrentCommentForReply(null);
   };
 
-  // Handle Edit (example only)
-  const handleEdit = (product) => {
-    alert(`Editing product: ${product.name}`);
+  const changeCommentStatusHandler = async (productId, commentId, status) => {
+    await updateCommentStatus(productId, commentId, status, token);
+    setComments((prev) => {
+      const updated = prev[productId].map((c) =>
+        c._id === commentId ? { ...c, status } : c
+      );
+      return { ...prev, [productId]: updated };
+    });
   };
 
-  // Filter + Search + Sort
+  const openReply = (productId, commentId) => {
+    const comment = comments[productId].find((c) => c._id === commentId);
+    if (comment) {
+      setCurrentCommentForReply({ productId, commentId });
+      setReplyText(comment.reply || "");
+    }
+  };
+
+  const submitReplyHandler = async () => {
+    if (!currentCommentForReply) return;
+    const { productId, commentId } = currentCommentForReply;
+    const newdata = {
+      reply: replyText,
+    };
+    await replyToComment(productId, commentId, newdata, token);
+    setComments((prev) => {
+      const updated = prev[productId].map((c) =>
+        c._id === commentId ? { ...c, reply: replyText } : c
+      );
+      return { ...prev, [productId]: updated };
+    });
+    setReplyText("");
+    setCurrentCommentForReply(null);
+  };
+
+  const confirmDeleteProduct = (productId) => {
+    setDeleteModal({ open: true, productId });
+  };
+
+  const handleDeleteProduct = async () => {
+    const { productId } = deleteModal;
+    const success = await deleteProductById(productId, token);
+    if (success) {
+      setProducts((prev) => prev.filter((p) => p._id !== productId));
+    }
+    setDeleteModal({ open: false, productId: null });
+  };
+
   const filteredProducts = products
     .filter(
       (p) =>
@@ -112,7 +142,6 @@ const AllProductList = () => {
         : b.name.localeCompare(a.name)
     );
 
-  // Pagination logic
   const paginatedProducts = filteredProducts.slice(
     (page - 1) * rowsPerPage,
     page * rowsPerPage
@@ -136,20 +165,26 @@ const AllProductList = () => {
               background: "linear-gradient(135deg, #ff94a3, #f48fb1)",
               color: "#fff",
               borderRadius: 2,
-              width: 40,
-              height: 40,
+              width: 44,
+              height: 44,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              boxShadow: 3,
             }}
           >
             <ShoppingCartIcon />
           </Box>
-          <Typography variant="h6" fontWeight="bold">
-            Product List
-          </Typography>
+          <Box>
+            <Typography variant="h6" fontWeight="700">
+              Product List
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Manage product variants, ratings and comments
+            </Typography>
+          </Box>
         </Box>
-        <Box display="flex" alignItems="center" gap={0.5}>
+        <Box display="flex" alignItems="center" gap={1}>
           <Typography variant="body1" color="text.secondary">
             Overview
           </Typography>
@@ -157,7 +192,7 @@ const AllProductList = () => {
         </Box>
       </Box>
 
-      {/* Search + Filter */}
+      {/* Search + Sort */}
       <Box
         display="flex"
         justifyContent="space-between"
@@ -166,14 +201,16 @@ const AllProductList = () => {
         mb={3}
       >
         <TextField
-          label="Search Product"
+          label="Search Product or Category"
           variant="outlined"
           size="small"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          sx={{ flex: 1, minWidth: 200 }}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setPage(1);
+          }}
+          sx={{ flex: 1, minWidth: 220 }}
         />
-
         <TextField
           select
           label="Sort"
@@ -189,89 +226,151 @@ const AllProductList = () => {
       </Box>
 
       {/* Product Table */}
-      <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
+      <TableContainer
+        component={Paper}
+        sx={{ borderRadius: 2, boxShadow: 3, overflow: "hidden" }}
+      >
         <Table>
           <TableHead
-            sx={{ background: "linear-gradient(135deg, #ff94a3, #f48fb1)" }}
+            sx={{ background: "linear-gradient(90deg,#f48fb1,#ff94a3)" }}
           >
             <TableRow>
-              <TableCell>
-                <strong>ID</strong>
-              </TableCell>
-              <TableCell>
-                <strong>Image</strong>
-              </TableCell>
-              <TableCell>
-                <strong>Product Name</strong>
-              </TableCell>
-              <TableCell>
-                <strong>Category</strong>
-              </TableCell>
-              <TableCell>
-                <strong>Price</strong>
-              </TableCell>
-              <TableCell>
-                <strong>Stock</strong>
-              </TableCell>
-              <TableCell align="center">
-                <strong>Actions</strong>
-              </TableCell>
+              <TableCell>No</TableCell>
+              <TableCell>Image</TableCell>
+              <TableCell>Product Name</TableCell>
+              <TableCell>Category</TableCell>
+              <TableCell>Rating</TableCell>
+              <TableCell>Stock</TableCell>
+              <TableCell>Comment</TableCell>
+              <TableCell align="center">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedProducts.map((product) => (
-              <TableRow key={product.id}>
-                <TableCell>{product.id}</TableCell>
-                <TableCell>
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    style={{
-                      width: 60,
-                      height: 60,
-                      borderRadius: 8,
-                      objectFit: "cover",
-                    }}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Typography fontWeight="500">{product.name}</Typography>
-                </TableCell>
-                <TableCell>{product.category}</TableCell>
-                <TableCell>₹{product.price}</TableCell>
-                <TableCell>{product.stock}</TableCell>
-                <TableCell align="center">
-                  <Box
-                    display="flex"
-                    justifyContent="center"
-                    flexWrap="wrap"
-                    gap={1}
-                  >
-                    <Button
-                      variant="outlined"
-                      sx={{ borderColor: "#4caf50", color: "#4caf50" }}
-                      size="small"
-                      component={Link}
-                      to="/product/update"
-                      onClick={() => handleEdit(product)}
+            {paginatedProducts.map((product, index) => (
+              <React.Fragment key={product._id}>
+                <TableRow>
+                  <TableCell>{(page - 1) * rowsPerPage + index + 1}</TableCell>
+                  <TableCell>
+                    <Avatar
+                      variant="rounded"
+                      src={`${baseURL}${product.image}`}
+                      alt={product.name}
+                      sx={{ width: 60, height: 60, borderRadius: 2 }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Typography fontWeight={600}>{product.name}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      SKU: P-{product._id.toString().padStart(3, "0")}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>{product.category}</TableCell>
+                  <TableCell>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Rating
+                        value={product.ratings}
+                        precision={0.5}
+                        readOnly
+                        size="small"
+                      />
+                      <Typography variant="caption" color="text.secondary">
+                        {product.ratings}
+                      </Typography>
+                    </Stack>
+                  </TableCell>
+                  <TableCell>{product.countInStock}</TableCell>
+                  <TableCell>
+                    <Tooltip title="Comments">
+                      <IconButton
+                        size="small"
+                        onClick={() => openCommentsDialog(product)}
+                      >
+                        <CommentIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Stack
+                      direction="row"
+                      justifyContent="center"
+                      spacing={1}
+                      flexWrap="wrap"
                     >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color="error"
-                      size="small"
-                      onClick={() => handleDeleteClick(product)}
+                      <Button
+                        variant="outlined"
+                        startIcon={<EditIcon />}
+                        size="small"
+                        sx={{ borderColor: "#4caf50", color: "#4caf50" }}
+                        component={Link}
+                        to={`/product/update/${product._id}`}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        size="small"
+                        startIcon={<DeleteIcon />}
+                        onClick={() => confirmDeleteProduct(product._id)}
+                      >
+                        Delete
+                      </Button>
+                      <IconButton onClick={() => toggleVariants(product._id)}>
+                        <ExpandMoreIcon />
+                      </IconButton>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+
+                {/* Collapsible Variants */}
+                <TableRow>
+                  <TableCell colSpan={8} sx={{ padding: 0 }}>
+                    <Collapse
+                      in={!!expandedVariants[product._id]}
+                      timeout="auto"
+                      unmountOnExit
                     >
-                      Delete
-                    </Button>
-                  </Box>
-                </TableCell>
-              </TableRow>
+                      <Box sx={{ margin: 2 }}>
+                        <Typography variant="subtitle1" fontWeight={600} mb={1}>
+                          Variants / Weight options
+                        </Typography>
+                        <Table size="small">
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Label</TableCell>
+                              <TableCell>Price</TableCell>
+                              <TableCell>Discount Price</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {(product.weights || []).map((v) => (
+                              <TableRow key={v._id}>
+                                <TableCell>{v.label}</TableCell>
+                                <TableCell>₹{v.price}</TableCell>
+                                <TableCell>₹{v.discountedPrice}</TableCell>
+                              </TableRow>
+                            ))}
+                            {(!product.weights ||
+                              product.weights.length === 0) && (
+                              <TableRow>
+                                <TableCell colSpan={3} align="center">
+                                  <Typography color="text.secondary">
+                                    No variants available
+                                  </Typography>
+                                </TableCell>
+                              </TableRow>
+                            )}
+                          </TableBody>
+                        </Table>
+                      </Box>
+                    </Collapse>
+                  </TableCell>
+                </TableRow>
+              </React.Fragment>
             ))}
             {paginatedProducts.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} align="center">
+                <TableCell colSpan={8} align="center">
                   <Typography color="text.secondary">
                     No products found
                   </Typography>
@@ -294,34 +393,217 @@ const AllProductList = () => {
         </Box>
       )}
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Modal */}
       <Dialog
-        open={openDialog}
-        onClose={handleCloseDialog}
-        fullWidth
-        maxWidth="xs"
+        open={deleteModal.open}
+        onClose={() => setDeleteModal({ open: false, productId: null })}
       >
         <DialogTitle>Delete Product</DialogTitle>
         <DialogContent>
-          <Typography>
-            Are you sure you want to delete this product?
-          </Typography>
+          <Typography>Are you sure you want to delete this product?</Typography>
         </DialogContent>
         <DialogActions>
           <Button
-            onClick={handleCloseDialog}
-            variant="outlined"
-            color="secondary"
+            onClick={() => setDeleteModal({ open: false, productId: null })}
           >
             Cancel
           </Button>
-          <Button
-            onClick={handleConfirmDelete}
-            variant="contained"
-            color="error"
-          >
+          <Button color="error" onClick={handleDeleteProduct}>
             Delete
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Comments Dialog */}
+      <Dialog
+        open={!!openCommentsDialogFor}
+        onClose={closeCommentsDialog}
+        fullWidth
+        maxWidth="lg"
+      >
+        <DialogTitle>
+          <Box display="flex" alignItems="center" gap={2}>
+            <CommentIcon />
+            <Typography variant="h6">
+              Comments for{" "}
+              {products.find((p) => p._id === openCommentsDialogFor)?.name ||
+                ""}
+            </Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent dividers>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>User Name</TableCell>
+                  <TableCell>Rating</TableCell>
+                  <TableCell>Comment</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Reply</TableCell>
+                  <TableCell align="center">Action</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {(comments[openCommentsDialogFor] || []).map((c) => (
+                  <TableRow key={c._id}>
+                    <TableCell>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Avatar>{(c.name || "U")[0]}</Avatar>
+                        <Box>
+                          <Typography fontWeight={600}>{c.name}</Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            ID: {c._id}
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    </TableCell>
+                    <TableCell>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Rating
+                          value={c.rating}
+                          precision={0.5}
+                          readOnly
+                          size="small"
+                        />
+                        <Typography variant="caption" color="text.secondary">
+                          {c.rating}
+                        </Typography>
+                      </Stack>
+                    </TableCell>
+                    <TableCell>{c.comment}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={c.status}
+                        sx={{
+                          color: "#fff",
+                          backgroundColor:
+                            c.status === "approved"
+                              ? "#36bd36"
+                              : c.status === "pending" ||
+                                c.status === "not approved"
+                              ? "red"
+                              : "grey",
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">
+                        {c.reply || <em style={{ color: "#888" }}>No reply</em>}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        justifyContent="center"
+                      >
+                        <Button
+                          size="small"
+                          color="success"
+                          variant={
+                            c.status === "approved" ? "contained" : "outlined"
+                          }
+                          onClick={() =>
+                            changeCommentStatusHandler(
+                              openCommentsDialogFor,
+                              c._id,
+                              "approved"
+                            )
+                          }
+                        >
+                          Approved
+                        </Button>
+                        <Button
+                          size="small"
+                          color="error"
+                          variant={
+                            c.status === "not approved"
+                              ? "contained"
+                              : "outlined"
+                          }
+                          onClick={() =>
+                            changeCommentStatusHandler(
+                              openCommentsDialogFor,
+                              c._id,
+                              "not approved"
+                            )
+                          }
+                        >
+                          Not Approved
+                        </Button>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          onClick={() =>
+                            handleReplySubmit(
+                              productId,
+                              c._id,
+                              replyData[productId]?.[c._id] || ""
+                            )
+                          } // ✅ send only reply text
+                        >
+                          Reply
+                        </Button>
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {(comments[openCommentsDialogFor] || []).length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      <Typography color="text.secondary">
+                        No comments yet
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          {/* Reply editor */}
+          <Box mt={2}>
+            <Divider />
+            <Box display="flex" gap={2} alignItems="center" mt={2}>
+              <TextField
+                label="Reply"
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                placeholder="Write your reply here..."
+                fullWidth
+                size="small"
+              />
+              <Button
+                variant="contained"
+                onClick={submitReplyHandler}
+                disabled={!currentCommentForReply}
+              >
+                Save Reply
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  setReplyText("");
+                  setCurrentCommentForReply(null);
+                }}
+              >
+                Cancel
+              </Button>
+            </Box>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              mt={1}
+              display="block"
+            >
+              Tip: Click Reply on a comment to load it into the reply box for
+              editing.
+            </Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeCommentsDialog}>Close</Button>
         </DialogActions>
       </Dialog>
     </Box>

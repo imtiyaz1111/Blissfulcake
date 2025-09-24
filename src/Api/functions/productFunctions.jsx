@@ -7,18 +7,18 @@ export const getAllProduct = async (setAllProductData, setLoading) => {
   try {
     setLoading(true);
     const response = await axiosInstance.get(PRODUCT_ENDPOINTS.GET_ALL_PRODUCT);
-    if (response.data.success) {
-      setAllProductData(response.data.message);
-      toast.success(response.data.message);
+    if (response.data.success==true) {
+      setAllProductData(response.data.data);
+      toast.success(response.data.message); // ✅ fixed
     }
   } catch (error) {
-    toast.error(error.response?.data?.message || "Failed to all product");
+    toast.error(error.response?.data?.message || "Failed to fetch products");
   } finally {
     setLoading(false);
   }
 };
 
-// CREATE PRODUCTS
+// CREATE PRODUCT
 export const createProduct = async (formData, navigate, setLoading, token) => {
   try {
     setLoading(true);
@@ -32,7 +32,7 @@ export const createProduct = async (formData, navigate, setLoading, token) => {
         },
       }
     );
-    if (response.data.success) {
+    if (response.data.success==true) {
       toast.success(response.data.message);
       navigate("/product/manage");
     }
@@ -40,5 +40,93 @@ export const createProduct = async (formData, navigate, setLoading, token) => {
     toast.error(error.response?.data?.message || "Failed to create product");
   } finally {
     setLoading(false);
+  }
+};
+
+// UPDATE PRODUCT ✅ added
+export const updateProductById = async (id, formData, token) => {
+  try {
+    const response = await axiosInstance.put(
+      PRODUCT_ENDPOINTS.UPDATE_PRODUCT(id),
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    if (response.data.success==true) {
+      toast.success(response.data.data.message);
+      return true;
+    }
+    return false;
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Failed to update product");
+    return false;
+  }
+};
+
+// COMMENT STATUS UPDATE
+export const updateCommentStatus = async (productId, commentId, status, token) => {
+  try {
+    const response = await axiosInstance.put(
+      PRODUCT_ENDPOINTS.COMMENT_STATUS_PRODUCT(productId, commentId),
+      { status }, // ✅ ensure correct body
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    if (response.data.success==true) {
+      toast.success(response.data.message);
+    }
+  } catch (error) {
+    toast.error(
+      error.response?.data?.message || "Failed to change comment status"
+    );
+  }
+};
+
+// REPLY TO COMMENT
+export const replyToComment = async (productId, commentId, reply, token) => {
+  try {
+    const response = await axiosInstance.post(
+      PRODUCT_ENDPOINTS.REPLY_COMMENT_PRODUCT(productId, commentId),
+      { reply }, // ✅ send in correct format
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    if (response.data.success==true) {
+      toast.success(response.data.data.message);
+    }
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Failed to reply to comment");
+  }
+};
+
+// DELETE PRODUCT
+export const deleteProductById = async (id, token) => {
+  try {
+    const response = await axiosInstance.delete(
+      PRODUCT_ENDPOINTS.DELETE_PRODUCT(id),
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    if (response.data.success==true) {
+      toast.success(response.data.data.message);
+      return true; // ✅ return for frontend to use
+    }
+    return false;
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Failed to delete product");
+    return false;
   }
 };

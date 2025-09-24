@@ -34,7 +34,6 @@ const AddProduct = () => {
     careInstructions: "",
     manufactureDetails: "",
     countInStock: "",
-    quantity: 1,
     weights: [],
     image: null,
   });
@@ -109,7 +108,6 @@ const AddProduct = () => {
     formData.append("careInstructions", product.careInstructions);
     formData.append("manufactureDetails", product.manufactureDetails);
     formData.append("countInStock", product.countInStock);
-    formData.append("quantity", product.quantity);
     formData.append("weights", JSON.stringify(product.weights));
     if (product.image) formData.append("image", product.image);
     console.log("formdata",formData)
@@ -204,7 +202,7 @@ const AddProduct = () => {
                   }
                 />
               </Grid>
-              <Grid size={{ xs: 12, sm: 12, md: 3, lg: 3, xl: 3 }}>
+              <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4, xl: 4}}>
                 <TextField
                   select
                   label="Category"
@@ -221,7 +219,7 @@ const AddProduct = () => {
                   ))}
                 </TextField>
               </Grid>
-              <Grid size={{ xs: 12, sm: 12, md: 3, lg: 3, xl: 3 }}>
+              <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4, xl: 4 }}>
                 <TextField
                   label="Flavor"
                   name="flavor"
@@ -230,7 +228,7 @@ const AddProduct = () => {
                   fullWidth
                 />
               </Grid>
-              <Grid size={{ xs: 12, sm: 12, md: 3, lg: 3, xl: 3 }}>
+              <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4, xl: 4 }}>
                 <TextField
                   type="number"
                   label="Stock Count"
@@ -241,17 +239,7 @@ const AddProduct = () => {
                  
                 />
               </Grid>
-              <Grid size={{ xs: 12, sm: 12, md: 3, lg: 3, xl: 3 }}>
-                {" "}
-                <TextField
-                  type="number"
-                  label="Quantity"
-                  name="quantity"
-                  value={product.quantity}
-                  onChange={handleChange}
-                  fullWidth
-                />
-              </Grid>
+            
               <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}>
                 <Box
                   display="flex"
