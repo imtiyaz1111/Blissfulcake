@@ -372,9 +372,9 @@ const AddProduct = () => {
                 <Button
                   type="submit"
                   variant="contained"
-                  color="primary"
+                  
                   fullWidth
-                  sx={{ py: 1.2, fontSize: "16px", borderRadius: 2 }}
+                  sx={{ py: 1.2, fontSize: "16px", borderRadius: 2,background: "linear-gradient(135deg, #ff94a3, #f48fb1)", }}
                 >
                   {loading == true ? "Publish...." : "   Publish Product"}
                 </Button>

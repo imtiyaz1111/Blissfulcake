@@ -5,6 +5,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import "swiper/css";
 import { getAllReviewImg } from "../Api/functions/reviewImgFunctions";
+import { baseURL } from "../Api/axiosIntance"; 
 
 const ReviewSection = () => {
   const [reviewData, setReviewData] = useState([]);
@@ -40,7 +41,7 @@ const ReviewSection = () => {
       </Typography>
 
       <Swiper
-        spaceBetween={10} // 🔹 reduced spacing
+        spaceBetween={10}
         slidesPerView={3}
         loop={true}
         autoplay={{
@@ -56,33 +57,44 @@ const ReviewSection = () => {
         }}
         modules={[Autoplay]}
       >
-        {reviewData.map((data, index) => (
-          <SwiperSlide key={index}>
-            <Card
-              sx={{
-                borderRadius: 3,
-                overflow: "hidden",
-                boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
-                height: 400,
-                width: 300,
-                mx: "auto", // 🔹 keeps cards centered
-                transition: "0.3s",
-                "&:hover": { transform: "scale(1.03)" },
-              }}
-            >
-              <CardMedia
-                component="img"
-                image={`http://localhost:5000${data.reviewImg}`}
-                alt={`Review ${index + 1}`}
+        {reviewData.length > 0 ? (
+          reviewData.map((data, index) => (
+            <SwiperSlide key={data._id || index}>
+              <Card
                 sx={{
-                  height: "100%",
+                  borderRadius: 3,
+                  overflow: "hidden",
+                  boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
+                  height: { xs: 280, sm: 320, md: 360, lg: 400 },
                   width: "100%",
-                  objectFit: "cover",
+                  maxWidth: 300,
+                  mx: "auto",
+                  transition: "0.3s",
+                  "&:hover": { transform: "scale(1.03)" },
                 }}
-              />
-            </Card>
-          </SwiperSlide>
-        ))}
+              >
+                <CardMedia
+                  component="img"
+                  image={
+                    data.reviewImg
+                      ? `${baseURL}${data.reviewImg}`
+                      : "/no-image.jpg" // ✅ fallback image
+                  }
+                  alt={`Review ${index + 1}`}
+                  sx={{
+                    height: "100%",
+                    width: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+              </Card>
+            </SwiperSlide>
+          ))
+        ) : (
+          <Typography align="center" sx={{ mt: 4, color: "#777" }}>
+            No reviews available.
+          </Typography>
+        )}
       </Swiper>
     </Box>
   );

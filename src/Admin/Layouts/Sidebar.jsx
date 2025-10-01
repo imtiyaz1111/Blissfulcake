@@ -247,7 +247,7 @@ const Sidebar = ({ mobileOpen, handleDrawerToggle }) => {
         <ListItem disablePadding sx={{ display: "block" }}>
           <ListItemButton
             component={NavLink}
-            to="/contact"
+            to="/contact/manage"
             sx={{
               minHeight: 48,
               justifyContent: collapsed ? "center" : "initial",

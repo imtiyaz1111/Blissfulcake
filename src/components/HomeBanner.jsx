@@ -7,12 +7,14 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import { Autoplay } from "swiper/modules";
 import { getAllBanner } from "../Api/functions/homeBannerFunctions";
+import { baseURL } from "../Api/axiosIntance";
 
 const HomeBanner = () => {
   const [bannerData, setBannerData] = useState([]);
+  const [loading,setLoading]=useState(false)
 
   useEffect(() => {
-    getAllBanner(setBannerData);
+    getAllBanner(setBannerData,setLoading);
   }, []);
 
   return (
@@ -34,7 +36,7 @@ const HomeBanner = () => {
             <SwiperSlide key={item._id || index}>
               <Box
                 component="img"
-                src={`http://localhost:5000${item.bannerImg}`}
+                src={`${baseURL}${item.bannerImg}`}
                 alt={`Banner ${index + 1}`}
                 sx={{
                   width: "100%",

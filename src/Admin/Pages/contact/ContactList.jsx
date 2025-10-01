@@ -18,77 +18,64 @@ import {
   MenuItem,
   Pagination,
 } from "@mui/material";
-import CategoryIcon from "@mui/icons-material/Category";
+import ContactPhoneIcon from "@mui/icons-material/ContactPhone";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { Link } from "react-router-dom";
-import {
-  deleteCategories,
-  getAllCategories,
-} from "../../../Api/functions/categoriesFunction";
-import { baseURL } from "../../../Api/axiosIntance";
-import { useAuth } from "../../../context/AuthProvider";
+import { deleteContact, getAllContact } from "../../../Api/functions/contactFunctions";
+import Loading from "../../../components/Loading/Loading";
 
-const CategoryTable = () => {
-  const [categories, setCategories] = useState([]);
+const ContactList = () => {
+  const [contacts, setContacts] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedContact, setSelectedContact] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
+
+  // Fetch contacts
+  useEffect(() => {
+    setLoading(true);
+    getAllContact(setContacts).finally(() => setLoading(false));
+  }, []);
 
   // Pagination states
   const [page, setPage] = useState(1);
   const rowsPerPage = 5;
 
-  const [auth]=useAuth()
-  const token=auth?.token;
-
-  // Fetch categories
-  useEffect(() => {
-    getAllCategories(setCategories);
-  }, []);
-
   // Handle Delete
-  const handleDeleteClick = (category) => {
-    setSelectedCategory(category);
+  const handleDeleteClick = (contact) => {
+    setSelectedContact(contact);
     setOpenDialog(true);
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
-    setSelectedCategory(null);
+    setSelectedContact(null);
   };
 
-  const handleConfirmDelete = async () => {
-    try {
-      await deleteCategories(selectedCategory._id, token);
-      setCategories((prev) =>
-        prev.filter((cat) => cat._id !== selectedCategory._id)
-      );
-    } catch (error) {
-      console.error("Delete failed:", error);
-    } finally {
-      setOpenDialog(false);
-      setSelectedCategory(null);
-    }
+  const handleConfirmDelete = () => {
+    deleteContact(selectedContact._id)
+    setContacts(contacts.filter((c) => c._id !== selectedContact._id));
+    setOpenDialog(false);
+    setSelectedContact(null);
   };
 
   // Filter + Search + Sort
-  const filteredCategories = categories
-    .filter((cat) =>
-      cat.category?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredContacts = contacts
+    .filter((c) =>
+      c.name.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) =>
       sortOrder === "asc"
-        ? a.category.localeCompare(b.category)
-        : b.category.localeCompare(a.category)
+        ? a.name.localeCompare(b.name)
+        : b.name.localeCompare(a.name)
     );
 
   // Pagination logic
-  const paginatedCategories = filteredCategories.slice(
+  const paginatedContacts = filteredContacts.slice(
     (page - 1) * rowsPerPage,
     page * rowsPerPage
   );
-  const totalPages = Math.ceil(filteredCategories.length / rowsPerPage);
+  const totalPages = Math.ceil(filteredContacts.length / rowsPerPage);
 
   return (
     <Box sx={{ p: { xs: 2, sm: 3 }, bgcolor: "#FDEFF1", minHeight: "100vh" }}>
@@ -114,10 +101,10 @@ const CategoryTable = () => {
               justifyContent: "center",
             }}
           >
-            <CategoryIcon />
+            <ContactPhoneIcon />
           </Box>
           <Typography variant="h6" fontWeight="bold">
-            Category List
+            Contact List
           </Typography>
         </Box>
         <Box display="flex" alignItems="center" gap={0.5}>
@@ -128,7 +115,7 @@ const CategoryTable = () => {
         </Box>
       </Box>
 
-      {/* Search + Filter */}
+      {/* Search + Sort */}
       <Box
         display="flex"
         justifyContent="space-between"
@@ -137,7 +124,7 @@ const CategoryTable = () => {
         mb={3}
       >
         <TextField
-          label="Search Category"
+          label="Search Contact"
           variant="outlined"
           size="small"
           value={searchQuery}
@@ -159,90 +146,86 @@ const CategoryTable = () => {
         </TextField>
       </Box>
 
-      {/* Category Table */}
+      {/* Contact Table */}
       <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
         <Table>
-          <TableHead
-            sx={{ background: "linear-gradient(135deg, #ff94a3, #f48fb1)" }}
-          >
+          <TableHead sx={{ background: "linear-gradient(135deg, #ff94a3, #f48fb1)" }}>
             <TableRow>
               <TableCell>
                 <strong>No</strong>
               </TableCell>
               <TableCell>
-                <strong>Image</strong>
+                <strong>Name</strong>
               </TableCell>
               <TableCell>
-                <strong>Title</strong>
+                <strong>Email</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Phone</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Message</strong>
               </TableCell>
               <TableCell align="center">
-                <strong>Actions</strong>
+                <strong>Action</strong>
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedCategories.map((data, index) => (
-              <TableRow key={data._id}>
-                {/* Continuous numbering across pages */}
-                <TableCell>{(page - 1) * rowsPerPage + index + 1}</TableCell>
-                <TableCell>
-                  <img
-                    src={`${baseURL}${data.image}`}
-                    alt={data.category}
-                    style={{
-                      width: 60,
-                      height: 60,
-                      borderRadius: 8,
-                      objectFit: "cover",
-                    }}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Typography fontWeight="500">{data.category}</Typography>
-                </TableCell>
-                <TableCell align="center">
-                  <Box
-                    display="flex"
-                    justifyContent="center"
-                    flexWrap="wrap"
-                    gap={1}
-                  >
-                    <Button
-                      variant="outlined"
-                      sx={{ borderColor: "#4caf50", color: "#4caf50" }}
-                      size="small"
-                      component={Link}
-                      to={`/category/update/${data._id}`}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color="error"
-                      size="small"
-                      onClick={() => handleDeleteClick(data)}
-                    >
-                      Delete
-                    </Button>
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ))}
-            {paginatedCategories.length === 0 && (
+            {loading ? (
               <TableRow>
-                <TableCell colSpan={4} align="center">
-                  <Typography color="text.secondary">
-                    No categories found
-                  </Typography>
+                <TableCell colSpan={6} align="center">
+                  <Loading/>
                 </TableCell>
               </TableRow>
+            ) : (
+              <>
+                {paginatedContacts.map((data, index) => (
+                  <TableRow key={data._id || index}>
+                    <TableCell>{(page - 1) * rowsPerPage + index + 1}</TableCell>
+                    <TableCell>
+                      <Typography fontWeight="500">{data.name}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography fontWeight="500">{data.email}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography fontWeight="500">{data.phone}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography fontWeight="500">{data.message}</Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Box display="flex" justifyContent="center" gap={1}>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          size="small"
+                          onClick={() => handleDeleteClick(data)}
+                        >
+                          Delete
+                        </Button>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {paginatedContacts.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      <Typography color="text.secondary">
+                        No contacts found
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </>
             )}
           </TableBody>
         </Table>
       </TableContainer>
 
       {/* Pagination */}
-      {filteredCategories.length > rowsPerPage && (
+      {filteredContacts.length > rowsPerPage && (
         <Box display="flex" justifyContent="center" mt={3}>
           <Pagination
             count={totalPages}
@@ -260,10 +243,11 @@ const CategoryTable = () => {
         fullWidth
         maxWidth="xs"
       >
-        <DialogTitle>Delete Category</DialogTitle>
+        <DialogTitle>Delete Contact</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete this category?
+            Are you sure you want to delete{" "}
+            <strong>{selectedContact?.name}</strong>?
           </Typography>
         </DialogContent>
         <DialogActions>
@@ -287,4 +271,4 @@ const CategoryTable = () => {
   );
 };
 
-export default CategoryTable;
+export default ContactList;

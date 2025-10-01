@@ -71,7 +71,6 @@ const Navbar = () => {
   const [auth, setAuth] = useAuth();
   const token = auth?.token;
   const isLoggedIn = Boolean(token);
-  console.log("Auth in Navbar:", auth);
 
   const handleLogout = () => {
     setDrawerOpen(false);

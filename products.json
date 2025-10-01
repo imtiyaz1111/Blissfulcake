@@ -1,0 +1,240 @@
+[
+  {
+    "name": "Golden Anniversary Cake",
+    "description": "Elegant two-tier golden fondant cake for anniversary celebrations.",
+    "category": "Anniversary",
+    "flavor": "Vanilla",
+    "deliveryInformation": "Pre-order 24 hours in advance.",
+    "careInstructions": "Store in refrigerator. Best consumed within 48 hours.",
+    "manufactureDetails": "Made by Celebration Cakes Pvt Ltd.",
+    "weights": [
+      { "label": "2kg", "price": 2500 }
+    ],
+    "image": "/images/golden-anniversary.jpg",
+    "countInStock": 5,
+    "ratings": 0,
+    "numReviews": 0,
+    "reviews": []
+  },
+  {
+    "name": "Silver Jubilee Cake",
+    "description": "Beautiful silver-themed cake decorated with edible pearls.",
+    "category": "Anniversary",
+    "flavor": "Butterscotch",
+    "deliveryInformation": "Delivered within 12 hours of order.",
+    "careInstructions": "Keep chilled until serving.",
+    "manufactureDetails": "Jubilee Cakes Ltd.",
+    "weights": [
+      { "label": "1.5kg", "price": 1800 }
+    ],
+    "image": "/images/silver-jubilee.jpg",
+    "countInStock": 8,
+    "ratings": 0,
+    "numReviews": 0,
+    "reviews": []
+  },
+  {
+    "name": "Chocolate Chip Cupcakes",
+    "description": "Pack of 6 chocolate cupcakes with choco-chip toppings.",
+    "category": "Cupcakes",
+    "flavor": "Chocolate",
+    "deliveryInformation": "Same-day delivery.",
+    "careInstructions": "Best consumed within 12 hours.",
+    "manufactureDetails": "Cupcake Mania.",
+    "weights": [
+      { "label": "6 pcs", "price": 350 }
+    ],
+    "image": "/images/chocolate-chip-cupcakes.jpg",
+    "countInStock": 25,
+    "ratings": 0,
+    "numReviews": 0,
+    "reviews": []
+  },
+  {
+    "name": "Rainbow Sprinkle Cupcakes",
+    "description": "Colorful cupcakes topped with rainbow sprinkles.",
+    "category": "Cupcakes",
+    "flavor": "Vanilla",
+    "deliveryInformation": "Delivery within 6 hours.",
+    "careInstructions": "Keep at room temperature.",
+    "manufactureDetails": "Cupcake Treats.",
+    "weights": [
+      { "label": "6 pcs", "price": 400 }
+    ],
+    "image": "/images/rainbow-cupcakes.jpg",
+    "countInStock": 18,
+    "ratings": 0,
+    "numReviews": 0,
+    "reviews": []
+  },
+  {
+    "name": "Glazed Donuts",
+    "description": "Box of 6 freshly baked donuts with sugar glaze.",
+    "category": "Donuts",
+    "flavor": "Classic Glazed",
+    "deliveryInformation": "Delivered warm within 2 hours.",
+    "careInstructions": "Consume within 6 hours for best taste.",
+    "manufactureDetails": "Donut House.",
+    "weights": [
+      { "label": "6 pcs", "price": 300 }
+    ],
+    "image": "/images/glazed-donuts.jpg",
+    "countInStock": 20,
+    "ratings": 0,
+    "numReviews": 0,
+    "reviews": []
+  },
+  {
+    "name": "Chocolate Filled Donuts",
+    "description": "Donuts stuffed with rich chocolate filling.",
+    "category": "Donuts",
+    "flavor": "Chocolate",
+    "deliveryInformation": "Delivery available daily.",
+    "careInstructions": "Best enjoyed warm.",
+    "manufactureDetails": "Donut Factory.",
+    "weights": [
+      { "label": "6 pcs", "price": 380 }
+    ],
+    "image": "/images/chocolate-donuts.jpg",
+    "countInStock": 22,
+    "ratings": 0,
+    "numReviews": 0,
+    "reviews": []
+  },
+  {
+    "name": "Kids Unicorn Pastries",
+    "description": "Colorful unicorn pastries loved by kids.",
+    "category": "Kids",
+    "flavor": "Strawberry",
+    "deliveryInformation": "Delivered fresh daily.",
+    "careInstructions": "Keep refrigerated until serving.",
+    "manufactureDetails": "Kids Bakery Pvt Ltd.",
+    "weights": [
+      { "label": "6 pcs", "price": 500 }
+    ],
+    "image": "/images/unicorn-pastries.jpg",
+    "countInStock": 15,
+    "ratings": 0,
+    "numReviews": 0,
+    "reviews": []
+  },
+  {
+    "name": "Cartoon Character Pastries",
+    "description": "Pastries designed with cartoon characters for kids’ parties.",
+    "category": "Kids",
+    "flavor": "Mixed Flavors",
+    "deliveryInformation": "Pre-order 12 hours in advance.",
+    "careInstructions": "Store in fridge, consume within 24 hours.",
+    "manufactureDetails": "Party Treats Bakery.",
+    "weights": [
+      { "label": "6 pcs", "price": 550 }
+    ],
+    "image": "/images/cartoon-pastries.jpg",
+    "countInStock": 12,
+    "ratings": 0,
+    "numReviews": 0,
+    "reviews": []
+  },
+  {
+    "name": "Photo Print Cake Small",
+    "description": "Personalized cake with edible photo print.",
+    "category": "Photo Cakes",
+    "flavor": "Vanilla",
+    "deliveryInformation": "Upload photo at checkout.",
+    "careInstructions": "Keep in a cool place.",
+    "manufactureDetails": "Memories Cake Shop.",
+    "weights": [
+      { "label": "1kg", "price": 1200 }
+    ],
+    "image": "/images/photo-cake-small.jpg",
+    "countInStock": 10,
+    "ratings": 0,
+    "numReviews": 0,
+    "reviews": []
+  },
+  {
+    "name": "Anniversary Photo Cake",
+    "description": "Photo cake perfect for anniversary celebrations.",
+    "category": "Photo Cakes",
+    "flavor": "Red Velvet",
+    "deliveryInformation": "Delivery in 24 hours.",
+    "careInstructions": "Store chilled until use.",
+    "manufactureDetails": "Photo Delights Pvt Ltd.",
+    "weights": [
+      { "label": "2kg", "price": 2000 }
+    ],
+    "image": "/images/anniversary-photo-cake.jpg",
+    "countInStock": 6,
+    "ratings": 0,
+    "numReviews": 0,
+    "reviews": []
+  },
+  {
+    "name": "Superhero Theme Cake",
+    "description": "Superhero fondant cake loved by kids.",
+    "category": "Theme Cakes",
+    "flavor": "Chocolate",
+    "deliveryInformation": "Pre-order 24 hours in advance.",
+    "careInstructions": "Consume within 48 hours.",
+    "manufactureDetails": "Fantasy Cakes Pvt Ltd.",
+    "weights": [
+      { "label": "2kg", "price": 2800 }
+    ],
+    "image": "/images/superhero-cake.jpg",
+    "countInStock": 7,
+    "ratings": 0,
+    "numReviews": 0,
+    "reviews": []
+  },
+  {
+    "name": "Princess Doll Cake",
+    "description": "Doll-shaped fondant cake for birthdays.",
+    "category": "Theme Cakes",
+    "flavor": "Strawberry",
+    "deliveryInformation": "Delivered next day.",
+    "careInstructions": "Store in refrigerator only.",
+    "manufactureDetails": "Princess Cakes Factory.",
+    "weights": [
+      { "label": "2kg", "price": 3000 }
+    ],
+    "image": "/images/princess-cake.jpg",
+    "countInStock": 5,
+    "ratings": 0,
+    "numReviews": 0,
+    "reviews": []
+  },
+  {
+    "name": "Car Racing Theme Cake",
+    "description": "Cake designed with racing cars and tracks.",
+    "category": "Theme Cakes",
+    "flavor": "Butterscotch",
+    "deliveryInformation": "Pre-order 2 days in advance.",
+    "careInstructions": "Consume fresh for best taste.",
+    "manufactureDetails": "Speedy Cakes Ltd.",
+    "weights": [
+      { "label": "3kg", "price": 3500 }
+    ],
+    "image": "/images/car-racing-cake.jpg",
+    "countInStock": 4,
+    "ratings": 0,
+    "numReviews": 0,
+    "reviews": []
+  },
+  {
+    "name": "Soccer Ball Theme Cake",
+    "description": "Soccer ball-shaped cake for football lovers.",
+    "category": "Theme Cakes",
+    "flavor": "Vanilla",
+    "deliveryInformation": "Available for next-day delivery.",
+    "careInstructions": "Keep in fridge, serve cold.",
+    "manufactureDetails": "Sports Cakes Pvt Ltd.",
+    "weights": [
+      { "label": "2kg", "price": 2700 }
+    ],
+    "image": "/images/soccer-cake.jpg",
+    "countInStock": 6,
+    "ratings": 0,
+    "numReviews": 0,
+    "reviews": []
+  }
+]

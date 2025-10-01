@@ -11,42 +11,48 @@ import {
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { toast } from "react-toastify";
+import { createCategories } from "../../../Api/functions/categoriesFunction";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../context/AuthProvider";
 
 const AddCategory = () => {
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
   const [categoryTitle, setCategoryTitle] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const [auth] = useAuth();
+  const token = auth?.token;
 
-  // Handle image selection
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      setSelectedImage(URL.createObjectURL(file));
+      setSelectedFile(file);
+      setPreviewImage(URL.createObjectURL(file));
     }
   };
 
-  // Handle image delete
   const handleDeleteImage = () => {
-    setSelectedImage(null);
+    setSelectedFile(null);
+    setPreviewImage(null);
   };
 
-  // Handle form submit
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!selectedImage || !categoryTitle.trim()) {
-      alert("Please enter category title and select an image.");
+    if (!selectedFile || !categoryTitle.trim()) {
+      toast.error("Please enter category title and select an image.");
       return;
     }
-    // API call can go here
-    console.log("Category Submitted:", { title: categoryTitle, image: selectedImage });
-    alert("Category added successfully!");
-    // Reset form
-    setSelectedImage(null);
-    setCategoryTitle("");
+    const formData = new FormData();
+    formData.append("category", categoryTitle);
+    formData.append("image", selectedFile);
+
+    createCategories(formData, navigate, setLoading, token);
   };
 
   return (
     <Box sx={{ p: { xs: 2, sm: 3 }, bgcolor: "#FDEFF1", minHeight: "100vh" }}>
-      {/* Header */}
       <Box
         display="flex"
         justifyContent="space-between"
@@ -66,7 +72,6 @@ const AddCategory = () => {
         </Box>
       </Box>
 
-      {/* Form */}
       <form onSubmit={handleSubmit}>
         <Box
           display="flex"
@@ -82,53 +87,27 @@ const AddCategory = () => {
             boxShadow: 3,
           }}
         >
-          {/* Category Title Input */}
           <TextField
             label="Category Title"
             variant="outlined"
             fullWidth
             value={categoryTitle}
             onChange={(e) => setCategoryTitle(e.target.value)}
-            sx={{ borderRadius: 2 }}
           />
 
-          {/* Upload Button */}
           <Button
             variant="outlined"
             component="label"
             startIcon={<CloudUploadIcon />}
             fullWidth
-            sx={{
-              borderRadius: 2,
-              textTransform: "none",
-              height: 50,
-            }}
           >
-            {selectedImage ? "Change Image" : "Upload Category Image"}
-            <input
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={handleImageChange}
-            />
+            {previewImage ? "Change Image" : "Upload Category Image"}
+            <input type="file" accept="image/*" hidden onChange={handleImageChange} />
           </Button>
 
-          {/* Preview */}
-          {selectedImage && (
-            <Card
-              sx={{
-                width: "100%",
-                borderRadius: 2,
-                overflow: "hidden",
-                position: "relative",
-              }}
-            >
-              <CardMedia
-                component="img"
-                height="200"
-                image={selectedImage}
-                alt="Category Preview"
-              />
+          {previewImage && (
+            <Card sx={{ width: "100%", position: "relative" }}>
+              <CardMedia component="img" height="200" image={previewImage} />
               <IconButton
                 onClick={handleDeleteImage}
                 sx={{
@@ -137,7 +116,6 @@ const AddCategory = () => {
                   right: 8,
                   bgcolor: "rgba(0,0,0,0.6)",
                   color: "#fff",
-                  "&:hover": { bgcolor: "rgba(0,0,0,0.8)" },
                 }}
               >
                 <DeleteIcon />
@@ -145,19 +123,14 @@ const AddCategory = () => {
             </Card>
           )}
 
-          {/* Submit Button */}
           <Button
             type="submit"
             variant="contained"
             fullWidth
-            sx={{
-              borderRadius: 2,
-              textTransform: "none",
-              height: 50,
-              background: "linear-gradient(135deg, #ff94a3, #f48fb1)",
-            }}
+            disabled={loading}
+            sx={{ background: "linear-gradient(135deg, #ff94a3, #f48fb1)" }}
           >
-            Add Category
+            {loading ? "Adding..." : "Add Category"}
           </Button>
         </Box>
       </form>

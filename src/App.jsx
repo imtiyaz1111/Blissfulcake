@@ -31,6 +31,7 @@ import UpdatePassword from "./Pages/Auth/UpdatePassword";
 import AllProductList from "./Admin/Pages/Product/AllProductList";
 import AddProduct from "./Admin/Pages/Product/AddProduct";
 import UpdateProduct from "./Admin/Pages/Product/UpdateProduct";
+import ContactList from "./Admin/Pages/contact/ContactList";
 
 const App = () => {
   // const [loading, setLoading] = useState(true);
@@ -76,11 +77,12 @@ const App = () => {
     { path: "/review/add", element: <AddReveiwImg /> },
     { path: "/category/manage", element: <CategoryList /> },
     { path: "/category/add", element: <AddCategory /> },
-    { path: "/category/update", element: <UpdateCategory /> },
+    { path: "/category/update/:id", element: <UpdateCategory /> },
     { path: "/user/manage", element: <UsersList /> },
     { path: "/product/manage", element: <AllProductList /> },
     { path: "/product/add", element: <AddProduct /> },
     { path: "/product/update/:id", element: <UpdateProduct /> },
+    { path: "/contact/manage", element: <ContactList /> },
   ];
 
   return (
