@@ -24,7 +24,6 @@ const CategoriesList = () => {
   }, []);
 
   const handleCategoryClick = (category) => {
-    // Navigate to products page with category as query param
     navigate(`/shop/${category}`);
   };
 
@@ -39,11 +38,10 @@ const CategoriesList = () => {
         slidesPerView={3}
         loop={true}
         autoplay={{
-          delay: 1,
+          delay: 0, // continuous scroll
           disableOnInteraction: false,
-          pauseOnMouseEnter: false,
         }}
-        speed={6000}
+        speed={5000} // control scrolling speed (ms)
         allowTouchMove={false}
         freeMode={true}
         freeModeMomentum={false}
@@ -51,7 +49,7 @@ const CategoriesList = () => {
         breakpoints={{
           480: { slidesPerView: 3 },
           768: { slidesPerView: 4 },
-          1024: { slidesPerView: 5 },
+          1024: { slidesPerView: 6 },
         }}
       >
         {categoryData.map((cat, index) => (

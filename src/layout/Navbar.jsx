@@ -199,10 +199,12 @@ const Navbar = () => {
                     {item}
                   </Button>
                 ))}
-                <IconButton color="inherit">
+                <IconButton color="inherit" component={Link}
+                            to="/wishlist">
                   <FavoriteBorderIcon />
                 </IconButton>
-                <IconButton color="inherit">
+                <IconButton color="inherit" component={Link}
+                            to="/cart">
                   <ShoppingCartOutlinedIcon />
                 </IconButton>
 
@@ -296,8 +298,9 @@ const Navbar = () => {
               </Box>
 
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <IconButton color="inherit">
-                  <ShoppingCartOutlinedIcon />
+                <IconButton color="inherit" component={Link}
+                            to="/cart">
+                  <ShoppingCartOutlinedIcon  />
                 </IconButton>
                 <IconButton
                   color="inherit"
@@ -518,7 +521,7 @@ const Navbar = () => {
                       <Button
                         startIcon={<ShoppingCartOutlinedIcon />}
                         component={Link}
-                        to="/cart"
+                            to="/cart"
                       >
                         Cart
                       </Button>

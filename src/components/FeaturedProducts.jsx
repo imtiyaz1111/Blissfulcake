@@ -14,14 +14,14 @@ import {
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { getAllProduct } from "../Api/functions/productFunctions";
 import { baseURL } from "../Api/axiosIntance";
-
+import { Link } from "react-router-dom";
 
 const FeaturedProducts = () => {
-  const [allProduct,setAllProduct]=useState([])
-  const [loading,setLoading]=useState(false)
-  useEffect(()=>{
-    getAllProduct(setAllProduct,setLoading)
-  },[])
+  const [allProduct, setAllProduct] = useState([]);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    getAllProduct(setAllProduct, setLoading);
+  }, []);
   return (
     <Box
       sx={{
@@ -61,8 +61,8 @@ const FeaturedProducts = () => {
         justifyContent="center" // center align cards
         sx={{ maxWidth: "1300px", margin: "0 auto" }} // keep content centered
       >
-        {allProduct.slice(0,8).map((product) => (
-          <Grid key={product.id}  size={{ xs: 12, sm: 12, md: 3, lg: 3, xl: 3}}>
+        {allProduct.slice(0, 8).map((product) => (
+          <Grid key={product.id} size={{ xs: 12, sm: 12, md: 3, lg: 3, xl: 3 }}>
             <Card
               sx={{
                 height: "100%", // equal height for all
@@ -103,10 +103,7 @@ const FeaturedProducts = () => {
               />
 
               <CardContent sx={{ textAlign: "center", flexGrow: 1 }}>
-                <Typography
-                  variant="subtitle1"
-                  sx={{ fontWeight: 600, mb: 1 }}
-                >
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
                   {product.name}
                 </Typography>
 
@@ -114,11 +111,7 @@ const FeaturedProducts = () => {
                 {product.rating && (
                   <Box sx={{ mb: 1 }}>
                     <Rating value={product.ratings} precision={0.5} readOnly />
-                    <Typography
-                      component="span"
-                      variant="body2"
-                      sx={{ ml: 1 }}
-                    >
+                    <Typography component="span" variant="body2" sx={{ ml: 1 }}>
                       ({product.ratings.toFixed(1)})
                     </Typography>
                   </Box>
@@ -155,6 +148,8 @@ const FeaturedProducts = () => {
       <Box sx={{ mt: 5 }}>
         <Button
           variant="contained"
+          component={Link}
+          to="/shope"
           sx={{
             bgcolor: "#f48fb1",
             color: "white",

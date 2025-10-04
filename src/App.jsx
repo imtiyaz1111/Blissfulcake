@@ -52,7 +52,7 @@ const App = () => {
     { path: "/blog", element: <Blogs /> },
     { path: "/shop", element: <Products /> },
      { path: "/shop/:category", element: <ProductByCategory /> },
-    { path: "/add-to-cart", element: <CartPage /> },
+    { path: "/cart", element: <CartPage /> },
      { path: "/product/details", element: <ProductDetailsPage /> },
   ];
 "just have a look onyl"
