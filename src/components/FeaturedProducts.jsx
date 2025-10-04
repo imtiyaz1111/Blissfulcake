@@ -1,5 +1,5 @@
 // FeaturedProducts.js
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -12,69 +12,16 @@ import {
   Rating,
 } from "@mui/material";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import { getAllProduct } from "../Api/functions/productFunctions";
+import { baseURL } from "../Api/axiosIntance";
 
-// Example product data (8 items)
-const products = [
-  {
-    id: 1,
-    name: "Photo Cake",
-    price: 900,
-    image:
-      "https://mioamoreshop.com/_next/image?url=https%3A%2F%2Fapi.mioamoreshop.com%2Fstorage%2F4069%2FPhoto-Cake.jpeg&w=640&q=75",
-  },
-  {
-    id: 2,
-    name: "Dad’s Favourite Cake (454)",
-    price: 1425,
-    image:
-      "https://mioamoreshop.com/_next/image?url=https%3A%2F%2Fapi.mioamoreshop.com%2Fstorage%2F6046%2FDad%E2%80%99s-Favourite-Cake.jpg&w=640&q=75",
-  },
-  {
-    id: 3,
-    name: "Lavender Love Birds Cake (444)",
-    price: 3000,
-    rating: 5,
-    image:
-      "https://mioamoreshop.com/_next/image?url=https%3A%2F%2Fapi.mioamoreshop.com%2Fstorage%2F6061%2FLavender-Love-Birds-Cake.jpg&w=640&q=75",
-  },
-  {
-    id: 4,
-    name: "Red Velvet Cake",
-    price: 425,
-    image:
-      "https://mioamoreshop.com/_next/image?url=https%3A%2F%2Fapi.mioamoreshop.com%2Fstorage%2F5765%2FWhatsApp-Image-2025-05-28-at-12.40.38-PM.jpeg&w=640&q=75",
-  },
-  {
-    id: 5,
-    name: "Chocolate Truffle Cake",
-    price: 650,
-    image:
-      "https://mioamoreshop.com/_next/image?url=https%3A%2F%2Fapi.mioamoreshop.com%2Fstorage%2F3154%2FPool-Party.png&w=640&q=75",
-  },
-  {
-    id: 6,
-    name: "Butterscotch Delight Cake",
-    price: 700,
-    image:
-      "https://mioamoreshop.com/_next/image?url=https%3A%2F%2Fapi.mioamoreshop.com%2Fstorage%2F3144%2FTwinkle-Toes-Cake.png&w=640&q=75",
-  },
-  {
-    id: 7,
-    name: "Pineapple Cream Cake",
-    price: 550,
-    image:
-      "https://mioamoreshop.com/_next/image?url=https%3A%2F%2Fapi.mioamoreshop.com%2Fstorage%2F6065%2FLayers-of-Love-Cake.jpg&w=640&q=75",
-  },
-  {
-    id: 8,
-    name: "Black Forest Cake",
-    price: 800,
-    image:
-      "https://mioamoreshop.com/_next/image?url=https%3A%2F%2Fapi.mioamoreshop.com%2Fstorage%2F6065%2FLayers-of-Love-Cake.jpg&w=640&q=75",
-  },
-];
 
 const FeaturedProducts = () => {
+  const [allProduct,setAllProduct]=useState([])
+  const [loading,setLoading]=useState(false)
+  useEffect(()=>{
+    getAllProduct(setAllProduct,setLoading)
+  },[])
   return (
     <Box
       sx={{
@@ -114,8 +61,8 @@ const FeaturedProducts = () => {
         justifyContent="center" // center align cards
         sx={{ maxWidth: "1300px", margin: "0 auto" }} // keep content centered
       >
-        {products.map((product) => (
-          <Grid item key={product.id} xs={12} sm={6} md={3}>
+        {allProduct.slice(0,8).map((product) => (
+          <Grid key={product.id}  size={{ xs: 12, sm: 12, md: 3, lg: 3, xl: 3}}>
             <Card
               sx={{
                 height: "100%", // equal height for all
@@ -146,7 +93,7 @@ const FeaturedProducts = () => {
               <CardMedia
                 component="img"
                 height="200"
-                image={product.image}
+                image={`${baseURL}${product.image}`}
                 alt={product.name}
                 sx={{
                   objectFit: "cover",
@@ -166,13 +113,13 @@ const FeaturedProducts = () => {
                 {/* Rating */}
                 {product.rating && (
                   <Box sx={{ mb: 1 }}>
-                    <Rating value={product.rating} precision={0.5} readOnly />
+                    <Rating value={product.ratings} precision={0.5} readOnly />
                     <Typography
                       component="span"
                       variant="body2"
                       sx={{ ml: 1 }}
                     >
-                      ({product.rating.toFixed(1)})
+                      ({product.ratings.toFixed(1)})
                     </Typography>
                   </Box>
                 )}
@@ -182,7 +129,7 @@ const FeaturedProducts = () => {
                   variant="h6"
                   sx={{ color: "#f48fb1", fontWeight: "bold", mb: 2 }}
                 >
-                  ₹{product.price}
+                  ₹{product.weights[0].price}
                 </Typography>
 
                 {/* Add to Cart */}
@@ -215,7 +162,7 @@ const FeaturedProducts = () => {
             px: 4,
             py: 1.2,
             fontWeight: "bold",
-            "&:hover": { bgcolor: "#d81b60" },
+            "&:hover": { bgcolor: "#d0678b" },
           }}
         >
           View All

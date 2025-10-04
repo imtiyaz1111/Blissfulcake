@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -24,11 +25,12 @@ import {
 import { FilterList } from "@mui/icons-material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import { getAllProduct } from "../../Api/functions/productFunctions";
+import { getAllProductByCategory } from "../../Api/functions/productFunctions";
 import { baseURL } from "../../Api/axiosIntance";
 import Loading from "../../components/Loading/Loading";
+import { useParams } from "react-router-dom";
 
-const Products = () => {
+const ProductByCategory = () => {
   const [price, setPrice] = useState([100, 4000]);
   const [rating, setRating] = useState(null);
   const [flavours, setFlavours] = useState([]);
@@ -37,34 +39,33 @@ const Products = () => {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("default");
   const [visibleCount, setVisibleCount] = useState(6);
-  const [allProduct, setAllProduct] = useState([]);
+  const [allProductByCategory, setAllProductByCategory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { category } = useParams();
+  console.log("ca",category);
+  
 
-  // ✅ dynamic options from API
   const [flavourOptions, setFlavourOptions] = useState([]);
   const [weightOptions, setWeightOptions] = useState([]);
 
   useEffect(() => {
+    if (!category) return;
     setLoading(true);
-    getAllProduct((data) => {
-      setAllProduct(data);
-      setLoading(false);
-
+    getAllProductByCategory(setAllProductByCategory, category, setLoading).then((data) => {
       // Extract unique flavours
       const uniqueFlavours = [
-        ...new Set(data.map((p) => p.flavor).filter(Boolean)),
+        ...new Set(data?.map((p) => p.flavor).filter(Boolean)),
       ];
       setFlavourOptions(uniqueFlavours);
 
       // Extract unique weights
       const uniqueWeights = [
-        ...new Set(data.flatMap((p) => p.weights?.map((w) => w.label) || [])),
+        ...new Set(data?.flatMap((p) => p.weights?.map((w) => w.label) || [])),
       ];
       setWeightOptions(uniqueWeights);
-    }, setLoading);
-  }, []);
+    });
+  }, [category]);
 
-  // ✅ Flavour Filter Handler
   const handleFlavourChange = (flavour) => {
     setFlavours((prev) =>
       prev.includes(flavour)
@@ -73,7 +74,6 @@ const Products = () => {
     );
   };
 
-  // ✅ Weight Filter Handler
   const handleWeightChange = (weight) => {
     setWeights((prev) =>
       prev.includes(weight)
@@ -82,7 +82,6 @@ const Products = () => {
     );
   };
 
-  // ✅ Reset all filters
   const clearFilters = () => {
     setPrice([100, 4000]);
     setRating(null);
@@ -90,8 +89,7 @@ const Products = () => {
     setWeights([]);
   };
 
-  // ✅ Filtering Logic
-  const filteredProducts = allProduct
+  const filteredProducts = allProductByCategory
     .filter((p) => {
       const lowestPrice = Math.min(...p.weights.map((w) => w.price));
       return lowestPrice >= price[0] && lowestPrice <= price[1];
@@ -143,8 +141,8 @@ const Products = () => {
             sx={{
               bgcolor: "background.paper",
               borderRadius: 6,
-              position: "sticky", // ✅ sticky applied
-              top: 80, // ✅ adjust based on header height
+              position: "sticky",   // ✅ sticky applied
+              top: 80,              // ✅ adjust based on header height
               maxHeight: "calc(100vh - 100px)",
               overflowY: "auto",
               boxShadow:
@@ -565,4 +563,5 @@ const Products = () => {
   );
 };
 
-export default Products;
+export default ProductByCategory;
+

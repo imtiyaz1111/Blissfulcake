@@ -7,9 +7,22 @@ export const getAllProduct = async (setAllProductData, setLoading) => {
   try {
     setLoading(true);
     const response = await axiosInstance.get(PRODUCT_ENDPOINTS.GET_ALL_PRODUCT);
-    if (response.data.success==true) {
+    if (response.data.success == true) {
       setAllProductData(response.data.data);
-      toast.success(response.data.message); // ✅ fixed
+    }
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Failed to fetch products");
+  } finally {
+    setLoading(false);
+  }
+};
+// GET ALL PRODUCTS by category
+export const getAllProductByCategory = async (setAllProductByCategory, id,setLoading) => {
+  try {
+    setLoading(true);
+    const response = await axiosInstance.get(PRODUCT_ENDPOINTS.GET_ALL_PRODUCT_BY_CATEGORY(id));
+    if (response.data.success == true) {
+      setAllProductByCategory(response.data.data);
     }
   } catch (error) {
     toast.error(error.response?.data?.message || "Failed to fetch products");
@@ -18,17 +31,27 @@ export const getAllProduct = async (setAllProductData, setLoading) => {
   }
 };
 
-// GET ALL PRODUCTS
-export const getProductById = async (setSingleProduct, id) => {
+// ✅ Get Single Product by ID
+export const getProductById = async (id) => {
   try {
-    const response = await axiosInstance.get(PRODUCT_ENDPOINTS.GET_SINGLE_PRODUCT(id));
-    if (response.data.success==true) {
-      setSingleProduct(response.data.data);
-      toast.success(response.data.message); // ✅ fixed
+    const response = await axiosInstance.get(
+      PRODUCT_ENDPOINTS.GET_SINGLE_PRODUCT(id)
+    );
+
+    if (response?.data?.success === true) {
+      return response.data.data; // return product details
+    } else {
+      toast.error(response?.data?.message || "Failed to fetch product");
+      return null; // return null if not successful
     }
   } catch (error) {
-    toast.error(error.response?.data?.message || "Failed to fetch products");
-  } 
+    console.error("Error fetching product:", error);
+    toast.error(
+      error.response?.data?.message ||
+        "Something went wrong while fetching product"
+    );
+    return null; // always return something to avoid undefined issues
+  }
 };
 
 // CREATE PRODUCT
@@ -45,7 +68,7 @@ export const createProduct = async (formData, navigate, setLoading, token) => {
         },
       }
     );
-    if (response.data.success==true) {
+    if (response.data.success == true) {
       toast.success(response.data.message);
       navigate("/product/manage");
     }
@@ -57,9 +80,16 @@ export const createProduct = async (formData, navigate, setLoading, token) => {
 };
 
 // UPDATE PRODUCT ✅ added
-export const updateProductById = async (id, formData,navigate, setLoading, token) => {
+export const updateProductById = async (
+  id,
+  formData,
+  navigate,
+  setLoading,
+  token
+) => {
   try {
     setLoading(true);
+
     const response = await axiosInstance.put(
       PRODUCT_ENDPOINTS.UPDATE_PRODUCT(id),
       formData,
@@ -70,20 +100,26 @@ export const updateProductById = async (id, formData,navigate, setLoading, token
         },
       }
     );
-    if (response.data.success==true) {
+
+    if (response.data.success === true) {
       toast.success(response.data.message);
-      navigate("/product/manage")
+      navigate("/product/manage");
     }
   } catch (error) {
     toast.error(error.response?.data?.message || "Failed to update product");
     return false;
-  }finally {
+  } finally {
     setLoading(false);
   }
 };
 
 // COMMENT STATUS UPDATE
-export const updateCommentStatus = async (productId, commentId, status, token) => {
+export const updateCommentStatus = async (
+  productId,
+  commentId,
+  status,
+  token
+) => {
   try {
     const response = await axiosInstance.put(
       PRODUCT_ENDPOINTS.COMMENT_STATUS_PRODUCT(productId, commentId),
@@ -94,7 +130,7 @@ export const updateCommentStatus = async (productId, commentId, status, token) =
         },
       }
     );
-    if (response.data.success==true) {
+    if (response.data.success == true) {
       toast.success(response.data.message);
     }
   } catch (error) {
@@ -109,14 +145,14 @@ export const replyToComment = async (productId, commentId, reply, token) => {
   try {
     const response = await axiosInstance.post(
       PRODUCT_ENDPOINTS.REPLY_COMMENT_PRODUCT(productId, commentId),
-      reply , // ✅ send in correct format
+      reply, // ✅ send in correct format
       {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       }
     );
-    if (response.data.success==true) {
+    if (response.data.success == true) {
       toast.success(response.data.message);
     }
   } catch (error) {
@@ -135,7 +171,7 @@ export const deleteProductById = async (id, token) => {
         },
       }
     );
-    if (response.data.success==true) {
+    if (response.data.success == true) {
       toast.success(response.data.message);
       return true; // ✅ return for frontend to use
     }

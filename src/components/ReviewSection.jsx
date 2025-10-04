@@ -9,9 +9,10 @@ import { baseURL } from "../Api/axiosIntance";
 
 const ReviewSection = () => {
   const [reviewData, setReviewData] = useState([]);
+  const [loading,setLoading]=useState(false)
 
   useEffect(() => {
-    getAllReviewImg(setReviewData);
+    getAllReviewImg(setReviewData,setLoading);
   }, []);
 
   return (

@@ -1,17 +1,33 @@
+
 import React, { useEffect, useState } from "react";
-import { Box, Typography, Card, CardActionArea, CardMedia, CardContent } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Card,
+  CardActionArea,
+  CardMedia,
+  CardContent,
+} from "@mui/material";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination } from "swiper/modules";
+import { Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import { getAllCategories } from "../Api/functions/categoriesFunction";
-
+import { useNavigate } from "react-router-dom";
 
 const CategoriesList = () => {
   const [categoryData, setCategoryData] = useState([]);
-  useEffect(()=>{
-    getAllCategories(setCategoryData)
-  },[])
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    getAllCategories(setCategoryData);
+  }, []);
+
+  const handleCategoryClick = (category) => {
+    // Navigate to products page with category as query param
+    navigate(`/shop/${category}`);
+  };
+
   return (
     <Box sx={{ p: 4, background: "#FDEFF1" }}>
       <Typography variant="h4" align="center" gutterBottom fontWeight="bold">
@@ -23,14 +39,14 @@ const CategoriesList = () => {
         slidesPerView={3}
         loop={true}
         autoplay={{
-          delay: 1,                   // প্রায় continuous
+          delay: 1,
           disableOnInteraction: false,
           pauseOnMouseEnter: false,
         }}
-        speed={6000}                  // যত বেশি, তত smooth slow scroll
-        allowTouchMove={false}        // হাত দিয়ে swipe বন্ধ
-        freeMode={true}               // continuous free flow
-        freeModeMomentum={false}      // momentum বন্ধ
+        speed={6000}
+        allowTouchMove={false}
+        freeMode={true}
+        freeModeMomentum={false}
         modules={[Autoplay]}
         breakpoints={{
           480: { slidesPerView: 3 },
@@ -50,7 +66,14 @@ const CategoriesList = () => {
               }}
             >
               <CardActionArea
-                sx={{ display: "flex", flexDirection: "column", alignItems: "center",  border: "2px solid white", }}
+                onClick={() => handleCategoryClick(cat.category)}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  border: "2px solid white",
+                  cursor: "pointer",
+                }}
               >
                 <CardMedia
                   component="img"
@@ -84,3 +107,4 @@ const CategoriesList = () => {
 };
 
 export default CategoriesList;
+

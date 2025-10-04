@@ -19,6 +19,7 @@ import "react-quill-new/dist/quill.snow.css";
 import { createProduct } from "../../../Api/functions/productFunctions";
 import { useAuth } from "../../../context/AuthProvider";
 import { getAllCategories } from "../../../Api/functions/categoriesFunction";
+import { toast } from "react-toastify";
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -30,9 +31,6 @@ const AddProduct = () => {
     description: "",
     category: "",
     flavor: "",
-    deliveryInformation: "",
-    careInstructions: "",
-    manufactureDetails: "",
     countInStock: "",
     weights: [],
     image: null,
@@ -95,18 +93,53 @@ const AddProduct = () => {
     }
   };
 
+  // Frontend validation
+  const validateForm = () => {
+    if (!product.name.trim()) {
+      toast.error("Product name is required");
+      return false;
+    }
+    if (!product.description.trim()) {
+      toast.error("Product description is required");
+      return false;
+    }
+    if (!product.category) {
+      toast.error("Please select a category");
+      return false;
+    }
+    if (!product.countInStock || isNaN(product.countInStock) || product.countInStock < 0) {
+      toast.error("Stock count must be a valid number");
+      return false;
+    }
+    // Validate weights
+    for (let i = 0; i < product.weights.length; i++) {
+      const w = product.weights[i];
+      if (!w.label.trim()) {
+        toast.error(`Weight label is required for option ${i + 1}`);
+        return false;
+      }
+      if (isNaN(w.price) || w.price < 0) {
+        toast.error(`Price must be a valid number for weight option ${i + 1}`);
+        return false;
+      }
+      if (isNaN(w.discountedPrice) || w.discountedPrice < 0) {
+        toast.error(`Discounted price must be valid for weight option ${i + 1}`);
+        return false;
+      }
+    }
+    return true;
+  };
+
   // Submit form
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
     console.log("product",product)
     const formData = new FormData();
     formData.append("name", product.name);
     formData.append("description", product.description);
     formData.append("category", product.category);
     formData.append("flavor", product.flavor);
-    formData.append("deliveryInformation", product.deliveryInformation);
-    formData.append("careInstructions", product.careInstructions);
-    formData.append("manufactureDetails", product.manufactureDetails);
     formData.append("countInStock", product.countInStock);
     formData.append("weights", JSON.stringify(product.weights));
     if (product.image) formData.append("image", product.image);
@@ -169,39 +202,7 @@ const AddProduct = () => {
                   onChange={(val) => handleEditorChange("description", val)}
                 />
               </Grid>
-              <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4, xl: 4 }}>
-                {" "}
-                <ReactQuill
-                  placeholder="Delivery Information"
-                  theme="snow"
-                  value={product.deliveryInformation}
-                  onChange={(val) =>
-                    handleEditorChange("deliveryInformation", val)
-                  }
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4, xl: 4 }}>
-                {" "}
-                <ReactQuill
-                  placeholder="Care Instructions"
-                  theme="snow"
-                  value={product.careInstructions}
-                  onChange={(val) =>
-                    handleEditorChange("careInstructions", val)
-                  }
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4, xl: 4 }}>
-                {" "}
-                <ReactQuill
-                  placeholder="Manufacture Details"
-                  theme="snow"
-                  value={product.manufactureDetails}
-                  onChange={(val) =>
-                    handleEditorChange("manufactureDetails", val)
-                  }
-                />
-              </Grid>
+             
               <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4, xl: 4}}>
                 <TextField
                   select

@@ -16,26 +16,26 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
-import { getProductById, updateProductById } from "../../../Api/functions/productFunctions";
+import {
+  getProductById,
+  updateProductById,
+} from "../../../Api/functions/productFunctions";
 import { useAuth } from "../../../context/AuthProvider";
 import { getAllCategories } from "../../../Api/functions/categoriesFunction";
 import { baseURL } from "../../../Api/axiosIntance";
+import { toast } from "react-toastify";
 
 const UpdateProduct = () => {
   const navigate = useNavigate();
   const [auth] = useAuth();
   const token = auth.token;
-  const {id}=useParams()
+  const { id } = useParams();
   const [categoryData, setCategoryData] = useState([]);
-  const [getSingleProduct,setSingleProduct]=useState([])
   const [product, setProduct] = useState({
     name: "",
     description: "",
     category: "",
     flavor: "",
-    deliveryInformation: "",
-    careInstructions: "",
-    manufactureDetails: "",
     countInStock: "",
     weights: [],
     image: null,
@@ -43,33 +43,38 @@ const UpdateProduct = () => {
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  //   getAllCategory
+  // ✅ Fetch categories & product by ID
   useEffect(() => {
-  getAllCategories(setCategoryData);
-  getProductById((data) => {
-    if (data) {
-      // Populate product state with fetched data
-      setProduct({
-        name: data.name || "",
-        description: data.description || "",
-        category: data.category || "",
-        flavor: data.flavor || "",
-        deliveryInformation: data.deliveryInformation || "",
-        careInstructions: data.careInstructions || "",
-        manufactureDetails: data.manufactureDetails || "",
-        countInStock: data.countInStock || "",
-        weights: data.weights || [],
-        image: null, // image file not available, only preview
-      });
-      if (data.image) {
-        setPreview(`${baseURL}${data.image}`);
+    getAllCategories(setCategoryData);
+
+    const fetchProduct = async () => {
+      try {
+        const data = await getProductById(id);
+        console.log("data", data.description);
+
+        if (data) {
+          setProduct({
+            name: data?.name,
+            description: data.description || "",
+            category: data.category || "",
+            flavor: data.flavor || "",
+            countInStock: data.countInStock || "",
+            weights: data.weights || [],
+            image: null, // keep file null for now
+          });
+
+          if (data.image) {
+            setPreview(`${baseURL}${data.image}`);
+          }
+        }
+      } catch (error) {
+        // No extra toast here, getProductById already handles error
+        console.error("Error fetching product inside UpdateProduct:", error);
       }
-    }
-  }, id);
-}, [id]);
+    };
 
-
-  
+    if (id) fetchProduct();
+  }, [id]);
 
   // Handle input change
   const handleChange = (e) => {
@@ -121,23 +126,65 @@ const UpdateProduct = () => {
     }
   };
 
+  // Frontend validation
+  const validateForm = () => {
+    if (!product.name.trim()) {
+      toast.error("Product name is required");
+      return false;
+    }
+    if (!product.description.trim()) {
+      toast.error("Product description is required");
+      return false;
+    }
+    if (!product.category) {
+      toast.error("Please select a category");
+      return false;
+    }
+
+    if (
+      !product.countInStock ||
+      isNaN(product.countInStock) ||
+      product.countInStock < 0
+    ) {
+      toast.error("Stock count must be a valid number");
+      return false;
+    }
+    // Validate weights
+    for (let i = 0; i < product.weights.length; i++) {
+      const w = product.weights[i];
+      if (!w.label.trim()) {
+        toast.error(`Weight label is required for option ${i + 1}`);
+        return false;
+      }
+      if (isNaN(w.price) || w.price < 0) {
+        toast.error(`Price must be a valid number for weight option ${i + 1}`);
+        return false;
+      }
+      if (isNaN(w.discountedPrice) || w.discountedPrice < 0) {
+        toast.error(
+          `Discounted price must be valid for weight option ${i + 1}`
+        );
+        return false;
+      }
+    }
+    return true;
+  };
+
   // Submit form
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("product",product)
+    if (!validateForm()) return;
+    console.log("product", product);
     const formData = new FormData();
     formData.append("name", product.name);
     formData.append("description", product.description);
     formData.append("category", product.category);
     formData.append("flavor", product.flavor);
-    formData.append("deliveryInformation", product.deliveryInformation);
-    formData.append("careInstructions", product.careInstructions);
-    formData.append("manufactureDetails", product.manufactureDetails);
     formData.append("countInStock", product.countInStock);
     formData.append("weights", JSON.stringify(product.weights));
     if (product.image) formData.append("image", product.image);
-    console.log("formdata",formData)
-    updateProductById(id,formData, navigate, setLoading, token);
+    console.log("formdata", formData);
+    updateProductById(id, formData, navigate, setLoading, token);
   };
 
   return (
@@ -183,7 +230,6 @@ const UpdateProduct = () => {
                   value={product.name}
                   onChange={handleChange}
                   fullWidth
-                  
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}>
@@ -195,40 +241,8 @@ const UpdateProduct = () => {
                   onChange={(val) => handleEditorChange("description", val)}
                 />
               </Grid>
+
               <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4, xl: 4 }}>
-                {" "}
-                <ReactQuill
-                  placeholder="Delivery Information"
-                  theme="snow"
-                  value={product.deliveryInformation}
-                  onChange={(val) =>
-                    handleEditorChange("deliveryInformation", val)
-                  }
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4, xl: 4 }}>
-                {" "}
-                <ReactQuill
-                  placeholder="Care Instructions"
-                  theme="snow"
-                  value={product.careInstructions}
-                  onChange={(val) =>
-                    handleEditorChange("careInstructions", val)
-                  }
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4, xl: 4 }}>
-                {" "}
-                <ReactQuill
-                  placeholder="Manufacture Details"
-                  theme="snow"
-                  value={product.manufactureDetails}
-                  onChange={(val) =>
-                    handleEditorChange("manufactureDetails", val)
-                  }
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 12, md: 4, lg: 4, xl: 4}}>
                 <TextField
                   select
                   label="Category"
@@ -236,7 +250,6 @@ const UpdateProduct = () => {
                   value={product.category}
                   onChange={handleChange}
                   fullWidth
-                
                 >
                   {categoryData.map((cat, idx) => (
                     <MenuItem key={idx} value={cat.category}>
@@ -262,10 +275,9 @@ const UpdateProduct = () => {
                   value={product.countInStock}
                   onChange={handleChange}
                   fullWidth
-                 
                 />
               </Grid>
-            
+
               <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}>
                 <Box
                   display="flex"
@@ -399,7 +411,12 @@ const UpdateProduct = () => {
                   type="submit"
                   variant="contained"
                   fullWidth
-                  sx={{ py: 1.2, fontSize: "16px", borderRadius: 2, background: "linear-gradient(135deg, #ff94a3, #f48fb1)",}}
+                  sx={{
+                    py: 1.2,
+                    fontSize: "16px",
+                    borderRadius: 2,
+                    background: "linear-gradient(135deg, #ff94a3, #f48fb1)",
+                  }}
                 >
                   {loading == true ? "Publish...." : "   Publish Product"}
                 </Button>

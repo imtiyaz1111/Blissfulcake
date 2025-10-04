@@ -32,6 +32,9 @@ import AllProductList from "./Admin/Pages/Product/AllProductList";
 import AddProduct from "./Admin/Pages/Product/AddProduct";
 import UpdateProduct from "./Admin/Pages/Product/UpdateProduct";
 import ContactList from "./Admin/Pages/contact/ContactList";
+import CartPage from "./Pages/Product/CartPage";
+import ProductDetailsPage from "./Pages/Product/ProductDetailsPage";
+import ProductByCategory from "./Pages/Product/ProductByCategory";
 
 const App = () => {
   // const [loading, setLoading] = useState(true);
@@ -48,8 +51,11 @@ const App = () => {
     { path: "/contactus", element: <Contactus /> },
     { path: "/blog", element: <Blogs /> },
     { path: "/shop", element: <Products /> },
+     { path: "/shop/:category", element: <ProductByCategory /> },
+    { path: "/add-to-cart", element: <CartPage /> },
+     { path: "/product/details", element: <ProductDetailsPage /> },
   ];
-
+"just have a look onyl"
   const authRoute = [
     { path: "/login", element: <Login /> },
     { path: "/register", element: <Signup /> },
