@@ -25,25 +25,24 @@ import CategoryList from "./Admin/Pages/Category/CategoryList";
 import AddCategory from "./Admin/Pages/Category/AddCategory";
 import UpdateCategory from "./Admin/Pages/Category/UpdateCategory";
 import UsersList from "./Admin/Pages/User/UsersList";
-import Profile from "./Pages/Profile";
 import VerifyEmail from "./Pages/Auth/VerifyEmail";
 import UpdatePassword from "./Pages/Auth/UpdatePassword";
 import AllProductList from "./Admin/Pages/Product/AllProductList";
 import AddProduct from "./Admin/Pages/Product/AddProduct";
 import UpdateProduct from "./Admin/Pages/Product/UpdateProduct";
 import ContactList from "./Admin/Pages/contact/ContactList";
-import CartPage from "./Pages/Product/CartPage";
+import CartPage from "./Pages/CardPages/CartPage";
 import ProductDetailsPage from "./Pages/Product/ProductDetailsPage";
 import ProductByCategory from "./Pages/Product/ProductByCategory";
+import WishlistPage from "./Pages/WishlistPage/WishlistPage";
+
+// ✅ Profile Page and Sub Pages
+import ProfilePage from "./Pages/ProfilePage/ProfilePage";
+import OrderList from "./Pages/ProfilePage/OrderList";
+import TransactionList from "./Pages/ProfilePage/TransactionList";
+import AccountSettings from "./Pages/ProfilePage/AccountSettings";
 
 const App = () => {
-  // const [loading, setLoading] = useState(true);
-  //  useEffect(() => {
-  //   // simulate data loading
-  //   setTimeout(() => {
-  //     setLoading(false);
-  //   }, 3000);
-  // }, []);
   const publicRoute = [
     { path: "/", element: <Home /> },
     { path: "/aboutus", element: <Aboutus /> },
@@ -51,11 +50,12 @@ const App = () => {
     { path: "/contactus", element: <Contactus /> },
     { path: "/blog", element: <Blogs /> },
     { path: "/shop", element: <Products /> },
-     { path: "/shop/:category", element: <ProductByCategory /> },
+    { path: "/shop/:category", element: <ProductByCategory /> },
     { path: "/cart", element: <CartPage /> },
-     { path: "/product/details", element: <ProductDetailsPage /> },
+    { path: "/wishlist", element: <WishlistPage /> },
+    { path: "/product/details", element: <ProductDetailsPage /> },
   ];
-"just have a look onyl"
+
   const authRoute = [
     { path: "/login", element: <Login /> },
     { path: "/register", element: <Signup /> },
@@ -64,13 +64,6 @@ const App = () => {
     { path: "/change-password/:email", element: <ChangePassword /> },
     { path: "/verify-email/:token", element: <VerifyEmail /> },
     { path: "/update-password", element: <UpdatePassword /> },
-  ];
-
-  const privateRoute = [
-    {
-      path: "/profile",
-      element: <Profile />,
-    },
   ];
 
   const adminRoute = [
@@ -105,18 +98,19 @@ const App = () => {
             <Route key={index} path={item.path} element={item.element} />
           ))}
 
-          {/* User Private Routes */}
-          {privateRoute.map((item, index) => (
-            <Route
-              key={index}
-              path={item.path}
-              element={
-                <PrivateRoute allowedRoles={["user"]}>
-                  {item.element}
-                </PrivateRoute>
-              }
-            />
-          ))}
+          {/* Protected User Routes */}
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute allowedRoles={["user"]}>
+                <ProfilePage />
+              </PrivateRoute>
+            }
+          >
+            <Route path="orders" element={<OrderList />} />
+            <Route path="transactions" element={<TransactionList />} />
+            <Route path="settings" element={<AccountSettings />} />
+          </Route>
         </Route>
 
         {/* Admin Routes */}
