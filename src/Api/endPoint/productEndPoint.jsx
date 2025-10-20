@@ -13,6 +13,7 @@ const PRODUCT_ENDPOINTS = {
     `${baseURL}/api/products/reviews/${proId}/${revId}/status`,
   REPLY_COMMENT_PRODUCT: (proId, revId) =>
     `${baseURL}/api/products/reviews/${proId}/${revId}/reply`,
+  GET_RELATED_PRODUCTS: (id) => `${baseURL}/api/products/related/${id}`,
 };
 
 export default PRODUCT_ENDPOINTS;

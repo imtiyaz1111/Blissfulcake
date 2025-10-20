@@ -53,7 +53,7 @@ const App = () => {
     { path: "/shop/:category", element: <ProductByCategory /> },
     { path: "/cart", element: <CartPage /> },
     { path: "/wishlist", element: <WishlistPage /> },
-    { path: "/product/details", element: <ProductDetailsPage /> },
+    { path: "/product/:id", element: <ProductDetailsPage /> },
   ];
 
   const authRoute = [

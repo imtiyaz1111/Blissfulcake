@@ -84,6 +84,10 @@ const Navbar = () => {
         flexGrow: 1,
         backgroundColor: "#FDEFF1",
         boxShadow: "5px 8px 16px rgba(85, 21, 21, 0.1)",
+        position: "sticky",
+        top: 0,
+        zIndex: 1000,
+        
       }}
     >
       {/* Top pink bar */}

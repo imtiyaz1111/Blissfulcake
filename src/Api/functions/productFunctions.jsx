@@ -32,14 +32,14 @@ export const getAllProductByCategory = async (setAllProductByCategory, id,setLoa
 };
 
 // ✅ Get Single Product by ID
-export const getProductById = async (id) => {
+export const getProductById = async (id,setSingleProductData) => {
   try {
     const response = await axiosInstance.get(
       PRODUCT_ENDPOINTS.GET_SINGLE_PRODUCT(id)
     );
 
     if (response?.data?.success === true) {
-      return response.data.data; // return product details
+      setSingleProductData(response.data.data) ; // return product details
     } else {
       toast.error(response?.data?.message || "Failed to fetch product");
       return null; // return null if not successful
@@ -179,5 +179,18 @@ export const deleteProductById = async (id, token) => {
   } catch (error) {
     toast.error(error.response?.data?.message || "Failed to delete product");
     return false;
+  }
+};
+// Related Products 
+export const getRelatedProducts = async (id, setRelatedProductData) => {
+  try {
+    const response = await axiosInstance.get(     
+      PRODUCT_ENDPOINTS.GET_RELATED_PRODUCTS(id)
+    );
+    if (response.data.success == true) {
+      setRelatedProductData(response.data.data);
+    }   
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Failed to fetch related products");
   }
 };

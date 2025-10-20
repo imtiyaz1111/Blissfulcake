@@ -27,6 +27,7 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { getAllProduct } from "../../Api/functions/productFunctions";
 import { baseURL } from "../../Api/axiosIntance";
 import Loading from "../../components/Loading/Loading";
+import { Link } from "react-router-dom";
 
 const Products = () => {
   const [price, setPrice] = useState([100, 4000]);
@@ -136,6 +137,9 @@ const Products = () => {
             display: { xs: "none", lg: "block" },
             width: "280px",
             flexShrink: 0,
+            position: "sticky", // ✅ sticky applied
+            top: "180px",
+            height: "500px",
           }}
         >
           <Box
@@ -143,9 +147,8 @@ const Products = () => {
             sx={{
               bgcolor: "background.paper",
               borderRadius: 6,
-              position: "sticky", // ✅ sticky applied
-              top: 80, // ✅ adjust based on header height
-              maxHeight: "calc(100vh - 100px)",
+
+              height: "100%",
               overflowY: "auto",
               boxShadow:
                 "0 4px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.08)",
@@ -304,6 +307,7 @@ const Products = () => {
           </Box>
 
           {/* Product Grid */}
+
           <Grid container spacing={4} justifyContent="center">
             {visibleProducts.length > 0 ? (
               visibleProducts.map((product) => {
@@ -319,14 +323,18 @@ const Products = () => {
                   <Grid
                     item
                     key={product._id}
-                    sx={{ flex: "1 1 300px", maxWidth: "400px" }}
                     xs={12}
                     sm={6}
                     md={4}
                     lg={3}
+                    sx={{ flex: "1 1 300px", maxWidth: "400px" }}
                   >
                     <Card
+                      component={Link}
+                      to={`/product/${product._id}`}
                       sx={{
+                        textDecoration: "none",
+                        color: "inherit",
                         height: "100%",
                         display: "flex",
                         flexDirection: "column",
@@ -347,6 +355,7 @@ const Products = () => {
                           bgcolor: "white",
                           "&:hover": { bgcolor: "#f5f5f5" },
                         }}
+                        onClick={(e) => e.preventDefault()} // ✅ prevents navigation when clicking heart
                       >
                         <FavoriteBorderIcon />
                       </IconButton>
@@ -364,6 +373,7 @@ const Products = () => {
                         }}
                       />
 
+                      {/* Product Details */}
                       <CardContent sx={{ textAlign: "center", flexGrow: 1 }}>
                         <Typography
                           variant="subtitle1"
@@ -428,6 +438,7 @@ const Products = () => {
                               color: "white",
                             },
                           }}
+                          onClick={(e) => e.preventDefault()} // ✅ prevent link navigation
                         >
                           Add to Cart
                         </Button>
@@ -442,7 +453,6 @@ const Products = () => {
               </Typography>
             )}
           </Grid>
-
           {/* Load More */}
           {visibleCount < filteredProducts.length && (
             <Box textAlign="center" mt={4}>

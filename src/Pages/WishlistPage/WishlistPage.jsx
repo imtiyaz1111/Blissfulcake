@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Container,
@@ -8,6 +8,8 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import WishlistItem from "./WishlistItem";
+import { useAuth } from "../../context/AuthProvider";
+import { getAllWhishlist } from "../../Api/functions/wishlistFunctions";
 
 // Dummy wishlist data
 const wishlistItems = [
@@ -41,9 +43,17 @@ const wishlistItems = [
 ];
 
 const WishlistPage = () => {
+  const [wishlistData, setWishlistData] =useState([]);
+  const [auth] = useAuth();
+  const token = auth?.token;
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
+  useEffect(()=>{
+    getAllWhishlist(setWishlistData, token);
+  },[])
+  console.log("wi",wishlistData);
+  
 
   const pageBackgroundColor = "#fcf0f5";
 

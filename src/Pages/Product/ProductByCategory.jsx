@@ -24,7 +24,7 @@ import {
 import FilterListIcon from "@mui/icons-material/FilterList";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { baseURL } from "../../Api/axiosIntance";
 import Loading from "../../components/Loading/Loading";
 import { getAllProductByCategory } from "../../Api/functions/productFunctions";
@@ -63,9 +63,7 @@ const ProductByCategory = () => {
 
     const uniqueFlavours = [
       ...new Set(
-        allProductByCategory
-          .map((p) => p.flavor || p.flavour)
-          .filter(Boolean)
+        allProductByCategory.map((p) => p.flavor || p.flavour).filter(Boolean)
       ),
     ];
     setFlavourOptions(uniqueFlavours);
@@ -82,13 +80,17 @@ const ProductByCategory = () => {
 
   const handleFlavourChange = (flavour) => {
     setFlavours((prev) =>
-      prev.includes(flavour) ? prev.filter((f) => f !== flavour) : [...prev, flavour]
+      prev.includes(flavour)
+        ? prev.filter((f) => f !== flavour)
+        : [...prev, flavour]
     );
   };
 
   const handleWeightChange = (weight) => {
     setWeights((prev) =>
-      prev.includes(weight) ? prev.filter((w) => w !== weight) : [...prev, weight]
+      prev.includes(weight)
+        ? prev.filter((w) => w !== weight)
+        : [...prev, weight]
     );
   };
 
@@ -111,9 +113,13 @@ const ProductByCategory = () => {
       return flavours.length ? flavours.includes(productFlavour) : true;
     })
     .filter((p) =>
-      weights.length ? (p.weights || []).some((w) => weights.includes(w.label)) : true
+      weights.length
+        ? (p.weights || []).some((w) => weights.includes(w.label))
+        : true
     )
-    .filter((p) => (p.name || "").toLowerCase().includes(search.toLowerCase().trim()))
+    .filter((p) =>
+      (p.name || "").toLowerCase().includes(search.toLowerCase().trim())
+    )
     .sort((a, b) => {
       const priceArrA = (a.weights || []).map((w) => w.price || 0);
       const priceArrB = (b.weights || []).map((w) => w.price || 0);
@@ -130,7 +136,12 @@ const ProductByCategory = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="80vh"
+      >
         <Loading />
       </Box>
     );
@@ -145,6 +156,9 @@ const ProductByCategory = () => {
             display: { xs: "none", lg: "block" },
             width: "280px",
             flexShrink: 0,
+            position: "sticky", // ✅ sticky applied
+            top: "180px",
+            height: "500px",
           }}
         >
           <Box
@@ -154,16 +168,26 @@ const ProductByCategory = () => {
               borderRadius: 6,
               position: "sticky",
               top: 80,
-              maxHeight: "calc(100vh - 100px)",
+              height: "100%",
               overflowY: "auto",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.08)",
+              boxShadow:
+                "0 4px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.08)",
             }}
           >
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={2}
+            >
               <Typography variant="h6" fontWeight="bold">
                 Filters
               </Typography>
-              <Button onClick={clearFilters} size="small" sx={{ color: "purple" }}>
+              <Button
+                onClick={clearFilters}
+                size="small"
+                sx={{ color: "purple" }}
+              >
                 Clear All
               </Button>
             </Box>
@@ -192,7 +216,10 @@ const ProductByCategory = () => {
               <Typography fontWeight="bold" mb={1}>
                 Rating
               </Typography>
-              <Rating value={rating} onChange={(e, newVal) => setRating(newVal)} />
+              <Rating
+                value={rating}
+                onChange={(e, newVal) => setRating(newVal)}
+              />
             </Box>
 
             {/* Flavours */}
@@ -206,7 +233,12 @@ const ProductByCategory = () => {
                     {flavourOptions.map((f) => (
                       <FormControlLabel
                         key={f}
-                        control={<Checkbox checked={flavours.includes(f)} onChange={() => handleFlavourChange(f)} />}
+                        control={
+                          <Checkbox
+                            checked={flavours.includes(f)}
+                            onChange={() => handleFlavourChange(f)}
+                          />
+                        }
                         label={f}
                       />
                     ))}
@@ -226,7 +258,12 @@ const ProductByCategory = () => {
                     {weightOptions.map((w) => (
                       <FormControlLabel
                         key={w}
-                        control={<Checkbox checked={weights.includes(w)} onChange={() => handleWeightChange(w)} />}
+                        control={
+                          <Checkbox
+                            checked={weights.includes(w)}
+                            onChange={() => handleWeightChange(w)}
+                          />
+                        }
                         label={w}
                       />
                     ))}
@@ -239,70 +276,88 @@ const ProductByCategory = () => {
 
         {/* Product Section */}
         <Box flex={1}>
-         {/* Top Controls */}
-<Box
-  display="flex"
-  flexDirection={{ xs: "column", sm: "row" }}
-  gap={2}
-  justifyContent="space-between"
-  alignItems="center"
-  mb={2}
->
-  {/* Left: Category info */}
-  <Typography sx={{ mb: { xs: 1, sm: 0 } }}>
-    <b>Show:</b> {category}{" "}
-    <span style={{ color: "gray" }}>({allProductByCategory.length} items)</span>
-  </Typography>
+          {/* Top Controls */}
+          <Box
+            display="flex"
+            flexDirection={{ xs: "column", sm: "row" }}
+            gap={2}
+            justifyContent="space-between"
+            alignItems="center"
+            mb={2}
+          >
+            {/* Left: Category info */}
+            <Typography sx={{ mb: { xs: 1, sm: 0 } }}>
+              <b>Show:</b> {category}{" "}
+              <span style={{ color: "gray" }}>
+                ({allProductByCategory.length} items)
+              </span>
+            </Typography>
 
-  {/* Right: Search + Sort */}
-  <Box display="flex" gap={1} flexWrap="wrap" alignItems="center">
-    <TextField
-      variant="outlined"
-      size="small"
-      placeholder="Search products..."
-      value={search}
-      onChange={(e) => setSearch(e.target.value)}
-      sx={{ width: { xs: "100%", sm: 200, md: 250 } }}
-    />
+            {/* Right: Search + Sort */}
+            <Box display="flex" gap={1} flexWrap="wrap" alignItems="center">
+              <TextField
+                variant="outlined"
+                size="small"
+                placeholder="Search products..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                sx={{ width: { xs: "100%", sm: 200, md: 250 } }}
+              />
 
-    <Select
-      value={sort}
-      onChange={(e) => setSort(e.target.value)}
-      size="small"
-      sx={{ minWidth: 180 }}
-    >
-      <MenuItem value="default">Default</MenuItem>
-      <MenuItem value="priceLowHigh">Price: Low to High</MenuItem>
-      <MenuItem value="priceHighLow">Price: High to Low</MenuItem>
-      <MenuItem value="ratingHighLow">Rating: High to Low</MenuItem>
-    </Select>
+              <Select
+                value={sort}
+                onChange={(e) => setSort(e.target.value)}
+                size="small"
+                sx={{ minWidth: 180 }}
+              >
+                <MenuItem value="default">Default</MenuItem>
+                <MenuItem value="priceLowHigh">Price: Low to High</MenuItem>
+                <MenuItem value="priceHighLow">Price: High to Low</MenuItem>
+                <MenuItem value="ratingHighLow">Rating: High to Low</MenuItem>
+              </Select>
 
-    {/* Mobile Filter Icon */}
-    <IconButton
-      sx={{ display: { xs: "flex", lg: "none" } }}
-      onClick={() => setMobileOpen(true)}
-    >
-      <FilterListIcon />
-    </IconButton>
-  </Box>
-</Box>
-
+              {/* Mobile Filter Icon */}
+              <IconButton
+                sx={{ display: { xs: "flex", lg: "none" } }}
+                onClick={() => setMobileOpen(true)}
+              >
+                <FilterListIcon />
+              </IconButton>
+            </Box>
+          </Box>
 
           {/* Product Grid */}
           <Grid container spacing={4} justifyContent="center">
             {visibleProducts.length > 0 ? (
               visibleProducts.map((product) => {
-                const priceArr = (product.weights || []).map((w) => w.price || 0);
-                const lowestPrice = priceArr.length > 0 ? Math.min(...priceArr) : 0;
+                const priceArr = (product.weights || []).map(
+                  (w) => w.price || 0
+                );
+                const lowestPrice =
+                  priceArr.length > 0 ? Math.min(...priceArr) : 0;
                 const discountPrice =
-                  product.weights && product.weights.length > 0 && product.weights[0]?.discountedPrice > 0
+                  product.weights &&
+                  product.weights.length > 0 &&
+                  product.weights[0]?.discountedPrice > 0
                     ? product.weights[0].discountedPrice
                     : null;
 
                 return (
-                  <Grid item key={product._id || product.id || product.name} sx={{ flex: "1 1 300px", maxWidth: "400px" }} xs={12} sm={6} md={4} lg={3}>
+                  <Grid
+                    item
+                    key={product._id}
+                    xs={12}
+                    sm={6}
+                    md={4}
+                    lg={3}
+                    sx={{ flex: "1 1 300px", maxWidth: "400px" }}
+                  >
                     <Card
+                      component={Link}
+                      to={`/product/${product._id}`}
                       sx={{
+                        textDecoration: "none",
+                        color: "inherit",
                         height: "100%",
                         display: "flex",
                         flexDirection: "column",
@@ -314,36 +369,76 @@ const ProductByCategory = () => {
                         position: "relative",
                       }}
                     >
+                      {/* Wishlist Button */}
                       <IconButton
-                        sx={{ position: "absolute", top: 10, right: 10, bgcolor: "white", "&:hover": { bgcolor: "#f5f5f5" } }}
+                        sx={{
+                          position: "absolute",
+                          top: 10,
+                          right: 10,
+                          bgcolor: "white",
+                          "&:hover": { bgcolor: "#f5f5f5" },
+                        }}
+                        onClick={(e) => e.preventDefault()} // ✅ prevents navigation when clicking heart
                       >
                         <FavoriteBorderIcon />
                       </IconButton>
 
+                      {/* Product Image */}
                       <CardMedia
                         component="img"
                         height="200"
-                        image={product.image ? `${baseURL}${product.image}` : undefined}
+                        image={`${baseURL}${product.image}`}
                         alt={product.name}
-                        sx={{ objectFit: "cover", borderTopLeftRadius: "12px", borderTopRightRadius: "12px" }}
+                        sx={{
+                          objectFit: "cover",
+                          borderTopLeftRadius: "12px",
+                          borderTopRightRadius: "12px",
+                        }}
                       />
 
+                      {/* Product Details */}
                       <CardContent sx={{ textAlign: "center", flexGrow: 1 }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ fontWeight: 600, mb: 1 }}
+                        >
                           {product.name}
                         </Typography>
 
+                        {/* Rating */}
                         <Box sx={{ mb: 1 }}>
-                          <Rating value={product.ratings || 0} precision={0.5} readOnly />
-                          <Typography component="span" variant="body2" sx={{ ml: 1 }}>
-                            ({(product.ratings || 0).toFixed(1)})
+                          <Rating
+                            value={product.ratings}
+                            precision={0.5}
+                            readOnly
+                          />
+                          <Typography
+                            component="span"
+                            variant="body2"
+                            sx={{ ml: 1 }}
+                          >
+                            ({product.ratings.toFixed(1)})
                           </Typography>
                         </Box>
 
-                        <Typography variant="h6" sx={{ color: "#f48fb1", fontWeight: "bold", mb: 2 }}>
+                        {/* Price */}
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            color: "#f48fb1",
+                            fontWeight: "bold",
+                            mb: 2,
+                          }}
+                        >
                           {discountPrice ? (
                             <>
-                              <span style={{ textDecoration: "line-through", marginRight: "8px", color: "#999" }}>
+                              <span
+                                style={{
+                                  textDecoration: "line-through",
+                                  marginRight: "8px",
+                                  color: "#999",
+                                }}
+                              >
                                 ₹{lowestPrice}
                               </span>
                               ₹{discountPrice}
@@ -353,6 +448,7 @@ const ProductByCategory = () => {
                           )}
                         </Typography>
 
+                        {/* Add to Cart */}
                         <Button
                           variant="outlined"
                           sx={{
@@ -360,8 +456,12 @@ const ProductByCategory = () => {
                             color: "#f48fb1",
                             borderRadius: "25px",
                             px: 3,
-                            "&:hover": { bgcolor: "#f48fb1", color: "white" },
+                            "&:hover": {
+                              bgcolor: "#f48fb1",
+                              color: "white",
+                            },
                           }}
+                          onClick={(e) => e.preventDefault()} // ✅ prevent link navigation
                         >
                           Add to Cart
                         </Button>
@@ -382,7 +482,16 @@ const ProductByCategory = () => {
               <Button
                 variant="outlined"
                 onClick={() => setVisibleCount((prev) => prev + 3)}
-                sx={{ bgcolor: "#f48fb1", color: "white", border: "none", borderRadius: "25px", px: 4, py: 1.2, fontWeight: "bold", "&:hover": { bgcolor: "#d0678b" } }}
+                sx={{
+                  bgcolor: "#f48fb1",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "25px",
+                  px: 4,
+                  py: 1.2,
+                  fontWeight: "bold",
+                  "&:hover": { bgcolor: "#d0678b" },
+                }}
               >
                 Load More
               </Button>
@@ -392,12 +501,20 @@ const ProductByCategory = () => {
       </Box>
 
       {/* Mobile Drawer Filters */}
-      <Drawer anchor="left" open={mobileOpen} onClose={() => setMobileOpen(false)}>
+      <Drawer
+        anchor="left"
+        open={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+      >
         <Box p={2} sx={{ width: "80vw", maxWidth: 300 }}>
           <Typography variant="h6" fontWeight="bold" mb={2}>
             Filters
           </Typography>
-          <Button onClick={clearFilters} size="small" sx={{ color: "purple", mb: 2 }}>
+          <Button
+            onClick={clearFilters}
+            size="small"
+            sx={{ color: "purple", mb: 2 }}
+          >
             Clear All
           </Button>
 
@@ -425,7 +542,10 @@ const ProductByCategory = () => {
             <Typography fontWeight="bold" mb={1}>
               Rating
             </Typography>
-            <Rating value={rating} onChange={(e, newVal) => setRating(newVal)} />
+            <Rating
+              value={rating}
+              onChange={(e, newVal) => setRating(newVal)}
+            />
           </Box>
 
           {/* Flavours */}
@@ -439,7 +559,12 @@ const ProductByCategory = () => {
                   {flavourOptions.map((f) => (
                     <FormControlLabel
                       key={f}
-                      control={<Checkbox checked={flavours.includes(f)} onChange={() => handleFlavourChange(f)} />}
+                      control={
+                        <Checkbox
+                          checked={flavours.includes(f)}
+                          onChange={() => handleFlavourChange(f)}
+                        />
+                      }
                       label={f}
                     />
                   ))}
@@ -459,7 +584,12 @@ const ProductByCategory = () => {
                   {weightOptions.map((w) => (
                     <FormControlLabel
                       key={w}
-                      control={<Checkbox checked={weights.includes(w)} onChange={() => handleWeightChange(w)} />}
+                      control={
+                        <Checkbox
+                          checked={weights.includes(w)}
+                          onChange={() => handleWeightChange(w)}
+                        />
+                      }
                       label={w}
                     />
                   ))}
