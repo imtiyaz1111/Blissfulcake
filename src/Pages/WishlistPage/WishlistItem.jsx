@@ -1,5 +1,7 @@
 import React from "react";
 import { Box, Typography, Button, Card, styled, useTheme } from "@mui/material";
+import { useWishlist } from "../../context/WishlistProvider"; // adjust the import path if needed
+import { baseURL } from "../../Api/axiosIntance";
 
 // Styled Card
 const WishlistItemCard = styled(Card)(({ theme }) => ({
@@ -18,6 +20,16 @@ const WishlistItemCard = styled(Card)(({ theme }) => ({
 
 const WishlistItem = ({ item }) => {
   const theme = useTheme();
+  const { removeFromWishlistContext } = useWishlist();
+
+  // ✅ Remove handler
+  const removeHandler = () => {
+    if (item._id) {
+      removeFromWishlistContext(item._id);
+    } else {
+      console.warn("No wishlist ID found for this item");
+    }
+  };
 
   return (
     <WishlistItemCard>
@@ -36,7 +48,7 @@ const WishlistItem = ({ item }) => {
       >
         {/* Product Image */}
         <img
-          src={item.image}
+          src={`${baseURL}${item.image}`}
           alt={`${item.name} product image`}
           style={{
             width: 90,
@@ -44,10 +56,6 @@ const WishlistItem = ({ item }) => {
             borderRadius: theme.shape.borderRadius,
             marginRight: 16,
             objectFit: "cover",
-            [theme.breakpoints.down("sm")]: {
-              marginRight: 0,
-              marginBottom: 12,
-            },
           }}
         />
 
@@ -68,15 +76,17 @@ const WishlistItem = ({ item }) => {
             color="text.secondary"
             sx={{ fontSize: "0.85rem" }}
           >
-            {item.sku}
+            SKU: P-{item._id}
           </Typography>
+
           <Typography
             variant="body2"
             color="text.secondary"
             sx={{ fontSize: "0.85rem" }}
-          >
-            {item.details}
-          </Typography>
+            dangerouslySetInnerHTML={{
+              __html: item.description,
+            }}
+          />
         </Box>
 
         {/* Price + Buttons */}
@@ -96,7 +106,7 @@ const WishlistItem = ({ item }) => {
               fontSize: { xs: "0.95rem", sm: "1rem" },
             }}
           >
-            Price: ${item.price.toFixed(2)}
+            Price: ₹{item.weights[0].price?.toFixed(2) || "0.00"}
           </Typography>
 
           <Box
@@ -126,12 +136,13 @@ const WishlistItem = ({ item }) => {
               Add to Cart
             </Button>
 
+            {/* ✅ Remove Button with removeHandler */}
             <Button
               variant="outlined"
               color="error"
               size="small"
               sx={{ textTransform: "none", fontWeight: "bold" }}
-              onClick={() => console.log("Removed:", item.name)}
+              onClick={removeHandler}
             >
               Remove
             </Button>

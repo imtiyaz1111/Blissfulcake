@@ -1,4 +1,3 @@
-// FeaturedProducts.js
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -16,125 +15,43 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import { getAllProduct } from "../Api/functions/productFunctions";
 import { baseURL } from "../Api/axiosIntance";
 import { Link } from "react-router-dom";
-import {
-  addWhishlist,
-  deleteWhishlist,
-  getAllWhishlist,
-} from "../Api/functions/wishlistFunctions";
-import { useAuth } from "../context/AuthProvider";
-import { toast } from "react-toastify";
+import { useWishlist } from "../context/WishlistProvider";
 
 const FeaturedProducts = () => {
   const [allProduct, setAllProduct] = useState([]);
-  const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [auth] = useAuth();
-  const token = auth?.token;
-  console.log("token", token);
+  const { wishlist, addToWishlistContext, removeFromWishlistContext, isInWishlist } = useWishlist();
 
-  // ✅ Fetch all products
   useEffect(() => {
-    getAllProduct(setAllProduct, setLoading);
+    getAllProduct(setAllProduct,setLoading);
   }, []);
 
-  // ✅ Fetch wishlist if user logged in
-  useEffect(() => {
-    getAllWhishlist(setWishlist, token);
-  }, []);
-
-  console.log("wishlis", wishlist);
-
-  // ✅ Check if product is already in wishlist
-  const isInWishlist = (productId) =>
-  Array.isArray(wishlist) && wishlist.some((item) => item.productId?._id === productId);
-  // ✅ Toggle wishlist (add/remove)
-  const handleWishlist = async (product) => {
-    if (!token) {
-      toast.error("Please login to manage your wishlist");
-      return;
-    }
-
+  const handleWishlist = (product) => {
     const productId = product._id;
-
     if (isInWishlist(productId)) {
-      // Remove from wishlist
-      const wishlistItem = wishlist.find(
-        (item) => item.productId?._id === productId || item._id === productId
-      );
+      const wishlistItem = wishlist.find((item) => item?._id === productId);
       if (!wishlistItem) return;
-      await deleteWhishlist(wishlistItem._id, token);
-      setWishlist((prev) =>
-        prev.filter((item) => item._id !== wishlistItem._id)
-      );
+      removeFromWishlistContext(wishlistItem._id);
     } else {
-      // Add to wishlist
-      const data = { productId };
-      await addWhishlist(data, token);
-      setWishlist((prev) => [...prev, { productId: { _id: productId } }]);
+      addToWishlistContext(productId);
     }
   };
 
   return (
-    <Box
-      sx={{
-        width: "100%",
-        py: { xs: 5, md: 8 },
-        px: { xs: 2, sm: 4, md: 8 },
-        textAlign: "center",
-      }}
-    >
-      {/* Heading */}
-      <Typography
-        variant="h4"
-        sx={{
-          fontWeight: "bold",
-          color: "#f48fb1",
-          mb: 1,
-          fontSize: { xs: "1.8rem", md: "2.2rem" },
-        }}
-      >
+    <Box sx={{ width: "100%", py: 5, px: 4, textAlign: "center" }}>
+      <Typography variant="h4" sx={{ fontWeight: "bold", color: "#f48fb1", mb: 1 }}>
         Featured Products: Top Picks Inside
       </Typography>
-      <Typography
-        variant="body1"
-        sx={{
-          color: "text.secondary",
-          mb: 5,
-          fontSize: { xs: "0.9rem", md: "1rem" },
-        }}
-      >
+      <Typography variant="body1" sx={{ color: "text.secondary", mb: 5 }}>
         Discover our handpicked featured products - quality, style, and value!
       </Typography>
 
-      {/* Product Grid */}
-      <Grid
-        container
-        spacing={3}
-        justifyContent="center"
-        sx={{ maxWidth: "1300px", margin: "0 auto" }}
-      >
+      <Grid container spacing={3} justifyContent="center">
         {allProduct.slice(0, 8).map((product) => {
           const wishlisted = isInWishlist(product._id);
-
           return (
-            <Grid
-              key={product._id}
-              size={{ xs: 12, sm: 12, md: 3, lg: 3, xl: 3 }}
-            >
-              <Card
-                sx={{
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                  borderRadius: "12px",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                  transition: "0.3s",
-                  "&:hover": { transform: "translateY(-5px)" },
-                  position: "relative",
-                }}
-              >
-                {/* Wishlist Button */}
+            <Grid key={product._id}  size={{ xs: 12, sm: 12, md: 3, lg: 3, xl: 3 }}>
+              <Card sx={{ height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", position: "relative" }}>
                 <IconButton
                   onClick={() => handleWishlist(product)}
                   sx={{
@@ -143,93 +60,53 @@ const FeaturedProducts = () => {
                     right: 10,
                     bgcolor: wishlisted ? "#f48fb1" : "white",
                     color: wishlisted ? "white" : "inherit",
-                    "&:hover": {
-                      bgcolor: wishlisted ? "#f48fb1" : "#f5f5f5",
-                    },
+                    "&:hover": { bgcolor: wishlisted ? "#f48fb1" : "#f5f5f5" },
                   }}
                 >
                   {wishlisted ? <FavoriteIcon /> : <FavoriteBorderIcon />}
                 </IconButton>
 
-                {/* Product Image + Link */}
-                <Link
-                  to={`/product/${product._id}`}
-                  style={{ textDecoration: "none", color: "inherit" }}
-                >
+                <Link to={`/product/${product._id}`} style={{ textDecoration: "none", color: "inherit" }}>
                   <CardMedia
                     component="img"
                     height="200"
                     image={`${baseURL}${product.image}`}
                     alt={product.name}
-                    sx={{
-                      objectFit: "cover",
-                      borderTopLeftRadius: "12px",
-                      borderTopRightRadius: "12px",
-                    }}
+                    sx={{ objectFit: "cover", borderTopLeftRadius: "12px", borderTopRightRadius: "12px" }}
                   />
                 </Link>
 
-                {/* Product Info */}
                 <CardContent sx={{ textAlign: "center", flexGrow: 1 }}>
-                  <Link
-                    to={`/product/${product._id}`}
-                    style={{ textDecoration: "none", color: "inherit" }}
-                  >
-                    <Typography
-                      variant="subtitle1"
-                      sx={{ fontWeight: 600, mb: 1 }}
-                    >
+                  <Link to={`/product/${product._id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
                       {product.name}
                     </Typography>
                   </Link>
 
-                  {/* Rating */}
                   {product.ratings && (
                     <Box sx={{ mb: 1 }}>
-                      <Rating
-                        value={product.ratings}
-                        precision={0.5}
-                        readOnly
-                      />
-                      <Typography
-                        component="span"
-                        variant="body2"
-                        sx={{ ml: 1 }}
-                      >
+                      <Rating value={product.ratings} precision={0.5} readOnly />
+                      <Typography component="span" variant="body2" sx={{ ml: 1 }}>
                         ({product.ratings.toFixed(1)})
                       </Typography>
                     </Box>
                   )}
 
-                  {/* Price */}
-                  <Typography
-                    variant="h6"
-                    sx={{ color: "#f48fb1", fontWeight: "bold", mb: 2 }}
-                  >
+                  <Typography variant="h6" sx={{ color: "#f48fb1", fontWeight: "bold", mb: 2 }}>
                     ₹{product.weights?.[0]?.price || "N/A"}
                   </Typography>
 
-                  {/* Add to Cart */}
-                  <Button
-                    variant="outlined"
-                    sx={{
-                      borderColor: "#f48fb1",
-                      color: "#f48fb1",
-                      borderRadius: "25px",
-                      px: 3,
-                      "&:hover": { bgcolor: "#f48fb1", color: "white" },
-                    }}
-                  >
+                  <Button variant="outlined" sx={{ borderColor: "#f48fb1", color: "#f48fb1", borderRadius: "25px", px: 3, "&:hover": { bgcolor: "#f48fb1", color: "white" } }}>
                     Add to Cart
                   </Button>
                 </CardContent>
               </Card>
             </Grid>
+            
           );
         })}
       </Grid>
-
-      {/* View All Button */}
+        {/* View All Button */}
       <Box sx={{ mt: 5 }}>
         <Button
           variant="contained"

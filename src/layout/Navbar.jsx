@@ -14,6 +14,7 @@ import {
   Menu,
   MenuItem,
   Avatar,
+  Badge,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -35,10 +36,12 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import logo from "../assets/blissfulllogo.png";
 import { useAuth } from "../context/AuthProvider";
 import { logOut } from "../Api/functions/authFunctions";
+import { useWishlist } from "../context/WishlistProvider";
 
 const Navbar = () => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const { wishlist } = useWishlist();
 
   // Breakpoints
   const isBelow1176 = useMediaQuery("(max-width:1176px)");
@@ -87,7 +90,6 @@ const Navbar = () => {
         position: "sticky",
         top: 0,
         zIndex: 1000,
-        
       }}
     >
       {/* Top pink bar */}
@@ -204,7 +206,17 @@ const Navbar = () => {
                   </Button>
                 ))}
                 <IconButton color="inherit" component={Link} to="/wishlist">
-                  <FavoriteBorderIcon />
+                  <Badge
+                    badgeContent={wishlist.length}
+                    sx={{
+                      "& .MuiBadge-badge": {
+                        backgroundColor: "#f48fb1",
+                        color: "#fff",
+                      },
+                    }}
+                  >
+                    <FavoriteBorderIcon />
+                  </Badge>
                 </IconButton>
                 <IconButton color="inherit" component={Link} to="/cart">
                   <ShoppingCartOutlinedIcon />

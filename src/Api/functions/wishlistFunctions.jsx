@@ -35,7 +35,7 @@ export const getAllWhishlist = async (setAllWishlist, token) => {
     });
 
     if (response.data.success) {
-      setAllWishlist(response.data.data);
+      setAllWishlist(response.data.wishlist.products);
     }
     return response.data;
   } catch (error) {

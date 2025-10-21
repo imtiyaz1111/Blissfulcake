@@ -24,10 +24,12 @@ import {
 import { FilterList } from "@mui/icons-material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 import { getAllProduct } from "../../Api/functions/productFunctions";
 import { baseURL } from "../../Api/axiosIntance";
 import Loading from "../../components/Loading/Loading";
 import { Link } from "react-router-dom";
+import { useWishlist } from "../../context/WishlistProvider";
 
 const Products = () => {
   const [price, setPrice] = useState([100, 4000]);
@@ -41,9 +43,24 @@ const Products = () => {
   const [allProduct, setAllProduct] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ dynamic options from API
+  // Dynamic options from API
   const [flavourOptions, setFlavourOptions] = useState([]);
   const [weightOptions, setWeightOptions] = useState([]);
+
+  // Wishlist context
+  const { wishlist, addToWishlistContext, removeFromWishlistContext, isInWishlist } = useWishlist();
+
+  // Wishlist toggle handler
+  const handleWishlist = (product) => {
+    const productId = product._id;
+    if (isInWishlist(productId)) {
+      const wishlistItem = wishlist.find((item) => item?._id === productId);
+      if (!wishlistItem) return;
+      removeFromWishlistContext(wishlistItem._id);
+    } else {
+      addToWishlistContext(productId);
+    }
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -65,7 +82,7 @@ const Products = () => {
     }, setLoading);
   }, []);
 
-  // ✅ Flavour Filter Handler
+  // Flavour Filter Handler
   const handleFlavourChange = (flavour) => {
     setFlavours((prev) =>
       prev.includes(flavour)
@@ -74,7 +91,7 @@ const Products = () => {
     );
   };
 
-  // ✅ Weight Filter Handler
+  // Weight Filter Handler
   const handleWeightChange = (weight) => {
     setWeights((prev) =>
       prev.includes(weight)
@@ -83,7 +100,7 @@ const Products = () => {
     );
   };
 
-  // ✅ Reset all filters
+  // Reset all filters
   const clearFilters = () => {
     setPrice([100, 4000]);
     setRating(null);
@@ -91,7 +108,7 @@ const Products = () => {
     setWeights([]);
   };
 
-  // ✅ Filtering Logic
+  // Filtering Logic
   const filteredProducts = allProduct
     .filter((p) => {
       const lowestPrice = Math.min(...p.weights.map((w) => w.price));
@@ -137,7 +154,7 @@ const Products = () => {
             display: { xs: "none", lg: "block" },
             width: "280px",
             flexShrink: 0,
-            position: "sticky", // ✅ sticky applied
+            position: "sticky",
             top: "180px",
             height: "500px",
           }}
@@ -147,27 +164,17 @@ const Products = () => {
             sx={{
               bgcolor: "background.paper",
               borderRadius: 6,
-
               height: "100%",
               overflowY: "auto",
               boxShadow:
                 "0 4px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.08)",
             }}
           >
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              mb={2}
-            >
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
               <Typography variant="h6" fontWeight="bold">
                 Filters
               </Typography>
-              <Button
-                onClick={clearFilters}
-                size="small"
-                sx={{ color: "purple" }}
-              >
+              <Button onClick={clearFilters} size="small" sx={{ color: "purple" }}>
                 Clear All
               </Button>
             </Box>
@@ -196,10 +203,7 @@ const Products = () => {
               <Typography fontWeight="bold" mb={1}>
                 Rating
               </Typography>
-              <Rating
-                value={rating}
-                onChange={(e, newVal) => setRating(newVal)}
-              />
+              <Rating value={rating} onChange={(e, newVal) => setRating(newVal)} />
             </Box>
 
             {/* Flavours */}
@@ -265,15 +269,12 @@ const Products = () => {
             alignItems="center"
             mb={2}
           >
-            {/* Left: Category info */}
             <Typography sx={{ mb: { xs: 1, sm: 0 } }}>
               <b>Show:</b> All Products{" "}
               <span style={{ color: "gray" }}>({allProduct.length} items)</span>
             </Typography>
 
-            {/* Right: Search + Sort + Mobile Filter */}
             <Box display="flex" gap={1} flexWrap="wrap" alignItems="center">
-              {/* Search Input */}
               <TextField
                 variant="outlined"
                 size="small"
@@ -282,8 +283,6 @@ const Products = () => {
                 onChange={(e) => setSearch(e.target.value)}
                 sx={{ width: { xs: "100%", sm: 200, md: 250 } }}
               />
-
-              {/* Sort Dropdown */}
               <Select
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
@@ -296,7 +295,6 @@ const Products = () => {
                 <MenuItem value="ratingHighLow">Rating: High to Low</MenuItem>
               </Select>
 
-              {/* Mobile Filter Button */}
               <IconButton
                 sx={{ display: { xs: "flex", lg: "none" } }}
                 onClick={() => setMobileOpen(true)}
@@ -307,13 +305,10 @@ const Products = () => {
           </Box>
 
           {/* Product Grid */}
-
           <Grid container spacing={4} justifyContent="center">
             {visibleProducts.length > 0 ? (
               visibleProducts.map((product) => {
-                const lowestPrice = Math.min(
-                  ...product.weights.map((w) => w.price)
-                );
+                const lowestPrice = Math.min(...product.weights.map((w) => w.price));
                 const discountPrice =
                   product.weights[0].discountedPrice > 0
                     ? product.weights[0].discountedPrice
@@ -352,12 +347,22 @@ const Products = () => {
                           position: "absolute",
                           top: 10,
                           right: 10,
-                          bgcolor: "white",
-                          "&:hover": { bgcolor: "#f5f5f5" },
+                          bgcolor: isInWishlist(product._id) ? "#f48fb1" : "white",
+                          color: isInWishlist(product._id) ? "white" : "inherit",
+                          "&:hover": {
+                            bgcolor: isInWishlist(product._id) ? "#f48fb1" : "#f5f5f5",
+                          },
                         }}
-                        onClick={(e) => e.preventDefault()} // ✅ prevents navigation when clicking heart
+                        onClick={(e) => {
+                          e.preventDefault(); // prevent link navigation
+                          handleWishlist(product);
+                        }}
                       >
-                        <FavoriteBorderIcon />
+                        {isInWishlist(product._id) ? (
+                          <FavoriteIcon />
+                        ) : (
+                          <FavoriteBorderIcon />
+                        )}
                       </IconButton>
 
                       {/* Product Image */}
@@ -382,30 +387,20 @@ const Products = () => {
                           {product.name}
                         </Typography>
 
-                        {/* Rating */}
                         <Box sx={{ mb: 1 }}>
                           <Rating
                             value={product.ratings}
                             precision={0.5}
                             readOnly
                           />
-                          <Typography
-                            component="span"
-                            variant="body2"
-                            sx={{ ml: 1 }}
-                          >
+                          <Typography component="span" variant="body2" sx={{ ml: 1 }}>
                             ({product.ratings.toFixed(1)})
                           </Typography>
                         </Box>
 
-                        {/* Price */}
                         <Typography
                           variant="h6"
-                          sx={{
-                            color: "#f48fb1",
-                            fontWeight: "bold",
-                            mb: 2,
-                          }}
+                          sx={{ color: "#f48fb1", fontWeight: "bold", mb: 2 }}
                         >
                           {discountPrice ? (
                             <>
@@ -425,7 +420,6 @@ const Products = () => {
                           )}
                         </Typography>
 
-                        {/* Add to Cart */}
                         <Button
                           variant="outlined"
                           sx={{
@@ -433,12 +427,9 @@ const Products = () => {
                             color: "#f48fb1",
                             borderRadius: "25px",
                             px: 3,
-                            "&:hover": {
-                              bgcolor: "#f48fb1",
-                              color: "white",
-                            },
+                            "&:hover": { bgcolor: "#f48fb1", color: "white" },
                           }}
-                          onClick={(e) => e.preventDefault()} // ✅ prevent link navigation
+                          onClick={(e) => e.preventDefault()}
                         >
                           Add to Cart
                         </Button>
@@ -453,7 +444,7 @@ const Products = () => {
               </Typography>
             )}
           </Grid>
-          {/* Load More */}
+
           {visibleCount < filteredProducts.length && (
             <Box textAlign="center" mt={4}>
               <Button
@@ -487,11 +478,7 @@ const Products = () => {
           <Typography variant="h6" fontWeight="bold" mb={2}>
             Filters
           </Typography>
-          <Button
-            onClick={clearFilters}
-            size="small"
-            sx={{ color: "purple", mb: 2 }}
-          >
+          <Button onClick={clearFilters} size="small" sx={{ color: "purple", mb: 2 }}>
             Clear All
           </Button>
 
@@ -519,10 +506,7 @@ const Products = () => {
             <Typography fontWeight="bold" mb={1}>
               Rating
             </Typography>
-            <Rating
-              value={rating}
-              onChange={(e, newVal) => setRating(newVal)}
-            />
+            <Rating value={rating} onChange={(e, newVal) => setRating(newVal)} />
           </Box>
 
           {/* Flavours */}

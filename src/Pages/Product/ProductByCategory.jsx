@@ -24,10 +24,12 @@ import {
 import FilterListIcon from "@mui/icons-material/FilterList";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 import { Link, useParams } from "react-router-dom";
 import { baseURL } from "../../Api/axiosIntance";
 import Loading from "../../components/Loading/Loading";
 import { getAllProductByCategory } from "../../Api/functions/productFunctions";
+import { useWishlist } from "../../context/WishlistProvider";
 
 const ProductByCategory = () => {
   const [price, setPrice] = useState([100, 4000]);
@@ -45,6 +47,21 @@ const ProductByCategory = () => {
   const [weightOptions, setWeightOptions] = useState([]);
 
   const { category } = useParams();
+
+  // Wishlist context
+  const { wishlist, addToWishlistContext, removeFromWishlistContext, isInWishlist } = useWishlist();
+
+  // Wishlist toggle handler
+  const handleWishlist = (product) => {
+    const productId = product._id;
+    if (isInWishlist(productId)) {
+      const wishlistItem = wishlist.find((item) => item?._id === productId);
+      if (!wishlistItem) return;
+      removeFromWishlistContext(wishlistItem._id);
+    } else {
+      addToWishlistContext(productId);
+    }
+  };
 
   // Fetch products by category
   useEffect(() => {
@@ -156,7 +173,7 @@ const ProductByCategory = () => {
             display: { xs: "none", lg: "block" },
             width: "280px",
             flexShrink: 0,
-            position: "sticky", // ✅ sticky applied
+            position: "sticky",
             top: "180px",
             height: "500px",
           }}
@@ -375,12 +392,26 @@ const ProductByCategory = () => {
                           position: "absolute",
                           top: 10,
                           right: 10,
-                          bgcolor: "white",
-                          "&:hover": { bgcolor: "#f5f5f5" },
+                          bgcolor: isInWishlist(product._id)
+                            ? "#f48fb1"
+                            : "white",
+                          color: isInWishlist(product._id) ? "white" : "inherit",
+                          "&:hover": {
+                            bgcolor: isInWishlist(product._id)
+                              ? "#f48fb1"
+                              : "#f5f5f5",
+                          },
                         }}
-                        onClick={(e) => e.preventDefault()} // ✅ prevents navigation when clicking heart
+                        onClick={(e) => {
+                          e.preventDefault(); // prevent link navigation
+                          handleWishlist(product);
+                        }}
                       >
-                        <FavoriteBorderIcon />
+                        {isInWishlist(product._id) ? (
+                          <FavoriteIcon />
+                        ) : (
+                          <FavoriteBorderIcon />
+                        )}
                       </IconButton>
 
                       {/* Product Image */}
@@ -461,7 +492,7 @@ const ProductByCategory = () => {
                               color: "white",
                             },
                           }}
-                          onClick={(e) => e.preventDefault()} // ✅ prevent link navigation
+                          onClick={(e) => e.preventDefault()} // prevent link navigation
                         >
                           Add to Cart
                         </Button>
@@ -542,10 +573,7 @@ const ProductByCategory = () => {
             <Typography fontWeight="bold" mb={1}>
               Rating
             </Typography>
-            <Rating
-              value={rating}
-              onChange={(e, newVal) => setRating(newVal)}
-            />
+            <Rating value={rating} onChange={(e, newVal) => setRating(newVal)} />
           </Box>
 
           {/* Flavours */}
