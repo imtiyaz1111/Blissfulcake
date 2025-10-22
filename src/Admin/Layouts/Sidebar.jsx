@@ -30,6 +30,7 @@ import {
   ExpandMore,
   Add as AddIcon,
   ListAlt as ListAltIcon,
+  LocalOffer as LocalOfferIcon
 } from "@mui/icons-material";
 import { NavLink } from "react-router-dom";
 import logo from "../../assets/blissfulllogo.png";
@@ -168,6 +169,14 @@ const Sidebar = ({ mobileOpen, handleDrawerToggle }) => {
             submenu: [
               { text: "Add Product", path: "/product/add" },
               { text: "Manage Products", path: "/product/manage" },
+            ],
+          },
+          {
+            text: "Coupon",
+            icon: <LocalOfferIcon />,
+            submenu: [
+              { text: "Add Product", path: "/coupon/add" },
+              { text: "Manage Products", path: "/coupon/manage" },
             ],
           },
           {

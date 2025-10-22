@@ -41,6 +41,9 @@ import ProfilePage from "./Pages/ProfilePage/ProfilePage";
 import OrderList from "./Pages/ProfilePage/OrderList";
 import TransactionList from "./Pages/ProfilePage/TransactionList";
 import AccountSettings from "./Pages/ProfilePage/AccountSettings";
+import AddCoupon from "./Admin/Pages/Coupon/AddCoupon";
+import AllCouponList from "./Admin/Pages/Coupon/AllCouponList";
+import UpdateCoupon from "./Admin/Pages/Coupon/UpdateCoupon";
 
 const App = () => {
   const publicRoute = [
@@ -82,6 +85,9 @@ const App = () => {
     { path: "/product/add", element: <AddProduct /> },
     { path: "/product/update/:id", element: <UpdateProduct /> },
     { path: "/contact/manage", element: <ContactList /> },
+    { path: "/coupon/add", element: <AddCoupon /> },
+    { path: "/coupon/manage", element: <AllCouponList /> },
+    { path: "/coupon/update/:id", element: <UpdateCoupon /> },
   ];
 
   return (
