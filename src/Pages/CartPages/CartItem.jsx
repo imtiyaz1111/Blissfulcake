@@ -10,8 +10,10 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
+import { baseURL } from "../../Api/axiosIntance";
+import { useCart } from "../../context/CartProvider";
 
-// Styled Card for each item
+// Styled Card
 const CartItemCard = styled(Card)(({ theme }) => ({
   display: "flex",
   marginBottom: theme.spacing(3),
@@ -19,23 +21,39 @@ const CartItemCard = styled(Card)(({ theme }) => ({
   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
 }));
 
-const CartItem = ({ item }) => {
-  const theme = useTheme();
-  const [quantity, setQuantity] = React.useState(item.quantity);
+const CartItem = ({ item, onQuantityChange, onRemove }) => {
 
-  const handleQuantityChange = (type) => {
-    if (type === "add") setQuantity((q) => q + 1);
-    else if (type === "remove" && quantity > 1) setQuantity((q) => q - 1);
+  const theme = useTheme();
+  const { product, quantity } = item;
+  const [qty, setQty] = React.useState(quantity);
+
+  // Sync local state if parent prop (item.quantity) changes after API update
+  React.useEffect(() => {
+    setQty(quantity);
+  }, [quantity]);
+
+  const handleChange = (type) => {
+    let newQty = qty;
+    if (type === "add") newQty += 1;
+    else if (type === "remove" && qty > 1) newQty -= 1;
+
+    if (newQty !== qty) {
+      setQty(newQty);
+      // Call the prop function, which triggers the API context update
+     onQuantityChange(product._id, newQty);
+     
+    }
   };
 
-  const lineTotal = item.price * quantity;
+  // Correctly calculates the line total using the nested weights array price
+  const lineTotal = (product.weights?.[0]?.price || 0) * qty;
 
   return (
     <CartItemCard>
       <Box sx={{ p: 2, display: "flex", alignItems: "center", width: "100%" }}>
         <img
-          src={item.image}
-          alt={item.name}
+          src={`${baseURL}${product.image}`}
+          alt={product.name}
           style={{
             width: 80,
             height: 80,
@@ -45,83 +63,53 @@ const CartItem = ({ item }) => {
           }}
         />
         <Box sx={{ flexGrow: 1 }}>
-          {" "}
           <Typography variant="subtitle1" fontWeight="bold">
-            {item.name}{" "}
+            {product.name}
           </Typography>
           <Typography
             variant="body2"
             color="text.secondary"
             sx={{ fontSize: "0.85rem" }}
           >
-            {item.sku}{" "}
+            SKU: {product._id}
           </Typography>
           <Typography
             variant="body2"
             color="text.secondary"
             sx={{ fontSize: "0.85rem" }}
           >
-            {item.details}{" "}
+            {product.flavor} | {product.weights?.[0]?.label}
           </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
-            <Typography
-              variant="body1"
-              fontWeight="bold"
-              sx={{ mr: 2, display: { xs: "block", md: "none" } }}
-            >
-              ₹{lineTotal.toFixed(2)}
-            </Typography>
-            <Button
-              variant="text"
-              color="error"
-              size="small"
-              sx={{
-                p: 0,
-                minWidth: "auto",
-                fontSize: "0.8rem",
-                display: { xs: "block", md: "none" },
-              }}
-            >
-              Remove
-            </Button>
-          </Box>
-          <Box
-            onClick={() => console.log("Remove item")}
-            sx={{
-              mt: 1,
-              cursor: "pointer",
-              color: theme.palette.error.main,
-              fontSize: "0.8rem",
-              display: { xs: "none", md: "block" },
-            }}
+          <Typography variant="body1" fontWeight="bold" sx={{ mt: 1 }}>
+            ₹{lineTotal.toFixed(2)}
+          </Typography>
+          <Button
+            variant="text"
+            color="error"
+            size="small"
+            onClick={() => onRemove(product._id)}
+            sx={{ mt: 1 }}
           >
-            <Typography
-              variant="caption"
-              color="error"
-              component="span"
-              sx={{ "&:hover": { textDecoration: "underline" } }}
-            >
-              &gt; Remove
-            </Typography>
-          </Box>
+            Remove
+          </Button>
         </Box>
 
         {/* Quantity Controls */}
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <IconButton
             size="small"
-            onClick={() => handleQuantityChange("remove")}
-            disabled={quantity <= 1}
+            onClick={() => handleChange("remove")}
+            disabled={qty <= 1}
             sx={{ border: `1px solid ${theme.palette.divider}`, p: 0.5 }}
           >
             <RemoveIcon fontSize="inherit" />
           </IconButton>
           <Typography variant="body1" sx={{ mx: 1.5 }}>
-            {quantity}
+            {qty}
           </Typography>
           <IconButton
             size="small"
-            onClick={() => handleQuantityChange("add")}
+            onClick={() => handleChange("add")}
             sx={{ border: `1px solid ${theme.palette.divider}`, p: 0.5 }}
           >
             <AddIcon fontSize="inherit" />

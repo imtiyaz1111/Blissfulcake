@@ -30,6 +30,8 @@ import { baseURL } from "../../Api/axiosIntance";
 import Loading from "../../components/Loading/Loading";
 import { getAllProductByCategory } from "../../Api/functions/productFunctions";
 import { useWishlist } from "../../context/WishlistProvider";
+import { useCart } from "../../context/CartProvider";
+import { toast } from "react-toastify";
 
 const ProductByCategory = () => {
   const [price, setPrice] = useState([100, 4000]);
@@ -49,18 +51,40 @@ const ProductByCategory = () => {
   const { category } = useParams();
 
   // Wishlist context
-  const { wishlist, addToWishlistContext, removeFromWishlistContext, isInWishlist } = useWishlist();
+  const {
+    wishlist,
+    addToWishlistContext,
+    removeFromWishlistContext,
+    isInWishlist,
+    fetchWishlist
+  } = useWishlist();
+
+  // Cart context
+  const { addToCartContext, isInCart, fetchCart } = useCart();
 
   // Wishlist toggle handler
-  const handleWishlist = (product) => {
+  const handleWishlist =async (product) => {
     const productId = product._id;
     if (isInWishlist(productId)) {
       const wishlistItem = wishlist.find((item) => item?._id === productId);
       if (!wishlistItem) return;
-      removeFromWishlistContext(wishlistItem._id);
+     await removeFromWishlistContext(wishlistItem._id);
+     await fetchWishlist();
     } else {
-      addToWishlistContext(productId);
+     await addToWishlistContext(productId);
+     await fetchWishlist();
     }
+  };
+
+  // Add to Cart handler
+  const handleAddToCart = async (product) => {
+    if (isInCart(product._id)) {
+      toast.info("Already in cart");
+      return;
+    }
+    await addToCartContext(product._id, 1);
+    await fetchCart(); // ✅ Refresh cart instantly
+    toast.success("Added to cart");
   };
 
   // Fetch products by category
@@ -68,6 +92,7 @@ const ProductByCategory = () => {
     if (!category) return;
     setLoading(true);
     getAllProductByCategory(setAllProductByCategory, category, setLoading);
+    
   }, [category]);
 
   // Set unique flavours and weights after fetching products
@@ -209,7 +234,7 @@ const ProductByCategory = () => {
               </Button>
             </Box>
 
-            {/* Price Filter */}
+            {/* Price */}
             <Box mb={2}>
               <Typography fontWeight="bold" mb={1}>
                 Price
@@ -291,9 +316,8 @@ const ProductByCategory = () => {
           </Box>
         </Box>
 
-        {/* Product Section */}
+        {/* Products Section */}
         <Box flex={1}>
-          {/* Top Controls */}
           <Box
             display="flex"
             flexDirection={{ xs: "column", sm: "row" }}
@@ -302,7 +326,6 @@ const ProductByCategory = () => {
             alignItems="center"
             mb={2}
           >
-            {/* Left: Category info */}
             <Typography sx={{ mb: { xs: 1, sm: 0 } }}>
               <b>Show:</b> {category}{" "}
               <span style={{ color: "gray" }}>
@@ -310,7 +333,6 @@ const ProductByCategory = () => {
               </span>
             </Typography>
 
-            {/* Right: Search + Sort */}
             <Box display="flex" gap={1} flexWrap="wrap" alignItems="center">
               <TextField
                 variant="outlined"
@@ -320,7 +342,6 @@ const ProductByCategory = () => {
                 onChange={(e) => setSearch(e.target.value)}
                 sx={{ width: { xs: "100%", sm: 200, md: 250 } }}
               />
-
               <Select
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
@@ -332,8 +353,6 @@ const ProductByCategory = () => {
                 <MenuItem value="priceHighLow">Price: High to Low</MenuItem>
                 <MenuItem value="ratingHighLow">Rating: High to Low</MenuItem>
               </Select>
-
-              {/* Mobile Filter Icon */}
               <IconButton
                 sx={{ display: { xs: "flex", lg: "none" } }}
                 onClick={() => setMobileOpen(true)}
@@ -358,6 +377,7 @@ const ProductByCategory = () => {
                   product.weights[0]?.discountedPrice > 0
                     ? product.weights[0].discountedPrice
                     : null;
+                const inCart = isInCart(product._id);
 
                 return (
                   <Grid
@@ -386,7 +406,7 @@ const ProductByCategory = () => {
                         position: "relative",
                       }}
                     >
-                      {/* Wishlist Button */}
+                      {/* Wishlist */}
                       <IconButton
                         sx={{
                           position: "absolute",
@@ -395,7 +415,9 @@ const ProductByCategory = () => {
                           bgcolor: isInWishlist(product._id)
                             ? "#f48fb1"
                             : "white",
-                          color: isInWishlist(product._id) ? "white" : "inherit",
+                          color: isInWishlist(product._id)
+                            ? "white"
+                            : "inherit",
                           "&:hover": {
                             bgcolor: isInWishlist(product._id)
                               ? "#f48fb1"
@@ -403,7 +425,7 @@ const ProductByCategory = () => {
                           },
                         }}
                         onClick={(e) => {
-                          e.preventDefault(); // prevent link navigation
+                          e.preventDefault();
                           handleWishlist(product);
                         }}
                       >
@@ -414,7 +436,7 @@ const ProductByCategory = () => {
                         )}
                       </IconButton>
 
-                      {/* Product Image */}
+                      {/* Image */}
                       <CardMedia
                         component="img"
                         height="200"
@@ -427,7 +449,7 @@ const ProductByCategory = () => {
                         }}
                       />
 
-                      {/* Product Details */}
+                      {/* Details */}
                       <CardContent sx={{ textAlign: "center", flexGrow: 1 }}>
                         <Typography
                           variant="subtitle1"
@@ -435,8 +457,6 @@ const ProductByCategory = () => {
                         >
                           {product.name}
                         </Typography>
-
-                        {/* Rating */}
                         <Box sx={{ mb: 1 }}>
                           <Rating
                             value={product.ratings}
@@ -451,15 +471,9 @@ const ProductByCategory = () => {
                             ({product.ratings.toFixed(1)})
                           </Typography>
                         </Box>
-
-                        {/* Price */}
                         <Typography
                           variant="h6"
-                          sx={{
-                            color: "#f48fb1",
-                            fontWeight: "bold",
-                            mb: 2,
-                          }}
+                          sx={{ color: "#f48fb1", fontWeight: "bold", mb: 2 }}
                         >
                           {discountPrice ? (
                             <>
@@ -481,20 +495,21 @@ const ProductByCategory = () => {
 
                         {/* Add to Cart */}
                         <Button
-                          variant="outlined"
+                          variant={inCart ? "contained" : "outlined"}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleAddToCart(product);
+                          }}
                           sx={{
                             borderColor: "#f48fb1",
-                            color: "#f48fb1",
+                            color: inCart ? "#fff" : "#f48fb1",
+                            bgcolor: inCart ? "#f48fb1" : "transparent",
                             borderRadius: "25px",
                             px: 3,
-                            "&:hover": {
-                              bgcolor: "#f48fb1",
-                              color: "white",
-                            },
+                            "&:hover": { bgcolor: "#f48fb1", color: "#fff" },
                           }}
-                          onClick={(e) => e.preventDefault()} // prevent link navigation
                         >
-                          Add to Cart
+                          {inCart ? "In Cart" : "Add to Cart"}
                         </Button>
                       </CardContent>
                     </Card>
@@ -531,7 +546,7 @@ const ProductByCategory = () => {
         </Box>
       </Box>
 
-      {/* Mobile Drawer Filters */}
+      {/* Mobile Drawer */}
       <Drawer
         anchor="left"
         open={mobileOpen}
@@ -573,7 +588,10 @@ const ProductByCategory = () => {
             <Typography fontWeight="bold" mb={1}>
               Rating
             </Typography>
-            <Rating value={rating} onChange={(e, newVal) => setRating(newVal)} />
+            <Rating
+              value={rating}
+              onChange={(e, newVal) => setRating(newVal)}
+            />
           </Box>
 
           {/* Flavours */}

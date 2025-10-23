@@ -7,7 +7,7 @@ const Coupon_ENDPOINTS = {
   CREATECOUPON: `${baseURL}/api/coupon/create/`,
   DELETECOUPON: (id) => `${baseURL}/api/coupon/${id}`,
   UPDATECOUPON: (id) => `${baseURL}/api/coupon/${id}`,
-  VERIFYCOUPON: `${baseURL}/api/coupon/verify/`,
+  VERIFYCOUPON: `${baseURL}/api/coupon/validate/`,
 };
 
 export default Coupon_ENDPOINTS;

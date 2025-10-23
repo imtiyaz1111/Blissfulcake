@@ -31,7 +31,7 @@ import AllProductList from "./Admin/Pages/Product/AllProductList";
 import AddProduct from "./Admin/Pages/Product/AddProduct";
 import UpdateProduct from "./Admin/Pages/Product/UpdateProduct";
 import ContactList from "./Admin/Pages/contact/ContactList";
-import CartPage from "./Pages/CardPages/CartPage";
+import CartPage from "./Pages/CartPages/CartPage";
 import ProductDetailsPage from "./Pages/Product/ProductDetailsPage";
 import ProductByCategory from "./Pages/Product/ProductByCategory";
 import WishlistPage from "./Pages/WishlistPage/WishlistPage";

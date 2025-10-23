@@ -37,11 +37,7 @@ const ProfilePage = () => {
     >
       {/* Hamburger Icon for mobile */}
       {isMobile && (
-        <IconButton
-          onClick={handleDrawerToggle}
-          sx={{ mb: 2 }}
-          color="primary"
-        >
+        <IconButton onClick={handleDrawerToggle} sx={{ mb: 2 }} color="primary">
           <MenuIcon />
         </IconButton>
       )}
@@ -53,11 +49,7 @@ const ProfilePage = () => {
         sx={{ maxWidth: "1200px", margin: "0 auto" }}
       >
         {/* Sidebar */}
-        {!isMobile && (
-          <Grid  size={{  lg: 3, xl: 3 }}>
-            {drawer}
-          </Grid>
-        )}
+        {!isMobile && <Grid size={{ lg: 3, xl: 3 }}>{drawer}</Grid>}
 
         {/* Drawer for mobile */}
         {isMobile && (
@@ -72,7 +64,7 @@ const ProfilePage = () => {
         )}
 
         {/* Main content */}
-        <Grid size={{  lg: 9, xl: 9 }}>
+        <Grid size={{ lg: 9, xl: 9 }}>
           <Outlet />
         </Grid>
       </Grid>

@@ -115,15 +115,25 @@ export const deleteCoupon = async (id, token, setLoading) => {
 };
 
 // Verify Coupon (for checkout usage)
-export const verifyCoupon = async (code, setDiscount, setLoading) => {
+export const verifyCoupon = async (codeObj, setDiscount, setLoading, token) => {
   try {
     setLoading(true);
-    const response = await axiosInstance.post(Coupon_ENDPOINTS.VERIFYCOUPON, {
-      code,
-    });
+    const response = await axiosInstance.post(
+      Coupon_ENDPOINTS.VERIFYCOUPON,
+      codeObj, // { code, totalAmount }
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
     if (response.data.success) {
       toast.success(response.data.message);
-      setDiscount(response.data.discount);
+
+      // ✅ Apply discount amount directly from backend
+      const discount = response.data.discountAmount || 0;
+      setDiscount(discount);
     } else {
       toast.error(response.data.message);
     }

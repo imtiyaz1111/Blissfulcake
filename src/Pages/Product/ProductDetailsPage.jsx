@@ -11,6 +11,7 @@ import {
   IconButton,
 } from "@mui/material";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import { getProductById } from "../../Api/functions/productFunctions";
 import { useParams } from "react-router-dom";
@@ -18,11 +19,23 @@ import { baseURL } from "../../Api/axiosIntance";
 import InfoTabs from "../../components/InfoTabs";
 import Loading from "../../components/Loading/Loading";
 import RelatedProducts from "./RelatedProducts";
+import { useWishlist } from "../../context/WishlistProvider";
+import { useCart } from "../../context/CartProvider";
+import { toast } from "react-toastify";
 
 const ProductDetailsPage = () => {
   const [singleProductData, setSingleProductData] = useState(null);
   const [selectedWeight, setSelectedWeight] = useState(null);
   const { id } = useParams();
+
+  const {
+    wishlist,
+    addToWishlistContext,
+    removeFromWishlistContext,
+    isInWishlist,
+  } = useWishlist();
+
+  const { cart, addToCartContext, isInCart } = useCart();
 
   useEffect(() => {
     getProductById(id, setSingleProductData);
@@ -42,7 +55,7 @@ const ProductDetailsPage = () => {
         alignItems="center"
         height="80vh"
       >
-        <Loading/>
+        <Loading />
       </Box>
     );
   }
@@ -57,6 +70,30 @@ const ProductDetailsPage = () => {
     }
     return 0;
   };
+
+  const handleWishlist = () => {
+    const productId = singleProductData._id;
+    if (isInWishlist(productId)) {
+      const wishlistItem = wishlist.find(
+        (item) => item?.productId?._id === productId
+      );
+      if (!wishlistItem) return;
+      removeFromWishlistContext(wishlistItem._id);
+    } else {
+      addToWishlistContext(productId);
+    }
+  };
+
+  const handleAddToCart = () => {
+    if (isInCart(singleProductData._id)) {
+      toast.info("Already in cart");
+      return;
+    }
+    addToCartContext(singleProductData._id, 1);
+  };
+
+  const inCart = isInCart(singleProductData._id);
+  const wishlisted = isInWishlist(singleProductData._id);
 
   return (
     <Box p={{ xs: 2, md: 5 }} bgcolor="#fafafa" minHeight="90vh">
@@ -230,7 +267,7 @@ const ProductDetailsPage = () => {
                 ))}
               </Stack>
 
-              {/* WhatsApp Contact for Custom/Bulk Orders */}
+              {/* WhatsApp Contact */}
               <Button
                 variant="contained"
                 startIcon={<WhatsAppIcon />}
@@ -240,7 +277,7 @@ const ProductDetailsPage = () => {
                   borderRadius: "25px",
                   textTransform: "none",
                 }}
-                href="https://wa.me/919876543210" // replace with your WhatsApp number
+                href="https://wa.me/919876543210"
                 target="_blank"
               >
                 Contact for Custom/Bulk Orders
@@ -250,19 +287,20 @@ const ProductDetailsPage = () => {
             {/* Buttons */}
             <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
               <Button
-                variant="contained"
+                variant={inCart ? "contained" : "outlined"}
                 disabled={singleProductData.countInStock === 0}
+                onClick={handleAddToCart}
                 sx={{
-                  bgcolor: "#f48fb1",
-                  color: "white",
+                  bgcolor: inCart ? "#f48fb1" : "transparent",
+                  color: inCart ? "#fff" : "#f48fb1",
                   borderRadius: "25px",
                   px: 4,
                   py: 1.2,
                   fontWeight: "bold",
-                  "&:hover": { bgcolor: "#d0678b" },
+                  "&:hover": { bgcolor: "#f48fb1", color: "#fff" },
                 }}
               >
-                Add to Cart
+                {inCart ? "In Cart" : "Add to Cart"}
               </Button>
 
               <Button
@@ -281,24 +319,27 @@ const ProductDetailsPage = () => {
                 Buy Now
               </Button>
 
+              {/* Wishlist */}
               <IconButton
+                onClick={handleWishlist}
                 sx={{
                   border: "1px solid #f48fb1",
-                  color: "#f48fb1",
+                  color: wishlisted ? "white" : "#f48fb1",
+                  bgcolor: wishlisted ? "#f48fb1" : "transparent",
                   borderRadius: "50%",
-                  "&:hover": { bgcolor: "#f48fb1", color: "white" },
+                  "&:hover": { bgcolor: "#f48fb1", color: "#fff" },
                 }}
               >
-                <FavoriteBorderIcon />
+                {wishlisted ? <FavoriteIcon /> : <FavoriteBorderIcon />}
               </IconButton>
             </Stack>
           </Box>
         </Grid>
       </Grid>
 
-      <InfoTabs/>
+      <InfoTabs />
       {/* Related Product */}
-      <RelatedProducts/>
+      <RelatedProducts />
     </Box>
   );
 };

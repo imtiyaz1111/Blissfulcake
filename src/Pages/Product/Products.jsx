@@ -30,6 +30,8 @@ import { baseURL } from "../../Api/axiosIntance";
 import Loading from "../../components/Loading/Loading";
 import { Link } from "react-router-dom";
 import { useWishlist } from "../../context/WishlistProvider";
+import { useCart } from "../../context/CartProvider";
+import { toast } from "react-toastify";
 
 const Products = () => {
   const [price, setPrice] = useState([100, 4000]);
@@ -43,23 +45,42 @@ const Products = () => {
   const [allProduct, setAllProduct] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Dynamic options from API
   const [flavourOptions, setFlavourOptions] = useState([]);
   const [weightOptions, setWeightOptions] = useState([]);
 
   // Wishlist context
-  const { wishlist, addToWishlistContext, removeFromWishlistContext, isInWishlist } = useWishlist();
+  const { wishlist, addToWishlistContext, removeFromWishlistContext } = useWishlist();
 
-  // Wishlist toggle handler
+  // Cart context
+  const { cart, addToCartContext,fetchCart } = useCart();
+
+  const isInWishlist = (productId) =>
+    wishlist.some((item) => item?._id === productId || item?.productId?._id === productId);
+
+  const isInCart = (productId) =>
+    cart.some((item) => item?.product?._id === productId || item?._id === productId);
+
   const handleWishlist = (product) => {
     const productId = product._id;
     if (isInWishlist(productId)) {
-      const wishlistItem = wishlist.find((item) => item?._id === productId);
+      const wishlistItem = wishlist.find(
+        (item) => item._id === productId || item?.productId?._id === productId
+      );
       if (!wishlistItem) return;
       removeFromWishlistContext(wishlistItem._id);
     } else {
       addToWishlistContext(productId);
     }
+  };
+
+  const handleAddToCart = async (productId) => {
+    if (isInCart(productId)) {
+      toast.info("Already in cart");
+      return;
+    }
+    await addToCartContext(productId, 1);
+    await fetchCart(); // ✅ Refresh cart instantly
+    toast.success("Added to cart");
   };
 
   useEffect(() => {
@@ -68,13 +89,10 @@ const Products = () => {
       setAllProduct(data);
       setLoading(false);
 
-      // Extract unique flavours
-      const uniqueFlavours = [
-        ...new Set(data.map((p) => p.flavor).filter(Boolean)),
-      ];
+      // Extract unique flavours and weights
+      const uniqueFlavours = [...new Set(data.map((p) => p.flavor).filter(Boolean))];
       setFlavourOptions(uniqueFlavours);
 
-      // Extract unique weights
       const uniqueWeights = [
         ...new Set(data.flatMap((p) => p.weights?.map((w) => w.label) || [])),
       ];
@@ -82,25 +100,18 @@ const Products = () => {
     }, setLoading);
   }, []);
 
-  // Flavour Filter Handler
   const handleFlavourChange = (flavour) => {
     setFlavours((prev) =>
-      prev.includes(flavour)
-        ? prev.filter((f) => f !== flavour)
-        : [...prev, flavour]
+      prev.includes(flavour) ? prev.filter((f) => f !== flavour) : [...prev, flavour]
     );
   };
 
-  // Weight Filter Handler
   const handleWeightChange = (weight) => {
     setWeights((prev) =>
-      prev.includes(weight)
-        ? prev.filter((w) => w !== weight)
-        : [...prev, weight]
+      prev.includes(weight) ? prev.filter((w) => w !== weight) : [...prev, weight]
     );
   };
 
-  // Reset all filters
   const clearFilters = () => {
     setPrice([100, 4000]);
     setRating(null);
@@ -108,22 +119,19 @@ const Products = () => {
     setWeights([]);
   };
 
-  // Filtering Logic
   const filteredProducts = allProduct
-    .filter((p) => {
-      const lowestPrice = Math.min(...p.weights.map((w) => w.price));
-      return lowestPrice >= price[0] && lowestPrice <= price[1];
-    })
+    .filter(
+      (p) =>
+        Math.min(...p.weights.map((w) => w.price)) >= price[0] &&
+        Math.min(...p.weights.map((w) => w.price)) <= price[1]
+    )
     .filter((p) => (rating ? p.ratings >= rating : true))
     .filter((p) => (flavours.length ? flavours.includes(p.flavor) : true))
-    .filter((p) =>
-      weights.length ? p.weights.some((w) => weights.includes(w.label)) : true
-    )
+    .filter((p) => (weights.length ? p.weights.some((w) => weights.includes(w.label)) : true))
     .filter((p) => p.name.toLowerCase().includes(search.toLowerCase().trim()))
     .sort((a, b) => {
       const priceA = Math.min(...a.weights.map((w) => w.price));
       const priceB = Math.min(...b.weights.map((w) => w.price));
-
       if (sort === "priceLowHigh") return priceA - priceB;
       if (sort === "priceHighLow") return priceB - priceA;
       if (sort === "ratingHighLow") return b.ratings - a.ratings;
@@ -134,12 +142,7 @@ const Products = () => {
 
   if (loading) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="80vh"
-      >
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
         <Loading />
       </Box>
     );
@@ -166,8 +169,7 @@ const Products = () => {
               borderRadius: 6,
               height: "100%",
               overflowY: "auto",
-              boxShadow:
-                "0 4px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.08)",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.08)",
             }}
           >
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
@@ -179,7 +181,7 @@ const Products = () => {
               </Button>
             </Box>
 
-            {/* Price Filter */}
+            {/* Price Slider */}
             <Box mb={2}>
               <Typography fontWeight="bold" mb={1}>
                 Price
@@ -217,12 +219,7 @@ const Products = () => {
                     {flavourOptions.map((f) => (
                       <FormControlLabel
                         key={f}
-                        control={
-                          <Checkbox
-                            checked={flavours.includes(f)}
-                            onChange={() => handleFlavourChange(f)}
-                          />
-                        }
+                        control={<Checkbox checked={flavours.includes(f)} onChange={() => handleFlavourChange(f)} />}
                         label={f}
                       />
                     ))}
@@ -242,12 +239,7 @@ const Products = () => {
                     {weightOptions.map((w) => (
                       <FormControlLabel
                         key={w}
-                        control={
-                          <Checkbox
-                            checked={weights.includes(w)}
-                            onChange={() => handleWeightChange(w)}
-                          />
-                        }
+                        control={<Checkbox checked={weights.includes(w)} onChange={() => handleWeightChange(w)} />}
                         label={w}
                       />
                     ))}
@@ -258,20 +250,11 @@ const Products = () => {
           </Box>
         </Box>
 
-        {/* Product Section */}
+        {/* Products Grid */}
         <Box flex={1}>
-          {/* Top Controls */}
-          <Box
-            display="flex"
-            flexDirection={{ xs: "column", sm: "row" }}
-            gap={2}
-            justifyContent="space-between"
-            alignItems="center"
-            mb={2}
-          >
+          <Box display="flex" flexDirection={{ xs: "column", sm: "row" }} gap={2} justifyContent="space-between" alignItems="center" mb={2}>
             <Typography sx={{ mb: { xs: 1, sm: 0 } }}>
-              <b>Show:</b> All Products{" "}
-              <span style={{ color: "gray" }}>({allProduct.length} items)</span>
+              <b>Show:</b> All Products <span style={{ color: "gray" }}>({allProduct.length} items)</span>
             </Typography>
 
             <Box display="flex" gap={1} flexWrap="wrap" alignItems="center">
@@ -283,61 +266,37 @@ const Products = () => {
                 onChange={(e) => setSearch(e.target.value)}
                 sx={{ width: { xs: "100%", sm: 200, md: 250 } }}
               />
-              <Select
-                value={sort}
-                onChange={(e) => setSort(e.target.value)}
-                size="small"
-                sx={{ minWidth: 180 }}
-              >
+              <Select value={sort} onChange={(e) => setSort(e.target.value)} size="small" sx={{ minWidth: 180 }}>
                 <MenuItem value="default">Default</MenuItem>
                 <MenuItem value="priceLowHigh">Price: Low to High</MenuItem>
                 <MenuItem value="priceHighLow">Price: High to Low</MenuItem>
                 <MenuItem value="ratingHighLow">Rating: High to Low</MenuItem>
               </Select>
-
-              <IconButton
-                sx={{ display: { xs: "flex", lg: "none" } }}
-                onClick={() => setMobileOpen(true)}
-              >
+              <IconButton sx={{ display: { xs: "flex", lg: "none" } }} onClick={() => setMobileOpen(true)}>
                 <FilterList />
               </IconButton>
             </Box>
           </Box>
 
-          {/* Product Grid */}
           <Grid container spacing={4} justifyContent="center">
             {visibleProducts.length > 0 ? (
               visibleProducts.map((product) => {
                 const lowestPrice = Math.min(...product.weights.map((w) => w.price));
                 const discountPrice =
-                  product.weights[0].discountedPrice > 0
-                    ? product.weights[0].discountedPrice
-                    : null;
+                  product.weights[0].discountedPrice > 0 ? product.weights[0].discountedPrice : null;
+                const inCart = isInCart(product._id);
+                const wishlisted = isInWishlist(product._id);
 
                 return (
-                  <Grid
-                    item
-                    key={product._id}
-                    xs={12}
-                    sm={6}
-                    md={4}
-                    lg={3}
-                    sx={{ flex: "1 1 300px", maxWidth: "400px" }}
-                  >
+                  <Grid item key={product._id} xs={12} sm={6} md={4} lg={3} sx={{ flex: "1 1 300px", maxWidth: "400px" }}>
                     <Card
-                      component={Link}
-                      to={`/product/${product._id}`}
                       sx={{
-                        textDecoration: "none",
-                        color: "inherit",
                         height: "100%",
                         display: "flex",
                         flexDirection: "column",
                         justifyContent: "space-between",
                         borderRadius: "12px",
                         boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                        transition: "0.3s",
-                        "&:hover": { transform: "translateY(-5px)" },
                         position: "relative",
                       }}
                     >
@@ -347,70 +306,43 @@ const Products = () => {
                           position: "absolute",
                           top: 10,
                           right: 10,
-                          bgcolor: isInWishlist(product._id) ? "#f48fb1" : "white",
-                          color: isInWishlist(product._id) ? "white" : "inherit",
-                          "&:hover": {
-                            bgcolor: isInWishlist(product._id) ? "#f48fb1" : "#f5f5f5",
-                          },
+                          bgcolor: wishlisted ? "#f48fb1" : "white",
+                          color: wishlisted ? "white" : "inherit",
+                          "&:hover": { bgcolor: wishlisted ? "#f48fb1" : "#f5f5f5" },
                         }}
-                        onClick={(e) => {
-                          e.preventDefault(); // prevent link navigation
-                          handleWishlist(product);
-                        }}
+                        onClick={() => handleWishlist(product)}
                       >
-                        {isInWishlist(product._id) ? (
-                          <FavoriteIcon />
-                        ) : (
-                          <FavoriteBorderIcon />
-                        )}
+                        {wishlisted ? <FavoriteIcon /> : <FavoriteBorderIcon />}
                       </IconButton>
 
-                      {/* Product Image */}
-                      <CardMedia
-                        component="img"
-                        height="200"
-                        image={`${baseURL}${product.image}`}
-                        alt={product.name}
-                        sx={{
-                          objectFit: "cover",
-                          borderTopLeftRadius: "12px",
-                          borderTopRightRadius: "12px",
-                        }}
-                      />
+                      <Link to={`/product/${product._id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                        <CardMedia
+                          component="img"
+                          height="200"
+                          image={`${baseURL}${product.image}`}
+                          alt={product.name}
+                          sx={{ objectFit: "cover", borderTopLeftRadius: "12px", borderTopRightRadius: "12px" }}
+                        />
+                      </Link>
 
-                      {/* Product Details */}
                       <CardContent sx={{ textAlign: "center", flexGrow: 1 }}>
-                        <Typography
-                          variant="subtitle1"
-                          sx={{ fontWeight: 600, mb: 1 }}
-                        >
-                          {product.name}
-                        </Typography>
+                        <Link to={`/product/${product._id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+                            {product.name}
+                          </Typography>
+                        </Link>
 
                         <Box sx={{ mb: 1 }}>
-                          <Rating
-                            value={product.ratings}
-                            precision={0.5}
-                            readOnly
-                          />
+                          <Rating value={product.ratings} precision={0.5} readOnly />
                           <Typography component="span" variant="body2" sx={{ ml: 1 }}>
                             ({product.ratings.toFixed(1)})
                           </Typography>
                         </Box>
 
-                        <Typography
-                          variant="h6"
-                          sx={{ color: "#f48fb1", fontWeight: "bold", mb: 2 }}
-                        >
+                        <Typography variant="h6" sx={{ color: "#f48fb1", fontWeight: "bold", mb: 2 }}>
                           {discountPrice ? (
                             <>
-                              <span
-                                style={{
-                                  textDecoration: "line-through",
-                                  marginRight: "8px",
-                                  color: "#999",
-                                }}
-                              >
+                              <span style={{ textDecoration: "line-through", marginRight: "8px", color: "#999" }}>
                                 ₹{lowestPrice}
                               </span>
                               ₹{discountPrice}
@@ -421,17 +353,18 @@ const Products = () => {
                         </Typography>
 
                         <Button
-                          variant="outlined"
+                          variant={inCart ? "contained" : "outlined"}
+                          onClick={() => handleAddToCart(product._id)}
                           sx={{
                             borderColor: "#f48fb1",
-                            color: "#f48fb1",
+                            color: inCart ? "#fff" : "#f48fb1",
+                            bgcolor: inCart ? "#f48fb1" : "transparent",
                             borderRadius: "25px",
                             px: 3,
-                            "&:hover": { bgcolor: "#f48fb1", color: "white" },
+                            "&:hover": { bgcolor: "#f48fb1", color: "#fff" },
                           }}
-                          onClick={(e) => e.preventDefault()}
                         >
-                          Add to Cart
+                          {inCart ? "In Cart" : "Add to Cart"}
                         </Button>
                       </CardContent>
                     </Card>
@@ -469,11 +402,7 @@ const Products = () => {
       </Box>
 
       {/* Mobile Drawer Filters */}
-      <Drawer
-        anchor="left"
-        open={mobileOpen}
-        onClose={() => setMobileOpen(false)}
-      >
+      <Drawer anchor="left" open={mobileOpen} onClose={() => setMobileOpen(false)}>
         <Box p={2} sx={{ width: "80vw", maxWidth: 300 }}>
           <Typography variant="h6" fontWeight="bold" mb={2}>
             Filters
@@ -482,19 +411,12 @@ const Products = () => {
             Clear All
           </Button>
 
-          {/* Price */}
+          {/* Price Slider */}
           <Box mb={2}>
             <Typography fontWeight="bold" mb={1}>
               Price
             </Typography>
-            <Slider
-              value={price}
-              onChange={(e, newVal) => setPrice(newVal)}
-              valueLabelDisplay="auto"
-              min={50}
-              max={5000}
-              sx={{ color: "purple" }}
-            />
+            <Slider value={price} onChange={(e, newVal) => setPrice(newVal)} valueLabelDisplay="auto" min={50} max={5000} sx={{ color: "purple" }} />
             <Box display="flex" justifyContent="space-between">
               <Typography>₹{price[0]}</Typography>
               <Typography>₹{price[1]}</Typography>
@@ -518,16 +440,7 @@ const Products = () => {
               <AccordionDetails>
                 <FormGroup>
                   {flavourOptions.map((f) => (
-                    <FormControlLabel
-                      key={f}
-                      control={
-                        <Checkbox
-                          checked={flavours.includes(f)}
-                          onChange={() => handleFlavourChange(f)}
-                        />
-                      }
-                      label={f}
-                    />
+                    <FormControlLabel key={f} control={<Checkbox checked={flavours.includes(f)} onChange={() => handleFlavourChange(f)} />} label={f} />
                   ))}
                 </FormGroup>
               </AccordionDetails>
@@ -543,16 +456,7 @@ const Products = () => {
               <AccordionDetails>
                 <FormGroup>
                   {weightOptions.map((w) => (
-                    <FormControlLabel
-                      key={w}
-                      control={
-                        <Checkbox
-                          checked={weights.includes(w)}
-                          onChange={() => handleWeightChange(w)}
-                        />
-                      }
-                      label={w}
-                    />
+                    <FormControlLabel key={w} control={<Checkbox checked={weights.includes(w)} onChange={() => handleWeightChange(w)} />} label={w} />
                   ))}
                 </FormGroup>
               </AccordionDetails>

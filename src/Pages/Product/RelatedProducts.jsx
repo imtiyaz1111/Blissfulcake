@@ -11,14 +11,35 @@ import {
   IconButton,
 } from "@mui/material";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 import { Link, useParams } from "react-router-dom";
 import { baseURL } from "../../Api/axiosIntance";
 import { getRelatedProducts } from "../../Api/functions/productFunctions";
+import { useWishlist } from "../../context/WishlistProvider";
+import { useCart } from "../../context/CartProvider";
+import { toast } from "react-toastify";
 
 const RelatedProducts = () => {
   const [relatedProductData, setRelatedProductData] = useState([]);
   const { id } = useParams();
 
+  const {
+    wishlist,
+    addToWishlistContext,
+    removeFromWishlistContext,
+    fetchWishlist,
+    isInWishlist,
+  } = useWishlist();
+
+  const {
+    cart,
+    addToCartContext,
+    removeFromCartContext,
+    fetchCart,
+    isInCart,
+  } = useCart();
+
+  // ✅ Fetch related products when product ID changes
   useEffect(() => {
     getRelatedProducts(id, setRelatedProductData);
   }, [id]);
@@ -27,6 +48,35 @@ const RelatedProducts = () => {
   if (!relatedProductData || relatedProductData.length === 0) {
     return null;
   }
+
+  // ❤️ Handle Wishlist Toggle (Instant refresh after update)
+  const handleWishlist = async (product) => {
+    const productId = product._id;
+    if (isInWishlist(productId)) {
+      const wishlistItem = wishlist.find(
+        (item) => item?.productId?._id === productId
+      );
+      if (!wishlistItem) return;
+      await removeFromWishlistContext(wishlistItem._id);
+      await fetchWishlist(); // ✅ Refresh wishlist instantly
+      toast.info("Removed from wishlist");
+    } else {
+      await addToWishlistContext(productId);
+      await fetchWishlist(); // ✅ Refresh wishlist instantly
+      toast.success("Added to wishlist");
+    }
+  };
+
+  // 🛒 Handle Add to Cart (Instant refresh after update)
+  const handleAddToCart = async (productId) => {
+    if (isInCart(productId)) {
+      toast.info("Already in cart");
+      return;
+    }
+    await addToCartContext(productId, 1);
+    await fetchCart(); // ✅ Refresh cart instantly
+    toast.success("Added to cart");
+  };
 
   return (
     <Box sx={{ mt: 6 }}>
@@ -52,11 +102,12 @@ const RelatedProducts = () => {
               : null;
           const weightLabel = firstWeight?.label || "";
 
+          const wishlisted = isInWishlist(product._id);
+          const inCart = isInCart(product._id);
+
           return (
             <Card
               key={product._id}
-              component={Link}
-              to={`/product/${product._id}`}
               sx={{
                 minWidth: 200,
                 flex: "0 0 auto",
@@ -64,22 +115,47 @@ const RelatedProducts = () => {
                 boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                 transition: "0.3s",
                 "&:hover": { transform: "translateY(-5px)" },
-                textDecoration: "none",
-                color: "inherit",
+                position: "relative",
               }}
             >
-              {/* Product Image */}
-              <CardMedia
-                component="img"
-                height="180"
-                image={`${baseURL}${product.image}`}
-                alt={product.name}
+              {/* ❤️ Wishlist Button */}
+              <IconButton
+                size="small"
+                onClick={() => handleWishlist(product)}
                 sx={{
-                  objectFit: "cover",
-                  borderTopLeftRadius: "8px",
-                  borderTopRightRadius: "8px",
+                  position: "absolute",
+                  top: 10,
+                  right: 10,
+                  bgcolor: wishlisted ? "#f48fb1" : "white",
+                  color: wishlisted ? "white" : "#f48fb1",
+                  border: "1px solid #f48fb1",
+                  "&:hover": { bgcolor: "#f48fb1", color: "#fff" },
                 }}
-              />
+              >
+                {wishlisted ? (
+                  <FavoriteIcon fontSize="small" />
+                ) : (
+                  <FavoriteBorderIcon fontSize="small" />
+                )}
+              </IconButton>
+
+              {/* Product Image */}
+              <Link
+                to={`/product/${product._id}`}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <CardMedia
+                  component="img"
+                  height="180"
+                  image={`${baseURL}${product.image}`}
+                  alt={product.name}
+                  sx={{
+                    objectFit: "cover",
+                    borderTopLeftRadius: "8px",
+                    borderTopRightRadius: "8px",
+                  }}
+                />
+              </Link>
 
               <CardContent>
                 {/* Product Name */}
@@ -133,33 +209,24 @@ const RelatedProducts = () => {
                   )}
                 </Typography>
 
-                {/* Add to Cart & Wishlist */}
+                {/* 🛒 Add to Cart Button */}
                 <Stack direction="row" spacing={1} mt={1}>
                   <Button
-                    variant="outlined"
+                    variant={inCart ? "contained" : "outlined"}
                     size="small"
+                    onClick={() => handleAddToCart(product._id)}
                     sx={{
                       borderRadius: "20px",
                       textTransform: "none",
                       px: 2,
                       borderColor: "#f48fb1",
-                      color: "#f48fb1",
+                      color: inCart ? "#fff" : "#f48fb1",
+                      bgcolor: inCart ? "#f48fb1" : "transparent",
                       "&:hover": { bgcolor: "#f48fb1", color: "#fff" },
                     }}
                   >
-                    Add to Cart
+                    {inCart ? "In Cart" : "Add to Cart"}
                   </Button>
-
-                  <IconButton
-                    size="small"
-                    sx={{
-                      border: "1px solid #f48fb1",
-                      color: "#f48fb1",
-                      "&:hover": { bgcolor: "#f48fb1", color: "#fff" },
-                    }}
-                  >
-                    <FavoriteBorderIcon fontSize="small" />
-                  </IconButton>
                 </Stack>
               </CardContent>
             </Card>

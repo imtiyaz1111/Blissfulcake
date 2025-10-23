@@ -69,6 +69,7 @@ export const WishlistProvider = ({ children }) => {
         addToWishlistContext,
         removeFromWishlistContext,
         isInWishlist,
+        fetchWishlist,
       }}
     >
       {children}

@@ -8,7 +8,11 @@ import {
   styled,
   useTheme,
   TextField,
+  CircularProgress,
 } from "@mui/material";
+import { toast } from "react-toastify";
+import { verifyCoupon } from "../../Api/functions/couponFunction";
+import { useAuth } from "../../context/AuthProvider";
 
 const SummaryCard = styled(Card)(({ theme }) => ({
   padding: theme.spacing(3),
@@ -22,31 +26,40 @@ const SummaryCard = styled(Card)(({ theme }) => ({
 
 const shippingEstimate = 20.0;
 
-const OrderSummary = ({ items }) => {
+const OrderSummary = ({ cartItems }) => {
   const theme = useTheme();
   const [coupon, setCoupon] = useState("");
   const [discount, setDiscount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [auth] = useAuth();
+  const token = auth?.token;
 
-  const subtotal = items.reduce(
-    (acc, item) => acc + item.price * item.quantity,
+  const subtotal = cartItems.reduce(
+    (acc, item) =>
+      acc + (item.product.weights?.[0]?.price || 0) * item.quantity,
     0
   );
 
-  const deliveryCharge = subtotal < 300 ? 50 : 0;
+  const deliveryCharge = subtotal < 300 && subtotal > 0 ? 50 : 0;
 
-  // Coupon logic
+  const estimatedTotalBeforeDiscount =
+    subtotal + shippingEstimate + deliveryCharge;
+
+  const estimatedTotal = Math.max(estimatedTotalBeforeDiscount - discount, 0);
+
   const handleApplyCoupon = () => {
-    if (coupon.trim().toUpperCase() === "DISCOUNT10") {
-      const discountAmount = subtotal * 0.1;
-      setDiscount(discountAmount);
-    } else {
-      setDiscount(0);
-      alert("Invalid coupon code");
+    if (!coupon.trim()) {
+      toast.error("Please enter a coupon code");
+      return;
     }
-  };
 
-  const estimatedTotal =
-    subtotal + shippingEstimate + deliveryCharge - discount;
+    const codeObj = {
+      code: coupon.trim(),
+      totalAmount: estimatedTotalBeforeDiscount,
+    };
+
+    verifyCoupon(codeObj, setDiscount, setLoading, token);
+  };
 
   const SummaryRow = ({
     label,
@@ -60,18 +73,19 @@ const OrderSummary = ({ items }) => {
         justifyContent: "space-between",
         mb: isTotal ? 0 : 1.5,
         mt: isTotal ? 2 : 0,
+        
       }}
     >
       <Typography
         variant={isTotal ? "h6" : "body1"}
-        fontWeight={isTotal ? "bold" : "regular"}
+        fontWeight={isTotal ? 700 : 400}
         color={isDiscount ? theme.palette.success.main : "text.primary"}
       >
         {label}
       </Typography>
       <Typography
         variant={isTotal ? "h6" : "body1"}
-        fontWeight={isTotal ? "bold" : "regular"}
+        fontWeight={isTotal ? 700 : 400}
         color={
           isTotal
             ? theme.palette.error.main
@@ -80,14 +94,15 @@ const OrderSummary = ({ items }) => {
             : "text.primary"
         }
       >
-        {isDiscount ? "- " : "₹"}
+        {isDiscount ? "- ₹" : "₹"}
         {value.toFixed(2)}
       </Typography>
     </Box>
   );
 
   return (
-    <SummaryCard>
+    <SummaryCard sx={{position: "sticky",
+        top: "180px",}}>
       <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
         Order Summary
       </Typography>
@@ -101,7 +116,6 @@ const OrderSummary = ({ items }) => {
         <SummaryRow label="Coupon Discount" value={discount} isDiscount />
       )}
 
-      {/* Coupon Input Section */}
       <Box sx={{ mt: 2, display: "flex", gap: 1 }}>
         <TextField
           variant="outlined"
@@ -110,6 +124,7 @@ const OrderSummary = ({ items }) => {
           value={coupon}
           onChange={(e) => setCoupon(e.target.value)}
           fullWidth
+          disabled={loading}
         />
         <Button
           variant="contained"
@@ -118,8 +133,9 @@ const OrderSummary = ({ items }) => {
             px: 3,
           }}
           onClick={handleApplyCoupon}
+          disabled={loading}
         >
-          Apply
+          {loading ? <CircularProgress size={24} color="inherit" /> : "Apply"}
         </Button>
       </Box>
 

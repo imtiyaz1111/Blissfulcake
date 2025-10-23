@@ -37,11 +37,13 @@ import logo from "../assets/blissfulllogo.png";
 import { useAuth } from "../context/AuthProvider";
 import { logOut } from "../Api/functions/authFunctions";
 import { useWishlist } from "../context/WishlistProvider";
+import { useCart } from "../context/CartProvider";
 
 const Navbar = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const { wishlist } = useWishlist();
+  const { cart } = useCart();
 
   // Breakpoints
   const isBelow1176 = useMediaQuery("(max-width:1176px)");
@@ -219,7 +221,17 @@ const Navbar = () => {
                   </Badge>
                 </IconButton>
                 <IconButton color="inherit" component={Link} to="/cart">
-                  <ShoppingCartOutlinedIcon />
+                  <Badge
+                    badgeContent={cart.length}
+                    sx={{
+                      "& .MuiBadge-badge": {
+                        backgroundColor: "#f48fb1",
+                        color: "#fff",
+                      },
+                    }}
+                  >
+                    <ShoppingCartOutlinedIcon />
+                  </Badge>
                 </IconButton>
 
                 {/* Profile Dropdown */}
