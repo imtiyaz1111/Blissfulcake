@@ -35,15 +35,14 @@ import CartPage from "./Pages/CartPages/CartPage";
 import ProductDetailsPage from "./Pages/Product/ProductDetailsPage";
 import ProductByCategory from "./Pages/Product/ProductByCategory";
 import WishlistPage from "./Pages/WishlistPage/WishlistPage";
-
-// ✅ Profile Page and Sub Pages
 import ProfilePage from "./Pages/ProfilePage/ProfilePage";
-import OrderList from "./Pages/ProfilePage/OrderList";
-import TransactionList from "./Pages/ProfilePage/TransactionList";
-import AccountSettings from "./Pages/ProfilePage/AccountSettings";
+import OrderList from "./Pages/ProfilePage/Order/OrderList";
+import TransactionList from "./Pages/ProfilePage/Payements/TransactionList";
 import AddCoupon from "./Admin/Pages/Coupon/AddCoupon";
 import AllCouponList from "./Admin/Pages/Coupon/AllCouponList";
 import UpdateCoupon from "./Admin/Pages/Coupon/UpdateCoupon";
+import MyProfile from "./Pages/ProfilePage/AccountSettings/MyProfile";
+import EditProfile from "./Pages/ProfilePage/AccountSettings/EditProfile";
 
 const App = () => {
   const publicRoute = [
@@ -115,7 +114,8 @@ const App = () => {
           >
             <Route path="orders" element={<OrderList />} />
             <Route path="transactions" element={<TransactionList />} />
-            <Route path="settings" element={<AccountSettings />} />
+            <Route path="settings/myprofile" element={<MyProfile />} />
+            <Route path="settings/edit" element={<EditProfile />} />
           </Route>
         </Route>
 
