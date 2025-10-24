@@ -23,7 +23,7 @@ export const getProfile = async (setProfileData, token,setLoading) => {
   }
 };
 
-export const updateProfile = async (fromData, token) => {
+export const updateProfile = async (fromData, token,navigate) => {
   try {
     const res = await axiosInstance.put(PROFILE_ENDPOINTS.updteProfile,fromData, {
       headers: {
@@ -31,7 +31,8 @@ export const updateProfile = async (fromData, token) => {
       },
     });
     if (res.data.success == true) {
-      setProfileData(res.data.data);
+      toast.success(res.data.message);
+      navigate("/profile/settings/myprofile");
     }
   } catch (error) {
     toast.error(

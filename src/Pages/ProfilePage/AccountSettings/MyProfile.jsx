@@ -13,18 +13,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import LockResetIcon from "@mui/icons-material/LockReset";
 import { getProfile } from "../../../Api/functions/profileFunctions";
 import { useAuth } from "../../../context/AuthProvider";
-
-// Dummy function to simulate fetching user data
-const fetchUserData = () => {
-  return {
-    username: "Sajda Parween",
-    email: "sajda@example.com",
-    phone: "9876543210",
-    address: "123, Street Name, City, Country",
-    profileImage: "", // you can put an image URL here
-  };
-};
-
+import { Link } from "react-router-dom";
 const MyProfile = () => {
   const [profileData, setProfileData] = useState({});
   const [loading, setLoading] = useState(true);
@@ -62,6 +51,8 @@ const MyProfile = () => {
               {/* Action Buttons */}
               <Box sx={{ mt: 2, display: "flex", gap: 2, flexWrap: "wrap" }}>
                 <Button
+                  LinkComponent={Link}
+                  to={"/profile/settings/edit"}
                   startIcon={<EditIcon />}
                   variant="contained"
                   sx={{
@@ -71,17 +62,17 @@ const MyProfile = () => {
                     textTransform: "none",
                     fontWeight: "bold",
                   }}
-                  onClick={() => alert("Redirect to edit profile page")}
                 >
                   Edit Profile
                 </Button>
 
                 <Button
+                  LinkComponent={Link}
+                  to={"/update-password"}
                   startIcon={<LockResetIcon />}
                   variant="outlined"
                   color="secondary"
                   sx={{ textTransform: "none", fontWeight: "bold" }}
-                  onClick={() => alert("Redirect to change password page")}
                 >
                   Change Password
                 </Button>
@@ -117,6 +108,8 @@ const MyProfile = () => {
               {/* Action Buttons */}
               <Box sx={{ mt: 2, display: "flex", gap: 2, flexWrap: "wrap" }}>
                 <Button
+                LinkComponent={Link}
+                  to={"/profile/settings/add-address"}
                   startIcon={<EditIcon />}
                   variant="contained"
                   sx={{
@@ -126,12 +119,10 @@ const MyProfile = () => {
                     textTransform: "none",
                     fontWeight: "bold",
                   }}
-                  onClick={() => alert("Redirect to edit profile page")}
+                  
                 >
                   Add Address
                 </Button>
-
-               
               </Box>
             </Grid>
           </Grid>

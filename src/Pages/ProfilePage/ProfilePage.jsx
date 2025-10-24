@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Grid, Box, IconButton, Drawer, useTheme, useMediaQuery } from "@mui/material";
+import {
+  Grid,
+  Box,
+  IconButton,
+  Drawer,
+  useTheme,
+  useMediaQuery,
+} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import ProfileSidebar from "./ProfileSidebar";
 import { Outlet } from "react-router-dom";
@@ -42,11 +49,7 @@ const ProfilePage = () => {
         sx={{ maxWidth: "1200px", margin: "0 auto" }}
       >
         {/* Sidebar */}
-        {!isMobile && (
-          <Grid size={{ lg: 3, xl: 3 }}>
-            {drawer}
-          </Grid>
-        )}
+        {!isMobile && <Grid size={{ lg: 3, xl: 3 }}>{drawer}</Grid>}
 
         {/* Drawer for mobile */}
         {isMobile && (

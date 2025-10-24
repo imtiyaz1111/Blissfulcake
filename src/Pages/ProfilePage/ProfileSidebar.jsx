@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Avatar,
@@ -15,7 +15,10 @@ import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
+import { useAuth } from "../../context/AuthProvider";
+import { getProfile } from "../../Api/functions/profileFunctions";
+import { baseURL } from "../../Api/axiosIntance";
 
 const navItems = [
   {
@@ -23,28 +26,49 @@ const navItems = [
     icon: <SettingsIcon />,
     to: "/profile/settings",
     subItems: [
-      { text: "My Profile", to: "settings/myprofile" },
-      { text: "Edit Profile", to: "settings/edit" },
-      { text: "Change Password", to: "settings/change-password" },
-      { text: "Add Address", to: "settings/add-address" },
+      { text: "My Profile", to: "/profile/settings/myprofile" },
+      { text: "Edit Profile", to: "/profile/settings/edit" },
+      { text: "Add Address", to: "/profile/settings/add-address" },
     ],
   },
   {
     text: "Order",
     icon: <ShoppingBagIcon />,
     to: "/profile/orders",
-    subItems: [{ text: "Order Lists", to: "orders" }],
+    subItems: [{ text: "Order Lists", to: "/profile/orders" }],
   },
   {
     text: "Payments",
     icon: <AccountBalanceWalletIcon />,
     to: "/profile/transactions",
-    subItems: [{ text: "Transaction List", to: "transactions" }],
+    subItems: [{ text: "Transaction List", to: "/profile/transactions" }],
   },
 ];
 
 const ProfileSidebar = ({ onLinkClick }) => {
+  const [profileData, setProfileData] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [auth] = useAuth();
+  const token = auth?.token;
+
+  useEffect(() => {
+    getProfile(setProfileData, token, setLoading);
+  }, []);
+  const location = useLocation();
   const [openMenus, setOpenMenus] = useState({});
+
+  // Automatically open the parent menu for the current route
+  useEffect(() => {
+    const activeParent = navItems.find((item) =>
+      item.subItems?.some((sub) => location.pathname.startsWith(sub.to))
+    );
+    if (activeParent) {
+      setOpenMenus((prev) => ({ ...prev, [activeParent.text]: true }));
+    } else {
+      // Default open "Account Settings" and "My Profile" if nothing matches
+      setOpenMenus({ "Account Settings": true });
+    }
+  }, [location.pathname]);
 
   const handleToggle = (text) => {
     setOpenMenus((prev) => ({ ...prev, [text]: !prev[text] }));
@@ -63,7 +87,7 @@ const ProfileSidebar = ({ onLinkClick }) => {
       }}
     >
       <Avatar
-        src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+        src={`${baseURL}${profileData.profileImage}`}
         alt="Profile"
         sx={{
           width: 80,
@@ -75,10 +99,10 @@ const ProfileSidebar = ({ onLinkClick }) => {
         }}
       />
       <Typography variant="h6" fontWeight={600}>
-        Imtiyaz Alam
+        {profileData.username}
       </Typography>
       <Typography variant="body2" sx={{ opacity: 0.9, mb: 3 }}>
-        imtiyaz@example.com
+        {profileData.email}
       </Typography>
 
       <Divider sx={{ mb: 2, backgroundColor: "rgba(255,255,255,0.5)" }} />
@@ -92,15 +116,16 @@ const ProfileSidebar = ({ onLinkClick }) => {
               }
               component={!item.subItems ? NavLink : "button"}
               to={!item.subItems ? item.to : undefined}
-              sx={({ isActive }) => ({
-                backgroundColor: isActive
-                  ? "rgba(255,255,255,0.3)"
-                  : "transparent",
+              sx={{
                 borderRadius: 2,
                 mb: 1,
                 transition: "0.3s",
+                backgroundColor:
+                  location.pathname === item.to
+                    ? "rgba(255,255,255,0.3)"
+                    : "transparent",
                 "&:hover": { backgroundColor: "rgba(255,255,255,0.25)" },
-              })}
+              }}
             >
               <ListItemIcon sx={{ color: "white" }}>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} />
@@ -111,23 +136,29 @@ const ProfileSidebar = ({ onLinkClick }) => {
             {item.subItems && (
               <Collapse in={openMenus[item.text]} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding sx={{ pl: 4 }}>
-                  {item.subItems.map((subItem) => (
-                    <ListItemButton
-                      key={subItem.text}
-                      component={NavLink}
-                      to={subItem.to}
-                      onClick={onLinkClick}
-                      sx={{
-                        mb: 1,
-                        borderRadius: 2,
-                        "&:hover": {
-                          backgroundColor: "rgba(255,255,255,0.25)",
-                        },
-                      }}
-                    >
-                      <ListItemText primary={subItem.text} />
-                    </ListItemButton>
-                  ))}
+                  {item.subItems.map((subItem) => {
+                    const isActive = location.pathname === subItem.to;
+                    return (
+                      <ListItemButton
+                        key={subItem.text}
+                        component={NavLink}
+                        to={subItem.to}
+                        onClick={onLinkClick}
+                        sx={{
+                          mb: 1,
+                          borderRadius: 2,
+                          backgroundColor: isActive
+                            ? "rgba(255,255,255,0.3)"
+                            : "transparent",
+                          "&:hover": {
+                            backgroundColor: "rgba(255,255,255,0.25)",
+                          },
+                        }}
+                      >
+                        <ListItemText primary={subItem.text} />
+                      </ListItemButton>
+                    );
+                  })}
                 </List>
               </Collapse>
             )}

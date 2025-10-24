@@ -43,6 +43,7 @@ import AllCouponList from "./Admin/Pages/Coupon/AllCouponList";
 import UpdateCoupon from "./Admin/Pages/Coupon/UpdateCoupon";
 import MyProfile from "./Pages/ProfilePage/AccountSettings/MyProfile";
 import EditProfile from "./Pages/ProfilePage/AccountSettings/EditProfile";
+import AddAddress from "./Pages/ProfilePage/AccountSettings/AddAddress";
 
 const App = () => {
   const publicRoute = [
@@ -116,6 +117,7 @@ const App = () => {
             <Route path="transactions" element={<TransactionList />} />
             <Route path="settings/myprofile" element={<MyProfile />} />
             <Route path="settings/edit" element={<EditProfile />} />
+            <Route path="settings/add-address" element={<AddAddress />} />
           </Route>
         </Route>
 

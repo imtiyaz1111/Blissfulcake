@@ -277,7 +277,7 @@ const Navbar = () => {
                     <>
                       <MenuItem
                         component={Link}
-                        to="/profile"
+                        to="/profile/settings/myprofile"
                         onClick={handleMenuClose}
                       >
                         Profile
@@ -369,7 +369,7 @@ const Navbar = () => {
                     <>
                       <MenuItem
                         component={Link}
-                        to="/profile"
+                        to="/profile/settings/myprofile"
                         onClick={handleMenuClose}
                       >
                         Profile
@@ -572,7 +572,7 @@ const Navbar = () => {
                           <Button
                             startIcon={<AccountCircleIcon />}
                             component={Link}
-                            to="/profile"
+                            to="/profile/settings/myprofile"
                           >
                             Profile
                           </Button>
