@@ -14,7 +14,7 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import { getProductById } from "../../Api/functions/productFunctions";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { baseURL } from "../../Api/axiosIntance";
 import InfoTabs from "../../components/InfoTabs";
 import Loading from "../../components/Loading/Loading";
@@ -305,6 +305,8 @@ const ProductDetailsPage = () => {
 
               <Button
                 variant="outlined"
+                LinkComponent={Link}
+                to={"/cart"}
                 disabled={singleProductData.countInStock === 0}
                 sx={{
                   borderColor: "#f48fb1",

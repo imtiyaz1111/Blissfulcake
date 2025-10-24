@@ -26,3 +26,26 @@ export const createAddress = async (formData, token, navigate, setLoading) => {
     setLoading(false);
   }
 };
+
+export const deleteAddress = async (id, token, setLoading) => {
+  try {
+    setLoading(true);
+    const res = await axiosInstance.delete(
+      ADDRESS_ENDPOINTS.deleteAddress(id),
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    if (res.data.success === true) {
+      toast.success(res.data.message);
+    }
+  } catch (error) {
+    toast.error(
+      error.response?.data?.message || "Delete Address failed. Please try again."
+    );
+  } finally {
+    setLoading(false);
+  }
+};

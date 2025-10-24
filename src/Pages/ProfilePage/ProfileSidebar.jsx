@@ -84,6 +84,7 @@ const ProfileSidebar = ({ onLinkClick }) => {
         height: "100%",
         p: 3,
         borderRadius: 2,
+       
       }}
     >
       <Avatar

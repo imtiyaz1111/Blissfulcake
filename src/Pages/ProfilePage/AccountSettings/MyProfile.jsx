@@ -8,21 +8,50 @@ import {
   Button,
   Avatar,
   Paper,
+  IconButton,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import LockResetIcon from "@mui/icons-material/LockReset";
 import { getProfile } from "../../../Api/functions/profileFunctions";
 import { useAuth } from "../../../context/AuthProvider";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { Link } from "react-router-dom";
+import { deleteAddress } from "../../../Api/functions/addressFunctions";
+import Loading from "../../../components/Loading/Loading";
 const MyProfile = () => {
   const [profileData, setProfileData] = useState({});
   const [loading, setLoading] = useState(true);
   const [auth] = useAuth();
   const token = auth?.token;
 
+ // ✅ Fetch profile data
+  const fetchProfile = async () => {
+    await getProfile(setProfileData, token, setLoading);
+  };
+
   useEffect(() => {
-    getProfile(setProfileData, token, setLoading);
+    fetchProfile();
   }, []);
+  const handleDeleteAddress = async (id) => {
+    // Implement delete address functionality here
+   await deleteAddress(id,token,setLoading)
+   await fetchProfile()
+  }
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "80vh",
+        }}
+      >
+        <Loading/>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ p: 1 }}>
@@ -37,7 +66,7 @@ const MyProfile = () => {
         <CardContent>
           <Grid container spacing={3} alignItems="center">
             {/* User Info */}
-            <Grid item xs={12} sm={9}>
+            <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }} sm={9}>
               <Typography variant="h6" fontWeight="bold">
                 {profileData.username || "-"}
               </Typography>
@@ -85,8 +114,23 @@ const MyProfile = () => {
                   <Paper
                     key={addr._id}
                     variant="outlined"
-                    sx={{ p: 2, mb: 2, borderRadius: 2 }}
+                    sx={{
+                      p: 2,
+                      mb: 2,
+                      borderRadius: 2,
+                      position: "relative", // required for absolute positioning
+                    }}
                   >
+                    {/* Delete Icon (top-right corner) */}
+                    <IconButton
+                      color="error"
+                      size="small"
+                      sx={{ position: "absolute", top: 8, right: 8 }}
+                      onClick={() => handleDeleteAddress(addr._id)} // 🔹 You can define this function
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+
                     <Typography>
                       <strong>{addr.fullName}</strong>
                     </Typography>
@@ -108,7 +152,7 @@ const MyProfile = () => {
               {/* Action Buttons */}
               <Box sx={{ mt: 2, display: "flex", gap: 2, flexWrap: "wrap" }}>
                 <Button
-                LinkComponent={Link}
+                  LinkComponent={Link}
                   to={"/profile/settings/add-address"}
                   startIcon={<EditIcon />}
                   variant="contained"
@@ -119,7 +163,6 @@ const MyProfile = () => {
                     textTransform: "none",
                     fontWeight: "bold",
                   }}
-                  
                 >
                   Add Address
                 </Button>
