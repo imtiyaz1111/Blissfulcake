@@ -13,6 +13,7 @@ import {
 import { toast } from "react-toastify";
 import { verifyCoupon } from "../../Api/functions/couponFunction";
 import { useAuth } from "../../context/AuthProvider";
+import { Link } from "react-router-dom";
 
 const SummaryCard = styled(Card)(({ theme }) => ({
   padding: theme.spacing(3),
@@ -145,6 +146,8 @@ const OrderSummary = ({ cartItems }) => {
 
       <Button
         variant="contained"
+        LinkComponent={Link}
+        to={"/checkout"}
         fullWidth
         sx={{
           mt: 3,
@@ -157,6 +160,8 @@ const OrderSummary = ({ cartItems }) => {
       </Button>
 
       <Button
+      LinkComponent={Link}
+        to={"/shop"}
         variant="text"
         fullWidth
         sx={{ mt: 1, color: theme.palette.text.secondary }}

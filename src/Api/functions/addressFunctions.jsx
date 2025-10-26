@@ -49,3 +49,26 @@ export const deleteAddress = async (id, token, setLoading) => {
     setLoading(false);
   }
 };
+
+export const getAllAddress = async (setAllAddresses,token,setLoading) => {
+  try {
+    setLoading(true);
+    const res = await axiosInstance.get(
+      ADDRESS_ENDPOINTS.getAllAddress,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    if (res.data.success === true) {
+      setAllAddresses(res.data.data);
+    }
+  } catch (error) {
+    toast.error(
+      error.response?.data?.message || "Fetch All Address failed. Please try again."
+    );
+  } finally {
+    setLoading(false);
+  }
+};

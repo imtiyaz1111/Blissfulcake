@@ -44,6 +44,7 @@ import UpdateCoupon from "./Admin/Pages/Coupon/UpdateCoupon";
 import MyProfile from "./Pages/ProfilePage/AccountSettings/MyProfile";
 import EditProfile from "./Pages/ProfilePage/AccountSettings/EditProfile";
 import AddAddress from "./Pages/ProfilePage/AccountSettings/AddAddress";
+import CheckoutPage from "./Pages/CheckoutPage/CheckoutPage";
 
 const App = () => {
   const publicRoute = [
@@ -57,6 +58,7 @@ const App = () => {
     { path: "/cart", element: <CartPage /> },
     { path: "/wishlist", element: <WishlistPage /> },
     { path: "/product/:id", element: <ProductDetailsPage /> },
+     { path: "/checkout", element: <CheckoutPage /> },
   ];
 
   const authRoute = [
