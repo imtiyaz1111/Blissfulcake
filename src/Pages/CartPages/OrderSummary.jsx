@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Box,
   Typography,
@@ -7,12 +7,7 @@ import {
   Card,
   styled,
   useTheme,
-  TextField,
-  CircularProgress,
 } from "@mui/material";
-import { toast } from "react-toastify";
-import { verifyCoupon } from "../../Api/functions/couponFunction";
-import { useAuth } from "../../context/AuthProvider";
 import { Link } from "react-router-dom";
 
 const SummaryCard = styled(Card)(({ theme }) => ({
@@ -29,11 +24,6 @@ const shippingEstimate = 20.0;
 
 const OrderSummary = ({ cartItems }) => {
   const theme = useTheme();
-  const [coupon, setCoupon] = useState("");
-  const [discount, setDiscount] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [auth] = useAuth();
-  const token = auth?.token;
 
   const subtotal = cartItems.reduce(
     (acc, item) =>
@@ -42,68 +32,36 @@ const OrderSummary = ({ cartItems }) => {
   );
 
   const deliveryCharge = subtotal < 300 && subtotal > 0 ? 50 : 0;
+  const estimatedTotal = subtotal + shippingEstimate + deliveryCharge;
 
-  const estimatedTotalBeforeDiscount =
-    subtotal + shippingEstimate + deliveryCharge;
-
-  const estimatedTotal = Math.max(estimatedTotalBeforeDiscount - discount, 0);
-
-  const handleApplyCoupon = () => {
-    if (!coupon.trim()) {
-      toast.error("Please enter a coupon code");
-      return;
-    }
-
-    const codeObj = {
-      code: coupon.trim(),
-      totalAmount: estimatedTotalBeforeDiscount,
-    };
-
-    verifyCoupon(codeObj, setDiscount, setLoading, token);
-  };
-
-  const SummaryRow = ({
-    label,
-    value,
-    isTotal = false,
-    isDiscount = false,
-  }) => (
+  const SummaryRow = ({ label, value, isTotal = false }) => (
     <Box
       sx={{
         display: "flex",
         justifyContent: "space-between",
         mb: isTotal ? 0 : 1.5,
         mt: isTotal ? 2 : 0,
-        
       }}
     >
       <Typography
         variant={isTotal ? "h6" : "body1"}
         fontWeight={isTotal ? 700 : 400}
-        color={isDiscount ? theme.palette.success.main : "text.primary"}
+        color="text.primary"
       >
         {label}
       </Typography>
       <Typography
         variant={isTotal ? "h6" : "body1"}
         fontWeight={isTotal ? 700 : 400}
-        color={
-          isTotal
-            ? theme.palette.error.main
-            : isDiscount
-            ? theme.palette.success.main
-            : "text.primary"
-        }
+        color={isTotal ? theme.palette.error.main : "text.primary"}
       >
-        {isDiscount ? "- ₹" : "₹"}
-        {value.toFixed(2)}
+        ₹{value.toFixed(2)}
       </Typography>
     </Box>
   );
 
   return (
-    <SummaryCard sx={{position: "sticky",
-        top: "180px",}}>
+    <SummaryCard sx={{ position: "sticky", top: "180px" }}>
       <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
         Order Summary
       </Typography>
@@ -113,32 +71,6 @@ const OrderSummary = ({ cartItems }) => {
       {deliveryCharge > 0 && (
         <SummaryRow label="Delivery Charge" value={deliveryCharge} />
       )}
-      {discount > 0 && (
-        <SummaryRow label="Coupon Discount" value={discount} isDiscount />
-      )}
-
-      <Box sx={{ mt: 2, display: "flex", gap: 1 }}>
-        <TextField
-          variant="outlined"
-          placeholder="Enter coupon code"
-          size="small"
-          value={coupon}
-          onChange={(e) => setCoupon(e.target.value)}
-          fullWidth
-          disabled={loading}
-        />
-        <Button
-          variant="contained"
-          sx={{
-            backgroundImage: "linear-gradient(to right, #fdadbb, #f77f9e)",
-            px: 3,
-          }}
-          onClick={handleApplyCoupon}
-          disabled={loading}
-        >
-          {loading ? <CircularProgress size={24} color="inherit" /> : "Apply"}
-        </Button>
-      </Box>
 
       <Divider sx={{ my: 2 }} />
 
@@ -160,7 +92,7 @@ const OrderSummary = ({ cartItems }) => {
       </Button>
 
       <Button
-      LinkComponent={Link}
+        LinkComponent={Link}
         to={"/shop"}
         variant="text"
         fullWidth

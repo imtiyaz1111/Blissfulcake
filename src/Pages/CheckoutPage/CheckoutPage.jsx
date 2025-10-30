@@ -59,13 +59,13 @@ const CheckoutPage = () => {
         </Box>
 
         <Grid container spacing={isTablet ? 2 : 4}>
-          <Grid item xs={12} lg={7}>
+          <Grid size={{ xs: 12, sm: 12, md: 12, lg: 7, xl: 7 }}>
             <CheckInfo
               onAddressSelect={(address) => setSelectedAddress(address)}
               onPaymentChange={(method) => setPaymentMethod(method)}
             />
           </Grid>
-          <Grid item xs={12} lg={5}>
+          <Grid size={{ xs: 12, sm: 12, md: 12, lg: 5, xl: 5 }}>
             <OrderSummary
               cartItems={cartItems}
               selectedAddress={selectedAddress}

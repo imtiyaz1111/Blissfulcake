@@ -2,7 +2,7 @@
 
 import axiosInstance from "../axiosIntance";
 import { toast } from "react-toastify";
-import TRANSACTION_ENDPOINTS from "../endPoint/transactionEndPoint";
+import TRANSACTION_ENDPOINTS from "../endPoint/transactionsEndPoint";
 
 // ✅ Get all transactions (Admin)
 export const getAllTransactions = async (setTransactions, token, setLoading) => {

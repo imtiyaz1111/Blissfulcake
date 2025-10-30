@@ -1,12 +1,21 @@
 // src/components/Checkout/OrderSummary.jsx
-
 import React, { useState } from "react";
-import { Box, Typography, Divider, Button, Card, styled } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Divider,
+  Button,
+  Card,
+  styled,
+  TextField,
+  CircularProgress,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from "../../context/AuthProvider";
 import { createOrder } from "../../Api/functions/orderFunctions";
 import { createCheckoutSession } from "../../Api/functions/paymentFunctions";
+import { verifyCoupon } from "../../Api/functions/couponFunction";
 
 const SummaryCard = styled(Card)(({ theme }) => ({
   padding: theme.spacing(3),
@@ -28,6 +37,9 @@ const OrderSummary = ({ cartItems, selectedAddress, paymentMethod }) => {
   const token = auth?.token;
   const email = auth?.user?.email;
   const [loading, setLoading] = useState(false);
+  const [coupon, setCoupon] = useState("");
+  const [discount, setDiscount] = useState(0);
+  const [couponLoading, setCouponLoading] = useState(false);
 
   const subtotal = cartItems.reduce(
     (acc, item) =>
@@ -37,7 +49,25 @@ const OrderSummary = ({ cartItems, selectedAddress, paymentMethod }) => {
 
   const deliveryCharge =
     subtotal > 0 && subtotal < freeShippingThreshold ? deliveryChargeAmount : 0;
-  const estimatedTotal = subtotal + deliveryCharge + shippingEstimate;
+
+  const estimatedTotalBeforeDiscount =
+    subtotal + deliveryCharge + shippingEstimate;
+
+  const estimatedTotal = Math.max(estimatedTotalBeforeDiscount - discount, 0);
+
+  const handleApplyCoupon = () => {
+    if (!coupon.trim()) {
+      toast.error("Please enter a coupon code");
+      return;
+    }
+
+    const codeObj = {
+      code: coupon.trim(),
+      totalAmount: estimatedTotalBeforeDiscount,
+    };
+
+    verifyCoupon(codeObj, setDiscount, setCouponLoading, token);
+  };
 
   const handlePlaceOrder = async () => {
     if (!selectedAddress || !paymentMethod) {
@@ -66,12 +96,22 @@ const OrderSummary = ({ cartItems, selectedAddress, paymentMethod }) => {
           address: selectedAddress,
           paymentStatus: "Pending",
           orderStatus: "Processing",
+          discountApplied: discount > 0 ? discount : 0,
+          couponCode: coupon || null,
         };
+
         await createOrder(payload, token, setLoading, navigate);
       } else {
-        // Stripe Checkout Flow
-        toast.info("Redirecting to secure Stripe checkout...");
-        const sessionData = await createCheckoutSession(cartItems, token, email);
+        toast.info("Redirecting to Stripe checkout...");
+        const sessionData = await createCheckoutSession(
+          cartItems,
+          token,
+          email,
+          selectedAddress,
+          discount,
+          coupon
+        );
+
         if (sessionData?.checkoutUrl) {
           window.location.href = sessionData.checkoutUrl;
         } else {
@@ -109,11 +149,47 @@ const OrderSummary = ({ cartItems, selectedAddress, paymentMethod }) => {
         </Box>
       )}
 
+      {discount > 0 && (
+        <Box display="flex" justifyContent="space-between" mb={1}>
+          <Typography color="success.main">Coupon Discount</Typography>
+          <Typography color="success.main">- ₹{discount.toFixed(2)}</Typography>
+        </Box>
+      )}
+
+      <Box sx={{ mt: 2, display: "flex", gap: 1 }}>
+        <TextField
+          variant="outlined"
+          placeholder="Enter coupon code"
+          size="small"
+          value={coupon}
+          onChange={(e) => setCoupon(e.target.value)}
+          fullWidth
+          disabled={couponLoading}
+        />
+        <Button
+          variant="contained"
+          sx={{
+            backgroundImage: "linear-gradient(to right, #fdadbb, #f77f9e)",
+            px: 3,
+          }}
+          onClick={handleApplyCoupon}
+          disabled={couponLoading}
+        >
+          {couponLoading ? (
+            <CircularProgress size={22} color="inherit" />
+          ) : (
+            "Apply"
+          )}
+        </Button>
+      </Box>
+
       <Divider sx={{ my: 2 }} />
 
       <Box display="flex" justifyContent="space-between" mb={2}>
         <Typography variant="h6">Total</Typography>
-        <Typography variant="h6">₹{estimatedTotal.toFixed(2)}</Typography>
+        <Typography variant="h6" color="error.main">
+          ₹{estimatedTotal.toFixed(2)}
+        </Typography>
       </Box>
 
       <Button
