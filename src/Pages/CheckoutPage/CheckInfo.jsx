@@ -19,13 +19,12 @@ import { getAllAddress } from "../../Api/functions/addressFunctions";
 import { useAuth } from "../../context/AuthProvider";
 import Loading from "../../components/Loading/Loading";
 
-// Section title styling
+// ✅ Styled Components
 const SectionTitle = styled(Typography)(({ theme }) => ({
   fontWeight: "bold",
   marginBottom: theme.spacing(2),
 }));
 
-// Payment option card styling
 const PaymentOptionPaper = styled(Paper)(({ selected }) => ({
   padding: "16px",
   border: selected ? "2px solid #FF69B4" : "1px solid #e0e0e0",
@@ -38,9 +37,9 @@ const PaymentOptionPaper = styled(Paper)(({ selected }) => ({
   transition: "0.3s",
 }));
 
-const CheckInfo = () => {
+const CheckInfo = ({ onAddressSelect, onPaymentChange }) => {
   const theme = useTheme();
-  const isMobile = useMediaQuery("(max-width:600px)");
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [allAddresses, setAllAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -49,7 +48,7 @@ const CheckInfo = () => {
   const [auth] = useAuth();
   const token = auth?.token;
 
-  // Fetch all addresses
+  // ✅ Fetch user addresses
   useEffect(() => {
     const fetchAddresses = async () => {
       setLoading(true);
@@ -58,28 +57,30 @@ const CheckInfo = () => {
     fetchAddresses();
   }, [token]);
 
-  // Set default selected address when addresses are loaded
+  // ✅ Set default address after fetching
   useEffect(() => {
     if (allAddresses.length > 0 && !selectedAddress) {
-      setSelectedAddress(allAddresses[0]);
+      const defaultAddress = allAddresses[0];
+      setSelectedAddress(defaultAddress);
+      onAddressSelect?.(defaultAddress);
     }
-  }, [allAddresses, selectedAddress]);
+  }, [allAddresses, selectedAddress, onAddressSelect]);
 
-  const handlePaymentMethodChange = (event) => {
-    setPaymentMethod(event.target.value);
-  };
-
-  const handleOpenAddressMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleCloseAddressMenu = () => {
-    setAnchorEl(null);
-  };
+  // ✅ Address selection menu handlers
+  const handleOpenAddressMenu = (event) => setAnchorEl(event.currentTarget);
+  const handleCloseAddressMenu = () => setAnchorEl(null);
 
   const handleSelectAddress = (address) => {
     setSelectedAddress(address);
+    onAddressSelect?.(address);
     handleCloseAddressMenu();
+  };
+
+  // ✅ Payment method change handler
+  const handlePaymentMethodChange = (event) => {
+    const method = event.target.value;
+    setPaymentMethod(method);
+    onPaymentChange?.(method);
   };
 
   return (
@@ -112,6 +113,7 @@ const CheckInfo = () => {
           </>
         ) : (
           <>
+            {/* --- Selected Address --- */}
             <Typography variant="subtitle1" fontWeight="bold">
               {selectedAddress?.fullName}
             </Typography>
@@ -124,6 +126,7 @@ const CheckInfo = () => {
               Phone: {selectedAddress?.phone}
             </Typography>
 
+            {/* --- Address Buttons --- */}
             <Box sx={{ mt: 2, display: "flex", gap: 2, flexWrap: "wrap" }}>
               <Button
                 variant="outlined"
@@ -197,10 +200,13 @@ const CheckInfo = () => {
                 gap: 2,
               }}
             >
-              {/* Pay Online */}
+              {/* --- Pay Online --- */}
               <PaymentOptionPaper
                 selected={paymentMethod === "online"}
-                onClick={() => setPaymentMethod("online")}
+                onClick={() => {
+                  setPaymentMethod("online");
+                  onPaymentChange?.("online");
+                }}
               >
                 <FormControlLabel
                   value="online"
@@ -236,10 +242,13 @@ const CheckInfo = () => {
                 />
               </PaymentOptionPaper>
 
-              {/* Cash on Delivery */}
+              {/* --- Cash on Delivery --- */}
               <PaymentOptionPaper
                 selected={paymentMethod === "cod"}
-                onClick={() => setPaymentMethod("cod")}
+                onClick={() => {
+                  setPaymentMethod("cod");
+                  onPaymentChange?.("cod");
+                }}
               >
                 <FormControlLabel
                   value="cod"
@@ -261,6 +270,13 @@ const CheckInfo = () => {
             </Box>
           </RadioGroup>
         </FormControl>
+
+        {/* --- Display current selections --- */}
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="body2" color="text.secondary">
+            Selected Payment Method: <b>{paymentMethod.toUpperCase()}</b>
+          </Typography>
+        </Box>
       </Paper>
     </Box>
   );

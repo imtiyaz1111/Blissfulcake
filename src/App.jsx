@@ -45,6 +45,8 @@ import MyProfile from "./Pages/ProfilePage/AccountSettings/MyProfile";
 import EditProfile from "./Pages/ProfilePage/AccountSettings/EditProfile";
 import AddAddress from "./Pages/ProfilePage/AccountSettings/AddAddress";
 import CheckoutPage from "./Pages/CheckoutPage/CheckoutPage";
+import CheckoutSuccess from "./Pages/CheckoutPage/CheckoutSuccess";
+import CheckoutCancel from "./Pages/CheckoutPage/CheckoutCancel";
 
 const App = () => {
   const publicRoute = [
@@ -58,7 +60,9 @@ const App = () => {
     { path: "/cart", element: <CartPage /> },
     { path: "/wishlist", element: <WishlistPage /> },
     { path: "/product/:id", element: <ProductDetailsPage /> },
-     { path: "/checkout", element: <CheckoutPage /> },
+    { path: "/checkout", element: <CheckoutPage /> },
+    { path: "/checkout-success", element: <CheckoutSuccess /> },
+    { path: "/checkout-cancel", element: <CheckoutCancel /> },
   ];
 
   const authRoute = [

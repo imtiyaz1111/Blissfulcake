@@ -100,9 +100,8 @@ export const clearCart = async (token) => {
       },
     });
 
-    if (response.data.success) {
+    if (response.data.success==true) {
       toast.success(response.data.message);
-      return response.data.cart; // Returns the full cart object (now with items: [])
     }
   } catch (error) {
     toast.error(

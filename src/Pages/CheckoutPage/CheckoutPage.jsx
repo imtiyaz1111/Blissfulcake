@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Container,
@@ -9,44 +9,40 @@ import {
 } from "@mui/material";
 import OrderSummary from "./OrderSummary";
 import { useCart } from "../../context/CartProvider";
-import Loading from "../../components/Loading/Loading"
+import Loading from "../../components/Loading/Loading";
 import CheckInfo from "./CheckInfo";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+// ✅ Initialize Stripe with your publishable key
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const CheckoutPage = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.down("md"));
-  const pageBackgroundColor = "#fcf0f5";
+  const { cart: cartItems, loading } = useCart();
 
-  // FIX: Destructure the cart items, loading, and context action functions
-  const {
-    cart: cartItems, // Renamed to cartItems from the context for clarity
-    loading,
-  } = useCart();
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState("online");
 
-  // Display loading state while fetching cart data
-  if (loading) {
+  if (loading)
     return (
+    
       <Box
         sx={{
-          backgroundColor: pageBackgroundColor,
           minHeight: "100vh",
-          py: 4,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
         }}
       >
-        <Loading/>
+        <Loading />
       </Box>
     );
-  }
-
 
   return (
-    <Box
-      sx={{ backgroundColor: pageBackgroundColor, minHeight: "100vh", py: 4 }}
-    >
+    <Elements stripe={stripePromise}>
+      <Box sx={{ backgroundColor: "#fcf0f5", minHeight: "100vh", py: 4 }}>
       <Container maxWidth="lg">
         <Box
           sx={{
@@ -58,23 +54,29 @@ const CheckoutPage = () => {
           }}
         >
           <Typography variant={isMobile ? "h5" : "h4"} fontWeight="bold">
-           Checkout
+            Checkout
           </Typography>
-         
         </Box>
 
         <Grid container spacing={isTablet ? 2 : 4}>
-          <Grid size={{ xs: 12, sm: 12, md: 12, lg: 7, xl: 7 }}>
-           <CheckInfo/>
+          <Grid item xs={12} lg={7}>
+            <CheckInfo
+              onAddressSelect={(address) => setSelectedAddress(address)}
+              onPaymentChange={(method) => setPaymentMethod(method)}
+            />
           </Grid>
-
-          <Grid size={{ xs: 12, sm: 12, md: 12, lg: 5, xl: 5 }}>
-            {/* Pass the items array to OrderSummary */}
-            <OrderSummary cartItems={cartItems} />
+          <Grid item xs={12} lg={5}>
+            <OrderSummary
+              cartItems={cartItems}
+              selectedAddress={selectedAddress}
+              paymentMethod={paymentMethod}
+            />
           </Grid>
         </Grid>
       </Container>
     </Box>
+    </Elements>
+    
   );
 };
 
