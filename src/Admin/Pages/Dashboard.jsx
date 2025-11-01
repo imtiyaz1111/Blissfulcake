@@ -1,5 +1,15 @@
-import React from "react";
-import { Box, Typography, Card, Grid, IconButton } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Typography,
+  Card,
+  Grid,
+  IconButton,
+  FormControl,
+  Select,
+  MenuItem,
+  InputLabel,
+} from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import CakeIcon from "@mui/icons-material/Cake";
 import PeopleIcon from "@mui/icons-material/People";
@@ -15,80 +25,147 @@ import ProductPerformance from "../Components/ProductPerformance";
 import RecentlyAddedProducts from "../Components/RecentlyAddedProducts";
 import UpcomingEventsOrders from "../Components/UpcomingEventsOrders";
 import ReviewsFeedback from "../Components/ReviewsFeedback";
+import { useAuth } from "../../context/AuthProvider";
+import { getAllUsers } from "../../Api/functions/authFunctions";
+import { getAllOrders } from "../../Api/functions/orderFunctions";
+import { getAllProduct } from "../../Api/functions/productFunctions";
+import {
+  getTotalRevenue,
+  getRevenueByPeriod,
+} from "../../Api/functions/stripeAnalyticsFunctions";
 
 const Dashboard = () => {
+  const [allUsers, setAllUsers] = useState([]);
+  const [allOrders, setAllOrders] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [period, setPeriod] = useState("all"); // all, day, week, month
+  const [auth] = useAuth();
+  const token = auth?.token;
+
+  // ✅ Fetch base data and revenue
+  useEffect(() => {
+    if (!token) return;
+    getAllUsers(setAllUsers, setLoading, token);
+    getAllOrders(setAllOrders, token, setLoading);
+    getAllProduct(setAllProducts, setLoading);
+
+    if (period === "all") {
+      getTotalRevenue(setTotalRevenue, token, setLoading);
+    } else {
+      getRevenueByPeriod(period, setTotalRevenue, token, setLoading);
+    }
+  }, [token, period]);
+
+  // ✅ Date-based filter function
+  const filterDataByPeriod = (data) => {
+    if (!data || !Array.isArray(data)) return [];
+    if (period === "all") return data;
+
+    const now = new Date();
+
+    return data.filter((item) => {
+      const created = new Date(item.createdAt);
+      const diffInDays = (now - created) / (1000 * 60 * 60 * 24);
+
+      switch (period) {
+        case "day":
+          return created.toDateString() === now.toDateString();
+        case "week":
+          return diffInDays <= 7;
+        case "month":
+          return diffInDays <= 30;
+        default:
+          return true;
+      }
+    });
+  };
+
+  // ✅ Apply filters
+  const filteredOrders = filterDataByPeriod(allOrders);
+  const filteredUsers = filterDataByPeriod(allUsers);
+  const filteredProducts = filterDataByPeriod(allProducts);
+
+  // ✅ Calculate counts and stats
+  const pendingOrdersCount = filteredOrders.filter(
+    (order) => order.orderStatus === "Processing"
+  ).length;
+
+  const averageRating =
+    filteredProducts.length > 0
+      ? (
+          filteredProducts.reduce(
+            (sum, product) => sum + (product.ratings || 0),
+            0
+          ) / filteredProducts.length
+        ).toFixed(1)
+      : 0;
+
+  // ✅ Dashboard summary cards
   const cards = [
     {
       title: "Total Orders",
-      value: "245",
-      change: "This Month",
-      icon: <CakeIcon sx={{ fontSize: 28 }} />, // Icon for the cake shop theme
-      // Soft Pink/Red Gradient (Matches the initial image)
-      bgColor: " #FF9A9E ",
+      value: `${filteredOrders.length}`,
+      change:
+        period === "all"
+          ? "All Time"
+          : period === "day"
+          ? "Today"
+          : period === "week"
+          ? "This Week"
+          : "This Month",
+      icon: <CakeIcon sx={{ fontSize: 28 }} />,
+      bgColor: "#FF9A9E",
     },
     {
       title: "Total Customers",
-      value: "1,234",
-      change: "Total Registered",
-      icon: <PeopleIcon sx={{ fontSize: 28 }} />, // Icon for users/customers
-      // Bright Blue Gradient
+      value: `${filteredUsers.length}`,
+      change: "Registered",
+      icon: <PeopleIcon sx={{ fontSize: 28 }} />,
       bgColor: "#66c2e0",
     },
     {
       title: "Total Revenue",
-      value: "$50,230",
-      change: "This Month",
-      icon: <AttachMoneyIcon sx={{ fontSize: 28 }} />, // Icon for money/revenue
-      // Vibrant Green/Teal Gradient
-      bgColor: "#6dbd88 ",
+      value: `$${totalRevenue?.toLocaleString() || 0}`,
+      change:
+        period === "all"
+          ? "All Time"
+          : period === "day"
+          ? "Today"
+          : period === "week"
+          ? "This Week"
+          : "This Month",
+      icon: <AttachMoneyIcon sx={{ fontSize: 28 }} />,
+      bgColor: "#6dbd88",
     },
     {
-      title: "Total Products ",
-      value: "120 Items",
-      change: "New!",
-      icon: <RedeemIcon sx={{ fontSize: 28 }} />, // Icon for products/gifts
-      // Pastel Purple Gradient
+      title: "Total Products",
+      value: `${filteredProducts.length}`,
+      change: "Available",
+      icon: <RedeemIcon sx={{ fontSize: 28 }} />,
       bgColor: "#9773c6",
     },
     {
       title: "Pending Orders",
-      value: "15 Active",
-      change: "Urgent",
-      icon: <LocalShippingIcon sx={{ fontSize: 28 }} />, // Icon for shipping/delivery
-      // Warm Orange Gradient
-      bgColor: " #e3b166",
+      value: `${pendingOrdersCount}`,
+      change: "Pending",
+      icon: <LocalShippingIcon sx={{ fontSize: 28 }} />,
+      bgColor: "#e3b166",
     },
     {
       title: "Average Rating",
-      value: "4.7 ⭐",
-      change: "Excellent",
-      icon: <StarIcon sx={{ fontSize: 28 }} />, // Icon for rating/stars
-      // Bright Yellow/Gold Gradient
-      bgColor: " #49a39b",
+      value: `${averageRating} ⭐`,
+      change: "Overall",
+      icon: <StarIcon sx={{ fontSize: 28 }} />,
+      bgColor: "#49a39b",
     },
   ];
-  // Sample Bar Chart Data (Orders, Sales, Users)
-  const barData = [
-    { month: "JAN", orders: 40, sales: 24, users: 30 },
-    { month: "FEB", orders: 30, sales: 13, users: 22 },
-    { month: "MAR", orders: 20, sales: 28, users: 25 },
-    { month: "APR", orders: 27, sales: 20, users: 18 },
-    { month: "MAY", orders: 18, sales: 23, users: 20 },
-    { month: "JUN", orders: 23, sales: 34, users: 28 },
-    { month: "JUL", orders: 34, sales: 22, users: 26 },
-    { month: "AUG", orders: 22, sales: 30, users: 24 },
-  ];
 
-  // Sample Pie Chart Data (Traffic Sources)
-  const pieData = [
-    { name: "Search Engines", value: 30, color: "#4FC3F7" },
-    { name: "Direct Click", value: 30, color: "#26A69A" },
-    { name: "Bookmarks Click", value: 40, color: "#EC407A" },
-  ];
   return (
     <>
       <Box sx={{ p: { xs: 2, sm: 3 }, bgcolor: "#FDEFF1", minHeight: "100vh" }}>
-        {/* Header */}
+        {/* ===== HEADER ===== */}
         <Box
           display="flex"
           justifyContent="space-between"
@@ -114,23 +191,47 @@ const Dashboard = () => {
               Dashboard
             </Typography>
           </Box>
-          <Box display="flex" alignItems="center" gap={0.5}>
-            <Typography variant="body1" color="text.secondary">
-              Overview
-            </Typography>
-            <InfoOutlinedIcon
-              fontSize="small"
-              sx={{ color: "text.secondary" }}
-            />
+
+          {/* Right Side: Overview + Period Selector */}
+          <Box display="flex" alignItems="center" gap={2}>
+            <Box display="flex" alignItems="center" gap={0.5}>
+              <Typography variant="body1" color="text.secondary">
+                Overview
+              </Typography>
+              <InfoOutlinedIcon
+                fontSize="small"
+                sx={{ color: "text.secondary" }}
+              />
+            </Box>
+
+            <FormControl
+              size="small"
+              sx={{
+                minWidth: 120,
+                background: "#fff",
+                borderRadius: 2,
+                boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+              }}
+            >
+              <InputLabel id="period-select-label">Period</InputLabel>
+              <Select
+                labelId="period-select-label"
+                value={period}
+                label="Period"
+                onChange={(e) => setPeriod(e.target.value)}
+              >
+                <MenuItem value="all">All</MenuItem>
+                <MenuItem value="day">Day</MenuItem>
+                <MenuItem value="week">Week</MenuItem>
+                <MenuItem value="month">Month</MenuItem>
+              </Select>
+            </FormControl>
           </Box>
         </Box>
 
+        {/* ===== DASHBOARD CARDS ===== */}
         <Box sx={{ flexGrow: 1 }}>
-          <Grid
-            container
-            spacing={{ xs: 2, md: 3 }}
-            columns={{ xs: 4, sm: 8, md: 12 }}
-          >
+          <Grid container spacing={{ xs: 2, md: 3 }}>
             {cards.map((card, index) => (
               <Grid key={index} size={{ xs: 12, sm: 12, md: 2, lg: 2, xl: 2 }}>
                 <Card
@@ -138,7 +239,6 @@ const Dashboard = () => {
                     p: 3,
                     borderRadius: 3,
                     minHeight: "150px",
-                    maxWidth: "100%",
                     background: card.bgColor,
                     color: "#fff",
                     display: "flex",
@@ -162,36 +262,26 @@ const Dashboard = () => {
                     </Typography>
                     {card.icon}
                   </Box>
-                  <Typography
-                    variant="h4"
-                    fontSize={22}
-                    fontWeight="bold"
-                    sx={{ mt: 1, mb: 1 }}
-                  >
+                  <Typography variant="h4" fontWeight="bold" sx={{ mt: 1 }}>
                     {card.value}
                   </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }} fontSize={18}>
-                    {card.change}
-                  </Typography>
+                  <Typography variant="body2">{card.change}</Typography>
                 </Card>
               </Grid>
             ))}
           </Grid>
         </Box>
-        {/* SalesAnalytics */}
-        <SalesAnalytics />
-        {/* RecentOrders */}
+
+        {/* ===== OTHER SECTIONS ===== */}
+        <SalesAnalytics
+          
+        />
         <RecentOrders />
-        {/* CustomersOverview */}
-        <CustomersOverview />
-        {/* ProductPerformance */}
-        <ProductPerformance />
-        {/* RecentlyAddedProducts */}
+        {/* <CustomersOverview users={filteredUsers} period={period} /> */}
+        {/* <ProductPerformance products={filteredProducts} period={period} /> */}
         <RecentlyAddedProducts />
-        {/* UpcomingEventsOrders */}
-        <UpcomingEventsOrders />
-        {/* ReviewsFeedback */}
-        <ReviewsFeedback />
+        <UpcomingEventsOrders  />
+        {/* <ReviewsFeedback products={filteredProducts} period={period} /> */}
       </Box>
     </>
   );

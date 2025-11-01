@@ -18,6 +18,7 @@ import { Link } from "react-router-dom";
 import { getAllAddress } from "../../Api/functions/addressFunctions";
 import { useAuth } from "../../context/AuthProvider";
 import Loading from "../../components/Loading/Loading";
+import { getProfile } from "../../Api/functions/profileFunctions";
 
 // ✅ Styled Components
 const SectionTitle = styled(Typography)(({ theme }) => ({
@@ -40,7 +41,8 @@ const PaymentOptionPaper = styled(Paper)(({ selected }) => ({
 const CheckInfo = ({ onAddressSelect, onPaymentChange }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [allAddresses, setAllAddresses] = useState([]);
+  const [profileData, setProfileData] = useState(null);
+  const allAddresses = profileData?.address || [];
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("online");
@@ -52,7 +54,7 @@ const CheckInfo = ({ onAddressSelect, onPaymentChange }) => {
   useEffect(() => {
     const fetchAddresses = async () => {
       setLoading(true);
-      await getAllAddress(setAllAddresses, token, setLoading);
+      await getProfile(setProfileData,token,setLoading);
     };
     fetchAddresses();
   }, [token]);

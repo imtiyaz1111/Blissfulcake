@@ -22,6 +22,7 @@ import RelatedProducts from "./RelatedProducts";
 import { useWishlist } from "../../context/WishlistProvider";
 import { useCart } from "../../context/CartProvider";
 import { toast } from "react-toastify";
+import CommentSection from "./CommentSection";
 
 const ProductDetailsPage = () => {
   const [singleProductData, setSingleProductData] = useState(null);
@@ -340,6 +341,7 @@ const ProductDetailsPage = () => {
       </Grid>
 
       <InfoTabs />
+      {/* <CommentSection/> */}
       {/* Related Product */}
       <RelatedProducts />
     </Box>

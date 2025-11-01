@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+// src/components/Admin/RecentOrders.jsx
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Paper,
@@ -15,114 +16,78 @@ import {
   InputAdornment,
   MenuItem,
   Pagination,
+  CircularProgress,
+  Tooltip,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import { getAllOrders } from "../../Api/functions/orderFunctions";
+import { toast } from "react-toastify";
+import { useAuth } from "../../context/AuthProvider";
 
-// Sample data
-const recentOrders = [
-  {
-    id: "#1023",
-    customer: "John Doe",
-    product: "Chocolate Cake",
-    date: "Oct 25, 2025",
-    status: "Delivered",
-    amount: "$45.00",
-    image: "https://i.ibb.co/D4nBbz5/cake1.jpg",
-  },
-  {
-    id: "#1024",
-    customer: "Emma Watson",
-    product: "Vanilla Cupcake",
-    date: "Oct 26, 2025",
-    status: "Pending",
-    amount: "$25.00",
-    image: "https://i.ibb.co/tJhhmV4/cake2.jpg",
-  },
-  {
-    id: "#1025",
-    customer: "Michael Smith",
-    product: "Red Velvet Cake",
-    date: "Oct 27, 2025",
-    status: "Cancelled",
-    amount: "$55.00",
-    image: "https://i.ibb.co/YcxS6ZL/cake3.jpg",
-  },
-  {
-    id: "#1026",
-    customer: "Sophia Lee",
-    product: "Fruit Cake",
-    date: "Oct 27, 2025",
-    status: "Delivered",
-    amount: "$60.00",
-    image: "https://i.ibb.co/02McznQ/cake4.jpg",
-  },
-  {
-    id: "#1027",
-    customer: "David Kim",
-    product: "Black Forest Cake",
-    date: "Oct 28, 2025",
-    status: "Pending",
-    amount: "$40.00",
-    image: "https://i.ibb.co/0sWmCfk/cake5.jpg",
-  },
-  {
-    id: "#1028",
-    customer: "Lara Croft",
-    product: "Butter Cake",
-    date: "Oct 29, 2025",
-    status: "Delivered",
-    amount: "$50.00",
-    image: "https://i.ibb.co/p4m3G4x/cake6.jpg",
-  },
-  {
-    id: "#1029",
-    customer: "Chris Evans",
-    product: "Chocolate Tart",
-    date: "Oct 30, 2025",
-    status: "Pending",
-    amount: "$35.00",
-    image: "https://i.ibb.co/82bX58y/cake7.jpg",
-  },
-  {
-    id: "#1030",
-    customer: "Scarlett Johansson",
-    product: "Strawberry Cake",
-    date: "Oct 30, 2025",
-    status: "Cancelled",
-    amount: "$48.00",
-    image: "https://i.ibb.co/hmRmtbQ/cake8.jpg",
-  },
-];
-
-// Helper for status color
+// ✅ Helper for status color
 const getChipStyle = (status) => {
-  switch (status) {
-    case "Delivered":
+  switch (status?.toLowerCase()) {
+    case "delivered":
       return { bg: "#d1e7dd", color: "#0f5132" };
-    case "Pending":
+    case "processing":
       return { bg: "#fff3cd", color: "#856404" };
-    case "Cancelled":
+    case "cancelled":
       return { bg: "#f8d7da", color: "#842029" };
     default:
       return { bg: "#e0e0e0", color: "#333" };
   }
 };
 
+// ✅ Helper for payment status color
+const getPaymentChipStyle = (status) => {
+  switch (status?.toLowerCase()) {
+    case "paid":
+      return { bg: "#d1e7dd", color: "#0f5132" };
+    case "failed":
+      return { bg: "#f8d7da", color: "#842029" };
+    default:
+      return { bg: "#fff3cd", color: "#856404" };
+  }
+};
+
 const RecentOrders = () => {
+  const [orders, setOrders] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [page, setPage] = useState(1);
-  const rowsPerPage = 4;
+  const [loading, setLoading] = useState(false);
+  const rowsPerPage = 5;
 
-  const filteredOrders = recentOrders.filter((order) => {
+  const [auth] = useAuth();
+  const token = auth?.token;  
+
+  // ✅ Fetch all orders
+  useEffect(() => {
+    if (!token) {
+      toast.error("Please login as admin to view orders");
+      return;
+    }
+    getAllOrders(setOrders, token, setLoading);
+  }, [token]);
+
+  // ✅ Filtering logic
+  const filteredOrders = orders.filter((order) => {
+    const customerName = order?.address?.fullName?.toLowerCase() || "";
+    const productName =
+      order?.items?.[0]?.productId?.name?.toLowerCase() ||
+      order?.items?.[0]?.productName?.toLowerCase() ||
+      "";
     const matchesSearch =
-      order.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.product.toLowerCase().includes(searchQuery.toLowerCase());
+      customerName.includes(searchQuery.toLowerCase()) ||
+      productName.includes(searchQuery.toLowerCase());
     const matchesStatus =
-      statusFilter === "All" ? true : order.status === statusFilter;
+      statusFilter === "All"
+        ? true
+        : order?.orderStatus?.toLowerCase() === statusFilter.toLowerCase();
     return matchesSearch && matchesStatus;
   });
 
+  // ✅ Pagination
   const totalPages = Math.ceil(filteredOrders.length / rowsPerPage);
   const paginatedOrders = filteredOrders.slice(
     (page - 1) * rowsPerPage,
@@ -154,7 +119,7 @@ const RecentOrders = () => {
           pb: 0.5,
         }}
       >
-        Recent Orders
+        All Orders
       </Typography>
 
       {/* Filters */}
@@ -209,8 +174,8 @@ const RecentOrders = () => {
           }}
         >
           <MenuItem value="All">All</MenuItem>
+          <MenuItem value="Processing">Processing</MenuItem>
           <MenuItem value="Delivered">Delivered</MenuItem>
-          <MenuItem value="Pending">Pending</MenuItem>
           <MenuItem value="Cancelled">Cancelled</MenuItem>
         </TextField>
       </Box>
@@ -224,84 +189,160 @@ const RecentOrders = () => {
           boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
         }}
       >
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: "#fce4ec" }}>
-              {["Order ID", "Customer", "Product", "Date", "Status", "Amount"].map(
-                (head) => (
+        {loading ? (
+          <Box display="flex" justifyContent="center" py={6}>
+            <CircularProgress sx={{ color: "#f48fb1" }} />
+          </Box>
+        ) : (
+          <Table>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: "#fce4ec" }}>
+                {[
+                  "Order ID",
+                  "Customer",
+                  "Product",
+                  "Date",
+                  "Order Status",
+                  "Payment Method",
+                  "Payment Status",
+                  "Amount",
+                  "Address",
+                ].map((head) => (
                   <TableCell
                     key={head}
-                    sx={{ fontWeight: 700, color: "#444", fontFamily: "'Poppins', sans-serif" }}
+                    sx={{
+                      fontWeight: 700,
+                      color: "#444",
+                      fontFamily: "'Poppins', sans-serif",
+                      whiteSpace: "nowrap",
+                    }}
                   >
                     {head}
                   </TableCell>
-                )
-              )}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {paginatedOrders.length > 0 ? (
-              paginatedOrders.map((order) => {
-                const chip = getChipStyle(order.status);
-                return (
-                  <TableRow
-                    key={order.id}
-                    hover
-                    sx={{
-                      "&:hover": { backgroundColor: "#fff3f7" },
-                      transition: "all 0.2s ease-in-out",
-                    }}
-                  >
-                    <TableCell>{order.id}</TableCell>
-                    <TableCell>
-                      <Box display="flex" alignItems="center" gap={1.5}>
-                        <Avatar
-                          src={order.image}
-                          alt={order.customer}
+                ))}
+              </TableRow>
+            </TableHead>
+
+            <TableBody>
+              {paginatedOrders.length > 0 ? (
+                paginatedOrders.map((order) => {
+                  const chip = getChipStyle(order?.orderStatus);
+                  const payChip = getPaymentChipStyle(order?.paymentStatus);
+                  const product = order?.items?.[0]?.productId;
+                  const imageUrl = product?.image
+                    ? `${import.meta.env.VITE_API_BASE_URL}${product.image}`
+                    : "https://via.placeholder.com/80";
+
+                  return (
+                    <TableRow
+                      key={order._id}
+                      hover
+                      sx={{
+                        "&:hover": { backgroundColor: "#fff3f7" },
+                        transition: "all 0.2s ease-in-out",
+                      }}
+                    >
+                      <TableCell>#{order._id.slice(-6)}</TableCell>
+
+                      <TableCell>
+                        <Box display="flex" alignItems="center" gap={1.5}>
+                          <Avatar
+                            src={imageUrl}
+                            alt={order?.address?.fullName}
+                            sx={{
+                              width: 40,
+                              height: 40,
+                              border: "2px solid #f48fb1",
+                            }}
+                          />
+                          <Typography fontWeight={600} color="#333">
+                            {order?.address?.fullName || "N/A"}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+
+                      <TableCell>
+                        {product?.name ||
+                          order?.items?.[0]?.productName ||
+                          "N/A"}
+                      </TableCell>
+
+                      <TableCell>
+                        {new Date(order?.createdAt).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </TableCell>
+
+                      <TableCell>
+                        <Chip
+                          label={order?.orderStatus || "N/A"}
                           sx={{
-                            width: 40,
-                            height: 40,
-                            border: "2px solid #f48fb1",
+                            backgroundColor: chip.bg,
+                            color: chip.color,
+                            fontWeight: 500,
                           }}
                         />
-                        <Typography fontWeight={600} color="#333">
-                          {order.customer}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell>{order.product}</TableCell>
-                    <TableCell>{order.date}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={order.status}
-                        sx={{
-                          backgroundColor: chip.bg,
-                          color: chip.color,
-                          fontWeight: 500,
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: "#d63384" }}>
-                      {order.amount}
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            ) : (
-              <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-                  <Typography color="text.secondary">
-                    No matching orders found
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+                      </TableCell>
+
+                      <TableCell>{order?.paymentMethod || "N/A"}</TableCell>
+
+                      <TableCell>
+                        <Chip
+                          label={order?.paymentStatus || "N/A"}
+                          sx={{
+                            backgroundColor: payChip.bg,
+                            color: payChip.color,
+                            fontWeight: 500,
+                          }}
+                        />
+                      </TableCell>
+
+                      <TableCell sx={{ fontWeight: 600, color: "#d63384" }}>
+                        ₹{order?.totalAmount?.toLocaleString() || "0"}
+                      </TableCell>
+
+                      <TableCell>
+                        <Tooltip
+                          title={order?.address?.street || "No address"}
+                          arrow
+                          placement="top"
+                        >
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              maxWidth: 200,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {order?.address?.street
+                              ? `${order?.address?.city}, ${order?.address?.state}`
+                              : "N/A"}
+                          </Typography>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
+                    <Typography color="text.secondary">
+                      No matching orders found
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        )}
       </TableContainer>
 
       {/* Pagination */}
-      {filteredOrders.length > rowsPerPage && (
+      {!loading && filteredOrders.length > rowsPerPage && (
         <Box display="flex" justifyContent="center" mt={3}>
           <Pagination
             count={totalPages}

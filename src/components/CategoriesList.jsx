@@ -14,6 +14,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { getAllCategories } from "../Api/functions/categoriesFunction";
 import { useNavigate } from "react-router-dom";
+import { baseURL } from "../Api/axiosIntance";
 
 const CategoriesList = () => {
   const [categoryData, setCategoryData] = useState([]);
@@ -75,7 +76,7 @@ const CategoriesList = () => {
               >
                 <CardMedia
                   component="img"
-                  image={`http://localhost:5000${cat.image}`}
+                  image={`${baseURL}${cat.image}`}
                   alt={cat.category}
                   sx={{
                     width: 150,

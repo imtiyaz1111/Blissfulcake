@@ -47,6 +47,7 @@ import AddAddress from "./Pages/ProfilePage/AccountSettings/AddAddress";
 import CheckoutPage from "./Pages/CheckoutPage/CheckoutPage";
 import CheckoutSuccess from "./Pages/CheckoutPage/CheckoutSuccess";
 import CheckoutCancel from "./Pages/CheckoutPage/CheckoutCancel";
+import OrderDetails from "./Pages/ProfilePage/Order/OrderDetails";
 
 const App = () => {
   const publicRoute = [
@@ -120,6 +121,7 @@ const App = () => {
             }
           >
             <Route path="orders" element={<OrderList />} />
+            <Route path="orders/:id" element={<OrderDetails />} />
             <Route path="transactions" element={<TransactionList />} />
             <Route path="settings/myprofile" element={<MyProfile />} />
             <Route path="settings/edit" element={<EditProfile />} />

@@ -3,23 +3,30 @@ import axiosInstance from "../axiosIntance";
 import { toast } from "react-toastify";
 import ORDER_ENDPOINTS from "../endPoint/orderEndPoint";
 
-// ✅ Create Order
 export const createOrder = async (payload, token, setLoading, navigate) => {
   try {
     setLoading(true);
-    const res = await axiosInstance.post(ORDER_ENDPOINTS.createOrder, payload, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+
+    const res = await axiosInstance.post(
+      ORDER_ENDPOINTS.createOrder,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     if (res.data.success) {
       toast.success(res.data.message || "Order placed successfully");
-      navigate("/profile/orders");
+      navigate("/profile/orders"); // Redirect to orders list
     } else {
       toast.error(res.data.message || "Failed to place order");
     }
 
     return res.data;
   } catch (error) {
+    console.error("❌ createOrder error:", error);
     toast.error(
       error.response?.data?.message ||
         "Failed to place order. Please try again."
@@ -82,6 +89,7 @@ export const getOrderById = async (id, token, setOrder, setLoading) => {
     setLoading(false);
   }
 };
+
 
 // ✅ Update Order Status (Admin)
 export const updateOrderStatus = async (id, status, token, setLoading) => {

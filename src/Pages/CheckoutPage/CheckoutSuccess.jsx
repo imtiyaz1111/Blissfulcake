@@ -47,8 +47,8 @@ const CheckoutSuccess = () => {
 
       <Button
         variant="contained"
-        color="primary"
-        sx={{ px: 4, py: 1.2 }}
+        
+        sx={{ px: 4, py: 1.2,background:"linear-gradient(to right, #fdadbb, #f77f9e)" }}
         onClick={() => navigate("/profile/orders")}
       >
         View My Orders

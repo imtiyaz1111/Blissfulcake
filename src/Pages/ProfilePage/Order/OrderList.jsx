@@ -1,3 +1,4 @@
+// src/pages/Profile/OrderList.jsx
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -15,23 +16,28 @@ import {
 } from "@mui/material";
 import { getUserOrders } from "../../../Api/functions/orderFunctions";
 import { useAuth } from "../../../context/AuthProvider";
+import { useNavigate } from "react-router-dom";
+import Loading from "../../../components/Loading/Loading";
 
 const OrderList = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [auth] = useAuth();
   const token = auth?.token;
+  const navigate = useNavigate();
 
   // Pagination states
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
+  // ✅ Fetch orders from API
   useEffect(() => {
     if (token) {
       getUserOrders(setOrders, token, setLoading);
     }
   }, [token]);
 
+  // Pagination handlers
   const handleChangePage = (event, newPage) => setPage(newPage);
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
@@ -63,7 +69,7 @@ const OrderList = () => {
 
       {loading ? (
         <Box display="flex" justifyContent="center" py={5}>
-          <CircularProgress />
+          <Loading />
         </Box>
       ) : orders.length === 0 ? (
         <Typography textAlign="center" color="text.secondary">
@@ -87,7 +93,15 @@ const OrderList = () => {
 
               <TableBody>
                 {paginatedOrders.map((order) => (
-                  <TableRow key={order._id} hover>
+                  <TableRow
+                    key={order._id}
+                    hover
+                    onClick={() => navigate(`/profile/orders/${order._id}`)}
+                    sx={{
+                      cursor: "pointer",
+                      "&:hover": { backgroundColor: "#f9f9f9" },
+                    }}
+                  >
                     <TableCell sx={{ color: "#555" }}>
                       #{order._id.slice(-6)}
                     </TableCell>

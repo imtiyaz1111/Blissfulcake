@@ -27,7 +27,6 @@ const CheckoutPage = () => {
 
   if (loading)
     return (
-    
       <Box
         sx={{
           minHeight: "100vh",
@@ -43,40 +42,39 @@ const CheckoutPage = () => {
   return (
     <Elements stripe={stripePromise}>
       <Box sx={{ backgroundColor: "#fcf0f5", minHeight: "100vh", py: 4 }}>
-      <Container maxWidth="lg">
-        <Box
-          sx={{
-            backgroundImage: "linear-gradient(to right, #f77f9e, #fdadbb)",
-            p: 3,
-            mb: 4,
-            borderRadius: theme.shape.borderRadius,
-            color: "white",
-          }}
-        >
-          <Typography variant={isMobile ? "h5" : "h4"} fontWeight="bold">
-            Checkout
-          </Typography>
-        </Box>
+        <Container maxWidth="lg">
+          <Box
+            sx={{
+              backgroundImage: "linear-gradient(to right, #f77f9e, #fdadbb)",
+              p: 3,
+              mb: 4,
+              borderRadius: theme.shape.borderRadius,
+              color: "white",
+            }}
+          >
+            <Typography variant={isMobile ? "h5" : "h4"} fontWeight="bold">
+              Checkout
+            </Typography>
+          </Box>
 
-        <Grid container spacing={isTablet ? 2 : 4}>
-          <Grid size={{ xs: 12, sm: 12, md: 12, lg: 7, xl: 7 }}>
-            <CheckInfo
-              onAddressSelect={(address) => setSelectedAddress(address)}
-              onPaymentChange={(method) => setPaymentMethod(method)}
-            />
+          <Grid container spacing={isTablet ? 2 : 4}>
+            <Grid size={{ xs: 12, sm: 12, md: 12, lg: 7, xl: 7 }}>
+              <CheckInfo
+                onAddressSelect={(address) => setSelectedAddress(address)}
+                onPaymentChange={(method) => setPaymentMethod(method)}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 12, md: 12, lg: 5, xl: 5 }}>
+              <OrderSummary
+                cartItems={cartItems}
+                selectedAddress={selectedAddress}
+                paymentMethod={paymentMethod}
+              />
+            </Grid>
           </Grid>
-          <Grid size={{ xs: 12, sm: 12, md: 12, lg: 5, xl: 5 }}>
-            <OrderSummary
-              cartItems={cartItems}
-              selectedAddress={selectedAddress}
-              paymentMethod={paymentMethod}
-            />
-          </Grid>
-        </Grid>
-      </Container>
-    </Box>
+        </Container>
+      </Box>
     </Elements>
-    
   );
 };
 

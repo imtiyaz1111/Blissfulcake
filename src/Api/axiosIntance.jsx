@@ -1,7 +1,7 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
-let adminUrl = "http://localhost:5000";
+let adminUrl = "https://blissfulcakebackend.onrender.com";
 // let adminUrl="http://localhost:3010";
 
 export const baseURL = adminUrl;

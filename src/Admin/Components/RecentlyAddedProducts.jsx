@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -15,88 +15,45 @@ import {
   TableCell,
   TableBody,
   TableContainer,
+  CircularProgress,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import { getAllProduct } from "../../Api/functions/productFunctions"; // ✅ adjust import path
+import { getAllCategories } from "../../Api/functions/categoriesFunction"; // ✅ adjust import path
+import { baseURL } from "../../Api/axiosIntance";
 
-const products = [
-  {
-    id: 1,
-    name: "Chocolate Truffle Cake",
-    category: "Chocolate",
-    image: "https://i.ibb.co/D4nBbz5/cake1.jpg",
-    price: "$25",
-    stock: 5,
-    rating: 4.8,
-    addedOn: "2025-10-25",
-  },
-  {
-    id: 2,
-    name: "Red Velvet Cake",
-    category: "Red Velvet",
-    image: "https://i.ibb.co/tJhhmV4/cake2.jpg",
-    price: "$30",
-    stock: 2,
-    rating: 4.6,
-    addedOn: "2025-10-22",
-  },
-  {
-    id: 3,
-    name: "Black Forest Cake",
-    category: "Forest",
-    image: "https://i.ibb.co/YcxS6ZL/cake3.jpg",
-    price: "$28",
-    stock: 12,
-    rating: 4.4,
-    addedOn: "2025-10-20",
-  },
-  {
-    id: 4,
-    name: "Strawberry Delight Cake",
-    category: "Strawberry",
-    image: "https://i.ibb.co/02McznQ/cake4.jpg",
-    price: "$27",
-    stock: 3,
-    rating: 4.2,
-    addedOn: "2025-10-24",
-  },
-  {
-    id: 5,
-    name: "Vanilla Cream Cake",
-    category: "Vanilla",
-    image: "https://i.ibb.co/0sWmCfk/cake5.jpg",
-    price: "$22",
-    stock: 8,
-    rating: 4.1,
-    addedOn: "2025-10-21",
-  },
-  {
-    id: 6,
-    name: "Coffee Walnut Cake",
-    category: "Coffee",
-    image: "https://i.ibb.co/p4m3G4x/cake6.jpg",
-    price: "$26",
-    stock: 1,
-    rating: 4.7,
-    addedOn: "2025-10-26",
-  },
-  {
-    id: 7,
-    name: "Blueberry Cheesecake",
-    category: "Cheesecake",
-    image: "https://i.ibb.co/V9Rj6bH/cake7.jpg",
-    price: "$29",
-    stock: 4,
-    rating: 4.9,
-    addedOn: "2025-10-27",
-  },
-];
 
 const RecentlyAddedProducts = () => {
+  const [allProducts, setAllProducts] = useState([]);
+  const [categoryList, setCategoryList] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [categoryLoading, setCategoryLoading] = useState(false);
 
-  const filteredProducts = products.filter(
+  // ✅ Fetch products
+  useEffect(() => {
+    getAllProduct(setAllProducts, setLoading);
+  }, []);
+
+  // ✅ Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setCategoryLoading(true);
+        await getAllCategories(setCategoryList);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      } finally {
+        setCategoryLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // ✅ Filter & paginate
+  const filteredProducts = allProducts.filter(
     (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) &&
       (category ? p.category === category : true)
@@ -109,11 +66,7 @@ const RecentlyAddedProducts = () => {
     page * itemsPerPage
   );
 
-  const handlePageChange = (event, value) => {
-    setPage(value);
-  };
-
-  const categories = [...new Set(products.map((p) => p.category))];
+  const handlePageChange = (event, value) => setPage(value);
 
   return (
     <Box mt={4}>
@@ -186,7 +139,7 @@ const RecentlyAddedProducts = () => {
               sx={{
                 backgroundColor: "#fff",
                 borderRadius: "12px",
-                minWidth: 150,
+                minWidth: 180,
                 "& .MuiOutlinedInput-root": {
                   "& fieldset": { borderColor: "#ffc0cb" },
                   "&:hover fieldset": { borderColor: "#f48fb1" },
@@ -194,11 +147,17 @@ const RecentlyAddedProducts = () => {
               }}
             >
               <MenuItem value="">All</MenuItem>
-              {categories.map((cat) => (
-                <MenuItem key={cat} value={cat}>
-                  {cat}
-                </MenuItem>
-              ))}
+              {categoryLoading ? (
+                <MenuItem disabled>Loading...</MenuItem>
+              ) : categoryList.length > 0 ? (
+                categoryList.map((cat) => (
+                  <MenuItem key={cat._id} value={cat.name}>
+                    {cat.name}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem disabled>No categories found</MenuItem>
+              )}
             </TextField>
           </Box>
         </Box>
@@ -213,137 +172,154 @@ const RecentlyAddedProducts = () => {
             border: "1px solid #ffd6e0",
           }}
         >
-          <Table>
-            <TableHead>
-              <TableRow
-                sx={{
-                  background: "linear-gradient(90deg, #ffb6c1, #f48fb1)",
-                }}
-              >
-                {[
-                  "Image",
-                  "Product Name",
-                  "Category",
-                  "Price",
-                  "Stock",
-                  "Rating",
-                  "Date Added",
-                ].map((head) => (
-                  <TableCell
-                    key={head}
-                    sx={{
-                      fontWeight: 700,
-                      color: "#fff",
-                      fontFamily: "'Poppins', sans-serif",
-                    }}
-                  >
-                    {head}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {paginatedProducts.length > 0 ? (
-                paginatedProducts.map((product) => (
-                  <TableRow
-                    key={product.id}
-                    hover
-                    sx={{
-                      backgroundColor: "#fff",
-                      transition: "0.3s",
-                      "&:hover": {
-                        backgroundColor: "#fff0f6",
-                      },
-                    }}
-                  >
-                    <TableCell>
-                      <Avatar
-                        variant="rounded"
-                        src={product.image}
-                        alt={product.name}
-                        sx={{
-                          width: 56,
-                          height: 56,
-                          border: "2px solid #ffb6c1",
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Typography
-                        fontWeight={600}
-                        sx={{
-                          color: "#880e4f",
-                          fontFamily: "'Poppins', sans-serif",
-                        }}
-                      >
-                        {product.name}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography
-                        sx={{
-                          fontFamily: "'Poppins', sans-serif",
-                          color: "#ad1457",
-                        }}
-                      >
-                        {product.category}
-                      </Typography>
-                    </TableCell>
+          {loading ? (
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              py={6}
+            >
+              <CircularProgress color="secondary" />
+            </Box>
+          ) : (
+            <Table>
+              <TableHead>
+                <TableRow
+                  sx={{
+                    background: "linear-gradient(90deg, #ffb6c1, #f48fb1)",
+                  }}
+                >
+                  {[
+                    "Image",
+                    "Product Name",
+                    "Category",
+                    "Price",
+                    "Stock",
+                    "Rating",
+                    "Date Added",
+                  ].map((head) => (
                     <TableCell
+                      key={head}
                       sx={{
-                        fontWeight: 600,
-                        color: "#d81b60",
+                        fontWeight: 700,
+                        color: "#fff",
                         fontFamily: "'Poppins', sans-serif",
                       }}
                     >
-                      {product.price}
+                      {head}
                     </TableCell>
-                    <TableCell
-                      sx={{
-                        color:
-                          product.stock < 3
-                            ? "#e53935"
-                            : product.stock < 6
-                            ? "#fbc02d"
-                            : "#388e3c",
-                        fontWeight: 600,
-                      }}
-                    >
-                      {product.stock}
-                    </TableCell>
-                    <TableCell>
-                      <Rating
-                        value={product.rating}
-                        precision={0.1}
-                        readOnly
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        fontFamily: "'Poppins', sans-serif",
-                        color: "#6a1b9a",
-                      }}
-                    >
-                      {product.addedOn}
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {paginatedProducts.length > 0 ? (
+                  paginatedProducts.map((product) => {
+                    const priceData = product.weights?.[0];
+                    const price = priceData
+                      ? `₹${priceData.discountedPrice} (${priceData.label})`
+                      : "-";
+                    return (
+                      <TableRow
+                        key={product._id}
+                        hover
+                        sx={{
+                          backgroundColor: "#fff",
+                          transition: "0.3s",
+                          "&:hover": {
+                            backgroundColor: "#fff0f6",
+                          },
+                        }}
+                      >
+                        <TableCell>
+                          <Avatar
+                            variant="rounded"
+                            src={`${baseURL}${product.image}`}
+                            alt={product.name}
+                            sx={{
+                              width: 56,
+                              height: 56,
+                              border: "2px solid #ffb6c1",
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Typography
+                            fontWeight={600}
+                            sx={{
+                              color: "#880e4f",
+                              fontFamily: "'Poppins', sans-serif",
+                            }}
+                          >
+                            {product.name}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography
+                            sx={{
+                              fontFamily: "'Poppins', sans-serif",
+                              color: "#ad1457",
+                            }}
+                          >
+                            {product.category}
+                          </Typography>
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            fontWeight: 600,
+                            color: "#d81b60",
+                            fontFamily: "'Poppins', sans-serif",
+                          }}
+                        >
+                          {price}
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            color:
+                              product.countInStock < 3
+                                ? "#e53935"
+                                : product.countInStock < 6
+                                ? "#fbc02d"
+                                : "#388e3c",
+                            fontWeight: 600,
+                          }}
+                        >
+                          {product.countInStock}
+                        </TableCell>
+                        <TableCell>
+                          <Rating
+                            value={product.ratings || 0}
+                            precision={0.1}
+                            readOnly
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            fontFamily: "'Poppins', sans-serif",
+                            color: "#6a1b9a",
+                          }}
+                        >
+                          {new Date(product.createdAt).toLocaleDateString()}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                      <Typography color="text.secondary">
+                        No matching products found
+                      </Typography>
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
-                    <Typography color="text.secondary">
-                      No matching products found
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                )}
+              </TableBody>
+            </Table>
+          )}
         </TableContainer>
 
         {/* Pagination */}
-        {filteredProducts.length > itemsPerPage && (
+        {!loading && filteredProducts.length > itemsPerPage && (
           <Box display="flex" justifyContent="center" mt={3}>
             <Pagination
               count={totalPages}
